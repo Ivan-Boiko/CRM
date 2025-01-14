@@ -1,0 +1,32 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 10px 20px;
+    background-color: var(--header-bg-color);
+    transition: all 1s ease;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .header__theme-switcher {
+    cursor: pointer;
+  }
+  
+  .header__language {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .header__language button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--text-color);
+  }
+  
+  .header__language button:hover {
+    text-decoration: underline;
+  }
+  

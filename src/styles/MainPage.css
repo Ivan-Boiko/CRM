@@ -1,0 +1,13 @@
+.main-page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    color: var(--text-color);
+  }
+  
+  .main-page__title {
+    font-size: 32px;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+  

@@ -1,0 +1,63 @@
+/* Основной контейнер */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    justify-content: flex-end;
+    width: 80px;
+    height: 50px;
+    border-radius: 25px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+    transition: background-color 0.3s ease;
+    padding:0 15px;
+    transition: all 0.7s ease;
+  }
+  .theme-toggle.dark-contaner {
+    justify-content: flex-start;
+    background-color: var(--bg-color);
+  }
+  .theme-toggle.dark-contaner > .toggle-text {
+    color: var(--text-color)
+  }
+  /* Круглая кнопка переключения */
+  .toggle-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: var(--toggle-circle, #ffffff);
+    border-radius: 50%;
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    transition: all 0.7s ease;
+    font-size: 17px;
+  }
+
+  /* Текст переключателя */
+  .toggle-text {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--toggle-text, #333333);
+    transition: color 0.7s ease;
+  }
+  
+  /* Темная тема - положение круга справа */
+  .toggle-circle.dark {
+    left: calc(100% - 45px);
+    background-color: var(--toggle-circle-dark, #222222);
+    color: #ffffff;
+  }
+  
+  
+  .theme-toggle:hover {
+    background-color: var(--toggle-hover-bg, #e0e0e0);
+  }
+  
+  .theme-toggle.dark-contaner:hover {
+    background-color: var(--second-bg-color);
+  }
+
+ 
