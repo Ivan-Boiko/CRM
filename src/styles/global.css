@@ -7,6 +7,7 @@
     --primary-hover-color: #0056b3;
     --input-border-color: #cccccc;
     --bg-color: #121212;
+    --bg-color_form: 0,0,0;
     --second-color: #121212;
     --border-color: #121212;
   }
@@ -16,6 +17,8 @@
     --header-bg-color: #1e1e1e;
     --form-bg-color: #1e1e1e;
     --text-color: #ffffff;
+    --bg-color:#ffffff;
+    --bg-color_form: 255,255,255;
     --primary-color: #bb86fc;
     --primary-hover-color: #3700b3;
     --input-border-color: #444444;
@@ -31,6 +34,7 @@
     box-sizing: border-box;
     font-family: Arial, sans-serif;
     color: var(--text-color);
+    
   }
 
   button {
@@ -40,10 +44,13 @@
   input {
     font-family: inherit;
   }
-  .registration-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: calc(100vh - 60px); /* Учитываем высоту header */
-  }
   
+  ul,li {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  h2 {
+    padding: 0;
+    margin: 0;
+  }

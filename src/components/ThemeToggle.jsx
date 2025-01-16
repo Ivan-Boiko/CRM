@@ -22,9 +22,6 @@ const ThemeToggle = () => {
       <div className={`toggle-circle ${isDarkMode ? "dark" : ""}`}>
         {isDarkMode ? "🌙" : "☀️"}
       </div>
-      <div className= "toggle-text">
-        {isDarkMode ? "Ночь" : "День"}
-      </div>
     </div>
   );
 };

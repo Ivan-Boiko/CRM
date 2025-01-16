@@ -6,7 +6,7 @@
     padding: 10px 20px;
     background-color: var(--header-bg-color);
     transition: all 1s ease;
-    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 0 15px rgba(var(--bg-color_form), 0.2);
   }
   
   .header__theme-switcher {

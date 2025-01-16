@@ -42,8 +42,9 @@ const RegistrationForm = ({ onSubmit }) => {
 
   return (
     <form className="registration-form" onSubmit={handleSubmit}>
-      <h2>Регистрация</h2>
-      <div className="form-group">
+      <h2 className="form-group__header">Регистрация</h2>
+      <ul className="registration-form__list">
+      <li className="form-group">
         <label>Имя</label>
         <input
           type="text"
@@ -52,9 +53,9 @@ const RegistrationForm = ({ onSubmit }) => {
           onChange={handleChange}
         />
         {errors.name && <span className="error">{errors.name}</span>}
-      </div>
+      </li>
 
-      <div className="form-group">
+      <li className="form-group">
         <label>Email</label>
         <input
           type="email"
@@ -63,9 +64,9 @@ const RegistrationForm = ({ onSubmit }) => {
           onChange={handleChange}
         />
         {errors.email && <span className="error">{errors.email}</span>}
-      </div>
+      </li>
 
-      <div className="form-group">
+      <li className="form-group">
         <label>Пароль</label>
         <input
           type="password"
@@ -74,9 +75,9 @@ const RegistrationForm = ({ onSubmit }) => {
           onChange={handleChange}
         />
         {errors.password && <span className="error">{errors.password}</span>}
-      </div>
+      </li>
 
-      <div className="form-group">
+      <li className="form-group">
         <label>Подтвердите пароль</label>
         <input
           type="password"
@@ -87,11 +88,13 @@ const RegistrationForm = ({ onSubmit }) => {
         {errors.confirmPassword && (
           <span className="error">{errors.confirmPassword}</span>
         )}
-      </div>
+      </li>
 
       <button type="submit" className="submit-btn">
         Зарегистрироваться
       </button>
+      </ul>
+      
     </form>
   );
 };
