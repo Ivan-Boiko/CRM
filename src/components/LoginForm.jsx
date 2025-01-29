@@ -1,8 +1,15 @@
 // LoginForm.jsx
 import React from 'react';
 import '../styles/LoginForm.css';
+import { useNavigate } from 'react-router-dom';
 
-function LoginForm({ onLogin, onRegister }) {
+function LoginForm({ onLogin}) {
+    const navigate = useNavigate();
+
+    const onRegister = () => {
+      navigate("/regist"); // Переход на страницу регистрации
+    };
+
     return (
         <div className="login-form">
             <h2>CRM</h2>
@@ -11,7 +18,7 @@ function LoginForm({ onLogin, onRegister }) {
                 <input type="password" placeholder="Пароль" required />
                 <button type="submit">Войти</button>
             </form>
-            <button className="register-btn" onClick={onRegister}>Регистрация</button>
+            <button className="register-btn button_glob" onClick={onRegister}>Регистрация</button>
         </div>
     );
 }

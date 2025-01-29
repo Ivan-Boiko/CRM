@@ -23,9 +23,11 @@ function MainPage() {
     };
 
     return (
+        <div className="container">
         <div className="main-page">
             <Header toggleTheme={toggleTheme} setLanguage={setLanguage} />
             <LoginForm onLogin={handleLogin} onRegister={handleRegister} />
+        </div>
         </div>
     );
 }
