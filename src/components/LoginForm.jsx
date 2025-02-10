@@ -1,6 +1,6 @@
 // LoginForm.jsx
 import React from 'react';
-import '../styles/LoginForm.css';
+import './LoginForm.css';
 import { useNavigate } from 'react-router-dom';
 
 function LoginForm({ onLogin}) {

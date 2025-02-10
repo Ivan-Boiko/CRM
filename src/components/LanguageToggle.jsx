@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import '../styles/LanguageToggle.css';
+import './LanguageToggle.css';
 
 const LanguageToggle = () => {
   const [isRussian, setIsRussian] = useState(localStorage.getItem("language") === "ru");

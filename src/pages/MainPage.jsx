@@ -2,7 +2,7 @@
 import React from 'react';
 import Header from '../components/Header';
 import LoginForm from '../components/LoginForm';
-import '../styles/MainPage.css';
+import './MainPage.css';
 
 function MainPage() {
     const toggleTheme = () => {

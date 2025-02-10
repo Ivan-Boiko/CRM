@@ -1,0 +1,59 @@
+.crm-task-manager {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+  }
+  
+  header h1 {
+    margin: 0;
+  }
+  
+  .tasks ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .tasks li {
+    margin: 5px 0;
+  }
+  
+  .status table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .status th, .status td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  
+  .priority {
+    font-weight: bold;
+  }
+  
+  .red {
+    color: red;
+  }
+  
+  .yellow {
+    color: yellow;
+  }
+  
+  .green {
+    color: green;
+  }
+  
+  .progress-bar {
+    width: 100%;
+    background-color: #f3f3f3;
+    border-radius: 5px;
+  }
+  
+  .progress-bar-fill {
+    height: 20px;
+    background-color: #4caf50;
+    border-radius: 5px;
+  }
+  
+  .deadlines {
+    margin-top: 20px;
+  }
