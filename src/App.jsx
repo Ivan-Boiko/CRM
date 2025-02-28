@@ -3,6 +3,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainPage from "./pages/MainPage";
 import RegistrationModal from "./pages/RegistrationModalPage";
+import MainPageLk from "./pages/MainPageLk";
 import "./styles/global.css";
 
 const App = () => {
@@ -11,7 +12,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/regist" element={<RegistrationModal />} />
-        {/* Здесь можно добавить другие страницы */}
+        <Route path="/main" element={<MainPageLk />} />
       </Routes>
     </Router>
   );

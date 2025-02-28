@@ -1,0 +1,128 @@
+.diary {
+  padding: 20px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.diary__input-section {
+  margin-bottom: 30px;
+}
+
+.diary__textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 15px;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.diary__add-btn {
+  padding: 12px 24px;
+  background-color: #00A86B;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.diary__add-btn:hover {
+  background-color: #009960;
+}
+
+.diary__entries {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.diary__entry {
+  padding: 20px;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  background: #FAFAFA;
+}
+
+.diary__entry-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.diary__entry-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #2C3E50;
+}
+
+.diary__entry-date {
+  font-size: 12px;
+  color: #7F8C8D;
+  white-space: nowrap;
+  margin-left: 15px;
+}
+
+.diary__edit-form {
+  width: 100%;
+}
+
+.diary__edit-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px;
+  border: 1px solid #E0E0E0;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.diary__edit-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.diary__edit-btn,
+.diary__save-btn,
+.diary__cancel-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.diary__edit-btn {
+  background: transparent;
+  border: 1px solid #E0E0E0;
+  color: #2C3E50;
+}
+
+.diary__save-btn {
+  background-color: #00A86B;
+  color: white;
+  border: none;
+}
+
+.diary__cancel-btn {
+  background-color: white;
+  border: 1px solid #E0E0E0;
+  color: #2C3E50;
+}
+
+.diary__edit-btn:hover {
+  background: #F8F9FA;
+}
+
+.diary__save-btn:hover {
+  background-color: #009960;
+}
+
+.diary__cancel-btn:hover {
+  background-color: #F8F9FA;
+}

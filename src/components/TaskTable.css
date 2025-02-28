@@ -1,0 +1,109 @@
+.tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tasks__container {
+  background: #FFFFFF;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.tasks__table {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  .tasks__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  
+  .tasks__row {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    border-bottom: 1px solid #F5F5F5;
+    transition: background-color 0.2s ease;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    cursor: pointer;
+  }
+  
+  .tasks__row--header {
+    background-color: #FFFFFF;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tasks__cell--header {
+    display: block;
+    width: 100%;
+    
+  }
+}
+
+.tasks__row:not(.tasks__row--header):hover {
+  background-color: #F8F9FA;
+}
+
+.tasks__row--header {
+  background-color: #FFFFFF;
+  font-weight: 500;
+}
+
+.tasks__cell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #2C3E50;
+  padding: 16px 16px;
+}
+.tasks__cell:first-child {
+  flex: 1.5;
+}
+
+
+.tasks__priority,
+.tasks__status {
+  border-radius: 20px;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tasks__priority {
+  font-weight: bold;
+}
+
+.tasks__priority--high {
+  color: #CF1322;
+}
+
+.tasks__priority--medium {
+  color: #D4B106;
+}
+
+.tasks__priority--low {
+  color: #389E0D;
+}
+
+.tasks__status--todo {
+  background-color: #F5F5F5;
+  color: #333333;
+}
+
+.tasks__status--in-progress {
+  background-color: #E6F7FF;
+  color: #1890FF;
+}
+
+.tasks__status--done {
+  background-color: #F6FFED;
+  color: #52C41A;
+}

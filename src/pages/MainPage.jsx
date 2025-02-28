@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import LoginForm from '../components/LoginForm';
 import '../styles/MainPage.css';
 
+
 function MainPage() {
     const toggleTheme = () => {
         document.body.classList.toggle('dark-theme');
