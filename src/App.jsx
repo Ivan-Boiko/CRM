@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainPage from "./pages/MainPage";
 import RegistrationModal from "./pages/RegistrationModalPage";
 import MainPageLk from "./pages/MainPageLk";
-import "./styles/global.css";
+import "./pages/global.css";
 
 const App = () => {
   return (

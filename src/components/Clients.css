@@ -1,24 +1,24 @@
-.diary {
+.clients {
   padding: 20px;
   background: #FFFFFF;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.diary__header {
+.clients__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
 }
 
-.diary__title {
+.clients__title {
   font-size: 24px;
   color: #2C3E50;
   margin: 0;
 }
 
-.diary__add-btn {
+.clients__add-btn {
   padding: 10px 20px;
   background-color: #00A86B;
   color: white;
@@ -29,24 +29,24 @@
   transition: background-color 0.2s;
 }
 
-.diary__add-btn:hover {
+.clients__add-btn:hover {
   background-color: #009960;
 }
 
-.diary__list {
-  display: flex;
-  flex-direction: column;
+.clients__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
 }
 
-.diary__empty {
+.clients__empty {
   text-align: center;
   padding: 40px;
   color: #7F8C8D;
   font-size: 16px;
 }
 
-.diary-card {
+.client-card {
   padding: 20px;
   border: 1px solid #E0E0E0;
   border-radius: 8px;
@@ -54,103 +54,34 @@
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.diary-card:hover {
+.client-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.diary-card__content {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 15px;
-}
-
-.diary-card__text {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.5;
+.client-card__name {
+  margin: 0 0 10px;
+  font-size: 18px;
   color: #2C3E50;
 }
 
-.diary-card__date {
-  font-size: 12px;
+.client-card__description {
+  margin: 0 0 15px;
+  font-size: 14px;
   color: #7F8C8D;
-  white-space: nowrap;
-  margin-left: 15px;
+  line-height: 1.5;
 }
 
-.diary-card__edit {
-  width: 100%;
-}
-
-.diary-card__edit-textarea {
-  width: 100%;
-  min-height: 100px;
-  padding: 10px;
-  border: 1px solid #E0E0E0;
-  border-radius: 6px;
-  margin-bottom: 10px;
+.client-card__contact {
   font-size: 14px;
-  resize: vertical;
-}
-
-.diary-card__edit-buttons {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
-/* Анимация для модального окна */
-@keyframes slideIn {
-  from { transform: translateY(-20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.diary__modal {
-  animation: slideIn 0.3s ease;
-}
-
-.diary-card__edit-btn,
-.diary-card__save-btn,
-.diary-card__cancel-btn {
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.diary-card__edit-btn {
-  background: transparent;
-  border: 1px solid #E0E0E0;
   color: #2C3E50;
 }
 
-.diary-card__save-btn {
-  background-color: #00A86B;
-  color: white;
-  border: none;
+.client-card__contact p {
+  margin: 5px 0;
 }
 
-.diary-card__cancel-btn {
-  background-color: white;
-  border: 1px solid #E0E0E0;
-  color: #2C3E50;
-}
-
-.diary-card__edit-btn:hover {
-  background: #F8F9FA;
-}
-
-.diary-card__save-btn:hover {
-  background-color: #009960;
-}
-
-.diary-card__cancel-btn:hover {
-  background-color: #F8F9FA;
-}
-
-/* Modal styles - same as in Scripts.css */
+/* Modal styles */
 .modal-overlay {
   position: fixed;
   top: 0;

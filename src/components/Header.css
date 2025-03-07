@@ -1,0 +1,60 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 5px;
+    box-shadow: 0 1px 3px var(--shadow-color);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 50%;
+    margin: 0 auto;
+    margin-bottom: 20px;
+}
+
+.header__theme-switcher {
+    cursor: pointer;
+    color: var(--text-primary-color);
+}
+
+.header__language {
+    display: flex;
+    gap: 10px;
+}
+
+.header__language button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--text-primary-color);
+    transition: color 0.2s;
+}
+
+.header__language button:hover {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+.header_title {
+    color: var(--text-primary-color);
+    margin: 0;
+    font-size: 20px;
+}
+
+.header_button {
+    background: none;
+    border: none;
+    color: var(--text-primary-color);
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.header_button:hover {
+    color: var(--accent-color);
+}
+
+
+  

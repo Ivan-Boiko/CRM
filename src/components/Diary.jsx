@@ -1,23 +1,38 @@
 import React, { useState } from 'react';
+import './common.css';
 import './Diary.css';
 
 const Diary = () => {
   const [entries, setEntries] = useState([]);
-  const [newEntry, setNewEntry] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(null);
+  const [newEntry, setNewEntry] = useState({
+    text: ''
+  });
   const [editText, setEditText] = useState('');
 
+  const handleInputChange = (e) => {
+    const { value } = e.target;
+    setNewEntry({
+      ...newEntry,
+      text: value
+    });
+  };
+
   const handleAddEntry = () => {
-    if (newEntry.trim()) {
+    if (newEntry.text.trim()) {
       setEntries([
         {
           id: Date.now(),
-          text: newEntry,
+          text: newEntry.text,
           date: new Date().toLocaleString()
         },
         ...entries
       ]);
-      setNewEntry('');
+      setNewEntry({
+        text: ''
+      });
+      setIsModalOpen(false);
     }
   };
 
@@ -34,64 +49,108 @@ const Diary = () => {
   };
 
   return (
-    <div className="diary">
-      <div className="diary__input-section">
-        <textarea
-          className="diary__textarea"
-          value={newEntry}
-          onChange={(e) => setNewEntry(e.target.value)}
-          placeholder="Напишите новую запись..."
-        />
+    <div className="container-card diary">
+      <div className="component-header">
+        <h2 className="component-title">Дневник</h2>
         <button 
-          className="diary__add-btn"
-          onClick={handleAddEntry}
+          className="btn-primary"
+          onClick={() => setIsModalOpen(true)}
         >
           Добавить запись
         </button>
       </div>
 
-      <div className="diary__entries">
-        {entries.map(entry => (
-          <div key={entry.id} className="diary__entry">
-            {isEditing === entry.id ? (
-              <div className="diary__edit-form">
+      {entries.length > 0 ? (
+        <div className="diary__list">
+          {entries.map(entry => (
+            <div key={entry.id} className="diary-card">
+              {isEditing === entry.id ? (
+                <div className="diary-card__edit">
+                  <textarea
+                    className="diary-card__edit-textarea"
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                  />
+                  <div className="diary-card__edit-buttons">
+                    <button 
+                      className="btn-primary diary-card__save-btn"
+                      onClick={() => saveEdit(entry.id)}
+                    >
+                      Сохранить
+                    </button>
+                    <button 
+                      className="btn-secondary diary-card__cancel-btn"
+                      onClick={() => setIsEditing(null)}
+                    >
+                      Отмена
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="diary-card__content">
+                    <p className="diary-card__text">{entry.text}</p>
+                    <span className="diary-card__date">{entry.date}</span>
+                  </div>
+                  <button 
+                    className="btn-secondary diary-card__edit-btn"
+                    onClick={() => handleEdit(entry.id, entry.text)}
+                  >
+                    Редактировать
+                  </button>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="empty-state">
+          <p>Дневник пуст</p>
+        </div>
+      )}
+
+      {isModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal__header">
+              <h3>Добавить новую запись</h3>
+              <button 
+                className="modal__close"
+                onClick={() => setIsModalOpen(false)}
+              >
+                &times;
+              </button>
+            </div>
+            <div className="modal__body">
+              <div className="form-group">
+                <label htmlFor="text">Текст записи *</label>
                 <textarea
-                  className="diary__edit-textarea"
-                  value={editText}
-                  onChange={(e) => setEditText(e.target.value)}
+                  id="text"
+                  value={newEntry.text}
+                  onChange={handleInputChange}
+                  placeholder="Напишите новую запись..."
+                  rows="6"
+                  required
                 />
-                <div className="diary__edit-buttons">
-                  <button 
-                    className="diary__save-btn"
-                    onClick={() => saveEdit(entry.id)}
-                  >
-                    Сохранить
-                  </button>
-                  <button 
-                    className="diary__cancel-btn"
-                    onClick={() => setIsEditing(null)}
-                  >
-                    Отмена
-                  </button>
-                </div>
               </div>
-            ) : (
-              <>
-                <div className="diary__entry-content">
-                  <p className="diary__entry-text">{entry.text}</p>
-                  <span className="diary__entry-date">{entry.date}</span>
-                </div>
-                <button 
-                  className="diary__edit-btn"
-                  onClick={() => handleEdit(entry.id, entry.text)}
-                >
-                  Редактировать
-                </button>
-              </>
-            )}
+            </div>
+            <div className="modal__footer">
+              <button 
+                className="btn-secondary modal__cancel"
+                onClick={() => setIsModalOpen(false)}
+              >
+                Отмена
+              </button>
+              <button 
+                className="btn-primary modal__submit"
+                onClick={handleAddEntry}
+              >
+                Добавить
+              </button>
+            </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

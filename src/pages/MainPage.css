@@ -1,0 +1,25 @@
+.page-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--main-bg-color);
+}
+
+.main-layout {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+
+.main-content {
+  border-radius: 12px;
+  width: 50%;
+}
+
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Стили для формы логина */

@@ -1,22 +1,25 @@
-.page-container {
+.page-container-lk {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-.main-layout {
+.main-layout-lk {
   display: flex;
   flex: 1;
 }
 
-.main-content {
+.main-content-lk {
   flex: 1;
   padding: 20px;
   background-color: #f5f5f5;
+  border-radius: 10px;
+  border: 1px solid #f5f5f5;
 }
 
-.content-wrapper {
-  margin-top: 20px;
+.content-wrapper-lk {
+  display: flex;
+  flex-direction: column;
 }
 
 .filters {

@@ -17,9 +17,6 @@ const TopBar = () => {
         </div>
       </div>
       <div className="topbar-right">
-        <button className="create-task-btn">
-          + Создать задачу
-        </button>
         <div className="notifications">
           <span className="notification-icon">🔔</span>
         </div>

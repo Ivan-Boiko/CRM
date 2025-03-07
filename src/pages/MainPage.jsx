@@ -2,8 +2,7 @@
 import React from 'react';
 import Header from '../components/Header';
 import LoginForm from '../components/LoginForm';
-import '../styles/MainPage.css';
-
+import './MainPage.css';
 
 function MainPage() {
     const toggleTheme = () => {
@@ -24,11 +23,15 @@ function MainPage() {
     };
 
     return (
-        <div className="container">
-        <div className="main-page">
+        <div className="page-container">
             <Header toggleTheme={toggleTheme} setLanguage={setLanguage} />
-            <LoginForm onLogin={handleLogin} onRegister={handleRegister} />
-        </div>
+            <div className="main-layout">
+                <div className="main-content">
+                    <div className="content-wrapper">
+                        <LoginForm onLogin={handleLogin} onRegister={handleRegister} />
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

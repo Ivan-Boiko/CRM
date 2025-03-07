@@ -4,6 +4,7 @@
   align-items: center;
   padding: 15px 30px;
   background-color: #FFFFFF;
+  border-bottom: 1px solid black;
 }
 
 .topbar-left {
@@ -45,24 +46,24 @@
   gap: 20px;
 }
 
+/* Remove the following styles from your TopBar.css file */
+/* 
 .create-task-btn {
-  padding: 8px 16px;
   background-color: #00A86B;
-  color: #FFFFFF;
+  color: white;
   border: none;
   border-radius: 8px;
-  cursor: pointer;
+  padding: 8px 16px;
   font-size: 14px;
-  transition: background-color 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  cursor: pointer;
+  margin-right: 20px;
+  transition: background-color 0.2s;
 }
 
 .create-task-btn:hover {
   background-color: #009960;
 }
-
+*/
 .notifications {
   cursor: pointer;
   padding: 8px;

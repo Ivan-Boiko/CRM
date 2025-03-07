@@ -3,8 +3,9 @@ import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import TaskTable from '../components/TaskTable';
 import FilterButtons from '../components/FilterButtons';
-import Scripts from '../components/Scripts';
-import Diary from '../components/Diary'; // Предполагаем, что у вас есть компонент для скриптов
+import Scripts from '../components/ScriptsDiary';
+import Diary from '../components/Diary';
+import Clients from '../components/Clients'; // Предполагаем, что у вас есть компонент для скриптов
 import './MainPageLk.css';
 
 const MainPageLk = () => {
@@ -18,12 +19,12 @@ const MainPageLk = () => {
   };
 
   return (
-    <div className="page-container">
+    <div className="page-container-lk">
       <TopBar />
-      <div className="main-layout">
+      <div className="main-layout-lk">
         <Sidebar onMenuClick={handleMenuClick} activeItemId={activeItemId} />
-        <div className="main-content">
-          <div className="content-wrapper">
+        <div className="main-content-lk">
+          <div className="content-wrapper-lk">
             {activeItemId === 1 && (
               <>
                 <div className="filters">
@@ -34,6 +35,7 @@ const MainPageLk = () => {
             )}
             {activeItemId === 2 && <Scripts />}
             {activeItemId === 3 && <Diary />}
+            {activeItemId === 4 && <Clients />}
           </div>
         </div>
       </div>
