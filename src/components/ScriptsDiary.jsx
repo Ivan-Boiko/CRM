@@ -70,7 +70,7 @@ const Scripts = () => {
   };
 
   return (
-    <div className="container-card scripts-container">
+    <div className="container-card scripts">
       <div className="component-header">
         <h2 className="component-title">Скрипты</h2>
         <button 
@@ -84,48 +84,48 @@ const Scripts = () => {
       {scripts.length > 0 ? (
         <div className="scripts__list">
           {scripts.map(script => (
-            <div key={script.id} className="script-item">
+            <div key={script.id} className="script-card">
               {isEditing === script.id ? (
-                <div className="script-item__edit">
-                  <div className="scripts__form-group">
-                    <label htmlFor={`edit-title-${script.id}`}>Название</label>
+                <div className="script-card__edit-form">
+                  <div className="script-card__form-group">
+                    <label className="script-card__form-label" htmlFor={`edit-title-${script.id}`}>Название</label>
                     <input
                       type="text"
                       id="title"
-                      className="scripts__input"
+                      className="script-card__form-input"
                       value={editScript.title}
                       onChange={handleEditChange}
                     />
                   </div>
-                  <div className="scripts__form-group">
-                    <label htmlFor={`edit-description-${script.id}`}>Описание</label>
+                  <div className="script-card__form-group">
+                    <label className="script-card__form-label" htmlFor={`edit-description-${script.id}`}>Описание</label>
                     <input
                       type="text"
                       id="description"
-                      className="scripts__input"
+                      className="script-card__form-input"
                       value={editScript.description}
                       onChange={handleEditChange}
                     />
                   </div>
-                  <div className="scripts__form-group">
-                    <label htmlFor={`edit-content-${script.id}`}>Скрипт</label>
+                  <div className="script-card__form-group">
+                    <label className="script-card__form-label" htmlFor={`edit-content-${script.id}`}>Скрипт</label>
                     <textarea
                       id="content"
-                      className="scripts__textarea"
+                      className="script-card__form-textarea"
                       value={editScript.content}
                       onChange={handleEditChange}
                       rows="10"
                     />
                   </div>
-                  <div className="scripts__buttons">
+                  <div className="script-card__form-buttons">
                     <button 
-                      className="scripts__submit-btn"
+                      className="script-card__save-btn"
                       onClick={() => saveEdit(script.id)}
                     >
                       Сохранить
                     </button>
                     <button 
-                      className="scripts__cancel-btn"
+                      className="script-card__cancel-btn"
                       onClick={() => setIsEditing(null)}
                     >
                       Отмена
@@ -134,16 +134,16 @@ const Scripts = () => {
                 </div>
               ) : (
                 <>
-                  <div className="script-item__header">
-                    <h3 className="script-item__title">{script.title}</h3>
-                    <span className="script-item__date">{script.date}</span>
+                  <div className="script-card__header">
+                    <h3 className="script-card__title">{script.title}</h3>
+                    <span className="script-card__date">{script.date}</span>
                   </div>
-                  <p className="script-item__description">{script.description}</p>
-                  <div className="script-item__content">
+                  <p className="script-card__description">{script.description}</p>
+                  <div className="script-card__content">
                     <pre>{script.content}</pre>
                   </div>
                   <button 
-                    className="script-item__edit-btn"
+                    className="script-card__edit-btn"
                     onClick={() => handleEdit(script.id)}
                   >
                     Редактировать
@@ -161,7 +161,7 @@ const Scripts = () => {
 
       {isModalOpen && (
         <div className="modal-overlay">
-          <div className="modal">
+          <div className="modal scripts__modal">
             <div className="modal__header">
               <h3>Добавить новый скрипт</h3>
               <button 

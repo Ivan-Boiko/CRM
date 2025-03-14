@@ -27,11 +27,10 @@
     left: 5px;
     transition: all 0.7s ease;
     font-size: 17px;
-    color: var(--second-color);
+    color: var(--text-color);
   }
   .toggle-circle_lang.russian {
     left: calc(100% - 45px);
-    color: var(--second-color);
   }
   
   .language-toggle.russian-container .toggle-text {

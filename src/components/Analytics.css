@@ -1,0 +1,103 @@
+/* Импортируем общие стили */
+@import './common.css';
+
+.analytics {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.analytics__period-selector {
+  display: flex;
+  gap: 10px;
+}
+
+.analytics__period-selector button {
+  padding: 8px 16px;
+}
+
+.analytics__period-selector button.active {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.analytics__summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.analytics__summary-item {
+  background-color: var(--card-bg-color);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.analytics__summary-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px var(--shadow-hover-color);
+}
+
+.analytics__summary-item h3 {
+  font-size: 16px;
+  color: var(--text-secondary-color);
+  margin: 0 0 10px 0;
+}
+
+.analytics__summary-value {
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--text-primary-color);
+  margin: 0;
+}
+
+.analytics__summary-value--success {
+  color: var(--accent-color);
+}
+
+.analytics__summary-value--danger {
+  color: #FF6B6B;
+}
+
+.analytics__summary-value--warning {
+  color: #FFD166;
+}
+
+.analytics__charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+}
+
+.analytics__chart-container {
+  background-color: var(--card-bg-color);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.analytics__chart-title {
+  font-size: 18px;
+  color: var(--text-primary-color);
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .analytics__charts {
+    grid-template-columns: 1fr;
+  }
+  
+  .analytics__summary {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .analytics__summary {
+    grid-template-columns: 1fr;
+  }
+}

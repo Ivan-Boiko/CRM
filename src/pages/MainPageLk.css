@@ -1,27 +1,27 @@
-.page-container-lk {
+.page-lk {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-.main-layout-lk {
+.page-lk__layout {
   display: flex;
   flex: 1;
+  background-color: var(--header-bg-color);
 }
 
-.main-content-lk {
+.page-lk__content {
   flex: 1;
-  padding: 20px;
-  background-color: #f5f5f5;
-  border-radius: 10px;
-  border: 1px solid #f5f5f5;
+  border: 1px solid var(--border-light-color);
+  border-left: none;
+  border-top: none;
 }
 
-.content-wrapper-lk {
+.page-lk__wrapper {
   display: flex;
   flex-direction: column;
 }
 
-.filters {
+.page-lk__filters {
   margin-bottom: 20px;
 }

@@ -1,68 +1,74 @@
 .sidebar {
   width: 250px;
-  background-color: #FFFFFF;
+  background-color: var(--main-bg-color);
   height: 100%;
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 30px;
-  border-right: 1px solid #F5F5F5;
+  margin-right: 20px;
+  border-radius: 5px;
 }
 
-.user-info {
+/* User section */
+.sidebar__user {
   display: flex;
   align-items: center;
-  gap: 15px;
   padding-bottom: 20px;
   border-bottom: 1px solid #F5F5F5;
 }
 
-.user-avatar {
+.sidebar__avatar {
   width: 45px;
   height: 45px;
   border-radius: 50%;
   object-fit: cover;
 }
 
-.user-details h3 {
+.sidebar__user-info {
+  margin-left: 12px;
+}
+
+.sidebar__user-title {
   font-size: 16px;
-  color: #2C3E50;
+  color: var(--text-primary-color, #2C3E50);
   margin: 0;
   font-weight: 500;
 }
 
-.user-details p {
+.sidebar__user-subtitle {
   font-size: 14px;
-  color: #7F8C8D;
+  color: var(--text-secondary-color, #7F8C8D);
   margin: 5px 0 0;
 }
 
-.menu {
+/* Menu section */
+.sidebar__menu {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.menu-item {
+.sidebar__menu-item {
   display: flex;
   align-items: center;
   padding: 12px 15px;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #2C3E50;
 }
 
-.menu-item:hover {
-  background-color: #F8F9FA;
+.sidebar__menu-item:hover {
+  background-color: var(--toggle-hover-bg);
 }
 
-.menu-item.active {
+.sidebar__menu-item--active {
   background-color: #FFF5EC;
-  color: #E67E22;
+}
+.sidebar__menu-item--active .sidebar__menu-title {
+  color: var(--side-bar-text-color-active);
 }
 
-.menu-item .icon {
+.sidebar__menu-icon {
   width: 20px;
   margin-right: 12px;
   font-size: 16px;
@@ -70,12 +76,16 @@
   align-items: center;
   justify-content: center;
 }
-
-.menu-item .title {
-  font-size: 14px;
-  font-weight: 400;
+.sidebar__menu-item--active .sidebar__menu-icon--first {
+  background-color: var(--main-bg-color);
 }
 
-.menu-item.active .title {
+.sidebar__menu-title {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-color);
+}
+
+.sidebar__menu-item--active .sidebar__menu-title {
   font-weight: 500;
 }

@@ -50,8 +50,6 @@
   /* Темная тема - положение круга справа */
   .toggle-circle.dark {
     left: calc(100% - 45px);
-    background-color: var(--toggle-circle-dark, #222222);
-    color: #ffffff;
   }
   
   

@@ -39,7 +39,7 @@ const Clients = () => {
   };
 
   return (
-    <div className="clients">
+    <div className="clients container-card">
       <div className="clients__header">
         <h2 className="clients__title">Клиенты</h2>
         <button 

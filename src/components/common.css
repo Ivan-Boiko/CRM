@@ -1,8 +1,11 @@
 /* Common container styles */
+::placeholder{
+  color: var(--text-color);
+}  
 .container-card {
   padding: 20px;
-  background: #FFFFFF;
-  border-radius: 12px;
+  background: var(--main-bg-color);
+  border-radius: 5px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
@@ -16,7 +19,7 @@
 
 .component-title {
   font-size: 24px;
-  color: #2C3E50;
+  color: var(--text-color);
   margin: 0;
 }
 
@@ -50,25 +53,7 @@
   background-color: #F8F9FA;
 }
 
-/* Common modal styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+/* Removing duplicate modal styles - these are now in RegistrationModal.css */
 
 .modal {
   background: white;
@@ -117,16 +102,14 @@
   margin-bottom: 15px;
 }
 
-.form-group label {
+.form-label {
   display: block;
   margin-bottom: 5px;
-  font-weight: 500;
-  color: #2C3E50;
   font-size: 14px;
+  color: #2C3E50;
 }
 
-.form-group input,
-.form-group textarea {
+.form-input {
   width: 100%;
   padding: 10px;
   border: 1px solid #E0E0E0;
@@ -134,14 +117,22 @@
   font-size: 14px;
 }
 
-.form-group textarea {
+.form-input:focus {
+  outline: none;
+  border-color: #00A86B;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #E0E0E0;
+  border-radius: 6px;
+  font-size: 14px;
+  min-height: 100px;
   resize: vertical;
 }
 
-/* Common empty state */
-.empty-state {
-  text-align: center;
-  padding: 40px;
-  color: #7F8C8D;
-  font-size: 16px;
+.form-textarea:focus {
+  outline: none;
+  border-color: #00A86B;
 }

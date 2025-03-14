@@ -1,43 +1,57 @@
-/* Импорт общих стилей */
+/* Import common styles */
 @import './common.css';
 
-.scripts-container {
+.scripts {
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-/* Специфичные стили для скриптов */
-.script-item {
-  margin-bottom: 20px;
-  background: #FAFAFA;
+.scripts__list {
+  width: 100%;
 }
 
-.script-item__header {
+.scripts__empty {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary-color);
+  font-size: 16px;
+}
+
+/* Script card styles */
+.script-card {
+  margin-bottom: 20px;
+  background: var(--card-bg-color);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px var(--shadow-color);
+}
+
+.script-card__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
 }
 
-.script-item__title {
+.script-card__title {
   margin: 0;
   font-size: 18px;
-  color: #2C3E50;
+  color: var(--text-primary-color);
 }
 
-.script-item__date {
+.script-card__date {
   font-size: 12px;
-  color: #7F8C8D;
+  color: var(--text-secondary-color);
 }
 
-.script-item__description {
+.script-card__description {
   margin: 0 0 15px;
   font-size: 14px;
-  color: #7F8C8D;
+  color: var(--text-secondary-color);
 }
 
-.script-item__content {
+.script-card__content {
   background: #F1F1F1;
   padding: 15px;
   border-radius: 6px;
@@ -47,57 +61,90 @@
   overflow-x: auto;
 }
 
-.script-item__edit {
-  width: 100%;
-}
-
-.script-item__edit-btn {
+.script-card__edit-btn {
   margin-top: 15px;
   background: transparent;
+  border: 1px solid var(--border-light-color);
+  padding: 8px 16px;
+  border-radius: 6px;
+  color: var(--text-primary-color);
+  cursor: pointer;
+  font-size: 14px;
 }
 
-.scripts__list {
+.script-card__edit-btn:hover {
+  background-color: var(--toggle-hover-bg);
+}
+
+/* Edit form styles */
+.script-card__edit-form {
   width: 100%;
 }
 
-.scripts__form-group {
-  width: 100%;
-  max-width: 50%;
-  display: flex;
-  flex-direction: column;
-}
-
-.scripts__form-group:not(:last-child) {
+.script-card__form-group {
   margin-bottom: 20px;
 }
 
-.scripts__form-group label {
-  width: 100%;
-  padding: 0 10px;
-  max-width: max-content;
+.script-card__form-label {
+  display: block;
   margin-bottom: 8px;
+  font-size: 14px;
+  color: var(--text-primary-color);
 }
 
-.scripts__input,
-.scripts__textarea {
-  max-width: 100%;
-}
-
-.scripts__textarea {
-  min-height: 200px;
-}
-
-.scripts__buttons {
-  display: flex;
+.script-card__form-input {
   width: 100%;
-  max-width: 35%;
+  padding: 10px;
+  border: 1px solid var(--border-light-color);
+  border-radius: 6px;
+  font-size: 14px;
 }
 
-.scripts__submit-btn {
-  margin-right: 20px;
+.script-card__form-textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 10px;
+  border: 1px solid var(--border-light-color);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: monospace;
+  resize: vertical;
 }
 
-/* Анимация для модального окна */
+.script-card__form-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.script-card__save-btn {
+  padding: 8px 16px;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.script-card__cancel-btn {
+  padding: 8px 16px;
+  background-color: white;
+  border: 1px solid var(--border-light-color);
+  color: var(--text-primary-color);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.script-card__save-btn:hover {
+  background-color: var(--accent-hover-color);
+}
+
+.script-card__cancel-btn:hover {
+  background-color: var(--toggle-hover-bg);
+}
+
+/* Animation */
 @keyframes slideIn {
   from { transform: translateY(-20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
@@ -105,52 +152,4 @@
 
 .scripts__modal {
   animation: slideIn 0.3s ease;
-}
-
-/* Modal styles */
-.modal {
-  background: white;
-  border-radius: 12px;
-  width: 500px;
-  max-width: 90%;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-.modal__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #E0E0E0;
-}
-
-.modal__header h3 {
-  margin: 0;
-  font-size: 18px;
-  color: #2C3E50;
-}
-
-.modal__close {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #7F8C8D;
-}
-
-.modal__body {
-  padding: 20px;
-}
-
-.form-group input,
-.form-group textarea {
-  width: 100%;
-}
-
-.modal__footer {
-  padding: 15px 20px;
-  border-top: 1px solid #E0E0E0;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
 }

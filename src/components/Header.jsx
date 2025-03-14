@@ -5,16 +5,18 @@ import ThemeToggle from "./ThemeToggle";
 import LanguageToggle from "./LanguageToggle"
 import { useNavigate } from 'react-router-dom';
 
-function Header(setLanguage) {
-        const navigate = useNavigate();
+// Fix the props destructuring
+function Header({ toggleTheme, setLanguage }) {
+    const navigate = useNavigate();
     
-        const onRegister = () => {
-          navigate("/"); // Переход на страницу регистрации
-        }
+    const onRegister = () => {
+        navigate("/"); // Переход на страницу регистрации
+    }
+    
     return (
         <div className="header">
             <div className="header__theme-switcher">
-                <ThemeToggle />
+                <ThemeToggle onChange={toggleTheme} />
             </div>
             <h1 className="header_title">
                 <button className="header_button button_glob" onClick={onRegister}>
@@ -22,7 +24,7 @@ function Header(setLanguage) {
                 </button>
             </h1>
             <div className="header__language">
-                <LanguageToggle />
+                <LanguageToggle onLanguageChange={setLanguage} />
             </div>
         </div>
     );

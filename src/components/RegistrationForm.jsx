@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./RegistrationForm.css";
 
-const RegistrationForm = ({ onSubmit }) => {
+const RegistrationForm = ({ onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -41,61 +41,63 @@ const RegistrationForm = ({ onSubmit }) => {
   };
 
   return (
-    <form className="registration-form" onSubmit={handleSubmit}>
-      <h2 className="form-group__header">Регистрация</h2>
-      <ul className="registration-form__list">
-      <li className="form-group">
-        <label>Имя</label>
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-        />
-        {errors.name && <span className="error">{errors.name}</span>}
-      </li>
-
-      <li className="form-group">
-        <label>Email</label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-        {errors.email && <span className="error">{errors.email}</span>}
-      </li>
-
-      <li className="form-group">
-        <label>Пароль</label>
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-        />
-        {errors.password && <span className="error">{errors.password}</span>}
-      </li>
-
-      <li className="form-group">
-        <label>Подтвердите пароль</label>
-        <input
-          type="password"
-          name="confirmPassword"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-        />
-        {errors.confirmPassword && (
-          <span className="error">{errors.confirmPassword}</span>
-        )}
-      </li>
-
-      <button type="submit" className="submit-btn">
-        Зарегистрироваться
+    <div className="registration-form">
+      <h2 className="registration-form__title">Регистрация</h2>
+      <form className="registration-form__form" onSubmit={handleSubmit}>
+        <div className="form-group">
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Имя"
+            className="registration-form__input"
+          />
+          {errors.name && <div className="error">{errors.name}</div>}
+        </div>
+        <div className="form-group">
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Email"
+            className="registration-form__input"
+          />
+          {errors.email && <div className="error">{errors.email}</div>}
+        </div>
+        <div className="form-group">
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Пароль"
+            className="registration-form__input"
+          />
+          {errors.password && <div className="error">{errors.password}</div>}
+        </div>
+        <div className="form-group">
+          <input
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            placeholder="Подтвердите пароль"
+            className="registration-form__input"
+          />
+          {errors.confirmPassword && (
+            <div className="error">{errors.confirmPassword}</div>
+          )}
+        </div>
+        <button type="submit" className="submit-btn">
+          Зарегистрироваться
+        </button>
+      </form>
+      <button className="close-btn" onClick={onCancel}>
+        Отмена
       </button>
-      </ul>
-      
-    </form>
+    </div>
   );
 };
 

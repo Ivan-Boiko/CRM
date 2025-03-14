@@ -1,36 +1,10 @@
+/* Import common styles instead of duplicating them */
+@import './common.css';
+
 .diary {
   padding: 20px;
-  background: #FFFFFF;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.diary__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.diary__title {
-  font-size: 24px;
-  color: #2C3E50;
-  margin: 0;
-}
-
-.diary__add-btn {
-  padding: 10px 20px;
-  background-color: #00A86B;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
-}
-
-.diary__add-btn:hover {
-  background-color: #009960;
 }
 
 .diary__list {
@@ -46,6 +20,7 @@
   font-size: 16px;
 }
 
+/* Card styles */
 .diary-card {
   padding: 20px;
   border: 1px solid #E0E0E0;
@@ -101,16 +76,6 @@
   justify-content: flex-end;
 }
 
-/* Анимация для модального окна */
-@keyframes slideIn {
-  from { transform: translateY(-20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.diary__modal {
-  animation: slideIn 0.3s ease;
-}
-
 .diary-card__edit-btn,
 .diary-card__save-btn,
 .diary-card__cancel-btn {
@@ -150,111 +115,12 @@
   background-color: #F8F9FA;
 }
 
-/* Modal styles - same as in Scripts.css */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+/* Animation */
+@keyframes slideIn {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
-.modal {
-  background: white;
-  border-radius: 12px;
-  width: 500px;
-  max-width: 90%;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-.modal__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #E0E0E0;
-}
-
-.modal__header h3 {
-  margin: 0;
-  font-size: 18px;
-  color: #2C3E50;
-}
-
-.modal__close {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #7F8C8D;
-}
-
-.modal__body {
-  padding: 20px;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
-  color: #2C3E50;
-  font-size: 14px;
-}
-
-.form-group input,
-.form-group textarea {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #E0E0E0;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-.form-group textarea {
-  resize: vertical;
-}
-
-.modal__footer {
-  padding: 15px 20px;
-  border-top: 1px solid #E0E0E0;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.modal__cancel,
-.modal__submit {
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.modal__cancel {
-  background-color: white;
-  border: 1px solid #E0E0E0;
-  color: #2C3E50;
-}
-
-.modal__submit {
-  background-color: #00A86B;
-  color: white;
-  border: none;
-}
-
-.modal__cancel:hover {
-  background-color: #F8F9FA;
-}
-
-.modal__submit:hover {
-  background-color: #009960;
+.diary__modal {
+  animation: slideIn 0.3s ease;
 }

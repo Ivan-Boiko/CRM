@@ -1,64 +1,110 @@
 :root {
+    /* Base colors */
     --main-bg-color: #f4f4f4;
     --header-bg-color: #ffffff;
     --form-bg-color: #ffffff;
     --text-color: #333333;
+    
+    /* UI element colors */
     --primary-color: #007bff;
     --primary-hover-color: #0056b3;
-    --input-border-color: #cccccc;
-    --bg-color: #121212;
-    --bg-color_form: 0,0,0;
-    --second-color: #121212;
-    --border-color: #121212;
-    
-    /* Добавляем новые переменные на основе Diary.css */
     --accent-color: #00A86B;
     --accent-hover-color: #009960;
+    --input-border-color: #cccccc;
+    
+    /* Component colors */
     --card-bg-color: #FAFAFA;
     --border-light-color: #E0E0E0;
     --text-primary-color: #2C3E50;
     --text-secondary-color: #7F8C8D;
+    --side-bar-text-color-active: #333333;
+    
+    /* Effects */
     --shadow-color: rgba(0, 0, 0, 0.05);
     --shadow-hover-color: rgba(0, 0, 0, 0.1);
     --modal-overlay-color: rgba(0, 0, 0, 0.5);
     
-    /* Переменные для ThemeToggle */
+    /* Theme toggle */
     --toggle-circle: #ffffff;
     --toggle-text: #333333;
     --toggle-hover-bg: #e0e0e0;
 }
   
 [data-theme="dark"] {
+    /* Base colors */
     --main-bg-color: #121212;
     --header-bg-color: #1e1e1e;
     --form-bg-color: #1e1e1e;
     --text-color: #ffffff;
-    --bg-color:#ffffff;
-    --bg-color_form: 255,255,255;
+    
+    /* UI element colors */
     --primary-color: #bb86fc;
     --primary-hover-color: #3700b3;
-    --input-border-color: #444444;
-    --second-bg-color: #696969;	
-    --second-color: #121212;
-    --border-color: #ffffff;
-    
-    /* Добавляем темные версии новых переменных */
     --accent-color: #00C17E;
     --accent-hover-color: #00D48A;
+    --input-border-color: #444444;
+    
+    /* Component colors */
     --card-bg-color: #2A2A2A;
     --border-light-color: #444444;
     --text-primary-color: #E0E0E0;
     --text-secondary-color: #A0A0A0;
+    
+    /* Effects */
     --shadow-color: rgba(0, 0, 0, 0.2);
     --shadow-hover-color: rgba(0, 0, 0, 0.3);
     --modal-overlay-color: rgba(0, 0, 0, 0.7);
     
-    /* Переменные для ThemeToggle в темной теме */
-    --toggle-circle-dark: #222222;
+    /* Theme toggle */
+    --toggle-circle: #222222;
 }
-.dark-mode {
-  background-color: var(--main-bg-color);
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@400;500;600&family=Merriweather:wght@400;700&family=Vollkorn:wght@400;500;600;700&display=swap');
+
+/* Font family variables */
+:root {
+    --font-primary: 'Playfair Display', serif;
+    --font-secondary: 'Lato', sans-serif;
+    --font-tertiary: 'Merriweather', serif;
+    --font-quaternary: 'Vollkorn', serif;
 }
+
+/* Typography styles */
+.font-primary {
+    font-family: var(--font-primary);
+    font-weight: 400;
+}
+
+.font-primary-medium {
+    font-family: var(--font-primary);
+    font-weight: 500;
+}
+
+.font-primary-bold {
+    font-family: var(--font-primary);
+    font-weight: 600;
+}
+
+.font-secondary {
+    font-family: var(--font-secondary);
+    font-weight: 400;
+}
+
+.font-secondary-bold {
+    font-family: var(--font-secondary);
+    font-weight: 700;
+}
+/* Base styles */
+html, body {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: var(--font-quaternary);
+  font-weight: bold;
+  color: var(--text-color);
+}
+
 #root {
   height: 100%;
 }
@@ -68,16 +114,7 @@
   display: flex;
 }
 
-html, body {
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
-  color: var(--text-color);
-}
-
+/* Reset styles */
 button {
   font-family: inherit;
   padding: 0;
@@ -99,4 +136,34 @@ h1, h2 {
   margin: 0;
 }
 
-/* Удалил дублирующийся стиль .button_glob, так как он уже определен в Header.css */
+/* Merriweather styles */
+.font-tertiary {
+    font-family: var(--font-tertiary);
+    font-weight: 400;
+}
+
+.font-tertiary-bold {
+    font-family: var(--font-tertiary);
+    font-weight: 700;
+}
+
+/* Vollkorn styles */
+.font-quaternary {
+    font-family: var(--font-quaternary);
+    font-weight: 400;
+}
+
+.font-quaternary-medium {
+    font-family: var(--font-quaternary);
+    font-weight: 500;
+}
+
+.font-quaternary-semibold {
+    font-family: var(--font-quaternary);
+    font-weight: 600;
+}
+
+.font-quaternary-bold {
+    font-family: var(--font-quaternary);
+    font-weight: 700;
+}

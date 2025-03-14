@@ -10,6 +10,7 @@
     max-width: 50%;
     margin: 0 auto;
     margin-bottom: 20px;
+    background-color: var(--header-bg-color);
 }
 
 .header__theme-switcher {

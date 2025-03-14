@@ -13,22 +13,24 @@ const Sidebar = ({ onMenuClick, activeItemId }) => {
 
   return (
     <div className="sidebar">
-      <div className="user-info">
-        <img src="/avatar.png" alt="User" className="user-avatar" />
-        <div className="user-details">
-          <h3>Панель управления</h3>
-          <p>Добро пожаловать</p>
+      <div className="sidebar__user">
+        <img src="/avatar.png" alt="User" className="sidebar__avatar" />
+        <div className="sidebar__user-info">
+          <h3 className="sidebar__user-title">Панель управления</h3>
+          <p className="sidebar__user-subtitle">Добро пожаловать</p>
         </div>
       </div>
-      <nav className="menu">
-        {menuItems.map(item => (
+      <nav className="sidebar__menu">
+        {menuItems.map((item, index) => (
           <div
             key={item.id}
-            className={`menu-item ${activeItemId === item.id ? 'active' : ''}`}
+            className={`sidebar__menu-item ${activeItemId === item.id ? 'sidebar__menu-item--active' : ''}`}
             onClick={() => onMenuClick(item.id)}
           >
-            <span className="icon">{item.icon}</span>
-            <span className="title">{item.title}</span>
+            <span className={`sidebar__menu-icon ${index === 0 ? 'sidebar__menu-icon--first' : ''}`}>
+              {item.icon}
+            </span>
+            <span className="sidebar__menu-title">{item.title}</span>
           </div>
         ))}
       </nav>

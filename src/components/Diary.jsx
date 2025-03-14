@@ -73,13 +73,13 @@ const Diary = () => {
                   />
                   <div className="diary-card__edit-buttons">
                     <button 
-                      className="btn-primary diary-card__save-btn"
+                      className="diary-card__save-btn"
                       onClick={() => saveEdit(entry.id)}
                     >
                       Сохранить
                     </button>
                     <button 
-                      className="btn-secondary diary-card__cancel-btn"
+                      className="diary-card__cancel-btn"
                       onClick={() => setIsEditing(null)}
                     >
                       Отмена
@@ -93,7 +93,7 @@ const Diary = () => {
                     <span className="diary-card__date">{entry.date}</span>
                   </div>
                   <button 
-                    className="btn-secondary diary-card__edit-btn"
+                    className="diary-card__edit-btn"
                     onClick={() => handleEdit(entry.id, entry.text)}
                   >
                     Редактировать
@@ -104,14 +104,14 @@ const Diary = () => {
           ))}
         </div>
       ) : (
-        <div className="empty-state">
+        <div className="diary__empty">
           <p>Дневник пуст</p>
         </div>
       )}
 
       {isModalOpen && (
         <div className="modal-overlay">
-          <div className="modal">
+          <div className="modal diary__modal">
             <div className="modal__header">
               <h3>Добавить новую запись</h3>
               <button 
@@ -136,13 +136,13 @@ const Diary = () => {
             </div>
             <div className="modal__footer">
               <button 
-                className="btn-secondary modal__cancel"
+                className="modal__cancel"
                 onClick={() => setIsModalOpen(false)}
               >
                 Отмена
               </button>
               <button 
-                className="btn-primary modal__submit"
+                className="modal__submit"
                 onClick={handleAddEntry}
               >
                 Добавить

@@ -1,4 +1,4 @@
-.login-form {
+.login {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -7,13 +7,15 @@
     background-color: var(--form-bg-color);
     border-radius: 12px;
     transition: all 0.3s ease;
+    width: 100%;
+    max-width: 600px;
 }
-.login-form form {
-width: 80%;
-padding: 10px 10px;
-max-width: 100%;
+.login__form {
+    width: 80%;
+    padding: 10px 10px;
+    max-width: 100%;
 }
-.login-form input {
+.login__input {
     width: 100%;
     max-width: 100%;
     padding: 10px;
@@ -21,17 +23,18 @@ max-width: 100%;
     border: 1px solid var(--border-light-color);
     border-radius: 6px;
     font-size: 14px;
-    color: var(--text-primary-color);
+    color: var(--text-color);
     background-color: var(--header-bg-color);
     transition: border-color 0.2s;
+    
 }
-  
-.login-form input:focus {
+
+.login__input:focus {
     outline: none;
     border-color: var(--accent-color);
 }
   
-.login-form button {
+.login__button {
     padding: 10px 20px;
     border: none;
     border-radius: 6px;
@@ -43,31 +46,35 @@ max-width: 100%;
     max-width: 40%;
 }
   
-.login-form button:hover {
+.login__button:hover {
     background-color: var(--accent-hover-color);
 }
 
-.login-form__title {
+.login__title {
     font-size: 24px;
     margin-bottom: 20px;
     color: var(--text-primary-color);
     font-weight: 600;
 }
 
-.login-form__register {
+.login__register {
     margin-top: 16px;
     text-align: center;
     font-size: 14px;
     color: var(--text-secondary-color);
 }
 
-.login-form__register-link {
+.login__register-button {
     color: var(--accent-color);
     cursor: pointer;
     text-decoration: none;
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
 }
 
-.login-form__register-link:hover {
+.login__register-button:hover {
     text-decoration: underline;
 }
   

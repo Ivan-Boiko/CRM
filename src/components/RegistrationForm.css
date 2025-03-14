@@ -1,68 +1,40 @@
-.registration-container {
-  display: flex;
-  width: 100%;
-  justify-content: center;
-  align-items: center;
-  height: calc(100vh - 100px);
-  background-color: var(--main-bg-color);
-  transition: all 0.3s ease;
-}
-
 .registration-form {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  border-radius: 12px;
   width: 100%;
-  max-width: 700px;
-  background-color: var(--form-bg-color);
-  box-shadow: 0 1px 3px var(--shadow-color);
-  transition: all 0.3s ease;
+  align-items: center;
 }
 
-.registration-form__list {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
+.registration-form__title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: var(--text-primary-color);
+  font-weight: 600;
+  text-align: center;
+  width: max-content;
 }
 
 .form-group {
   margin-bottom: 15px;
+}
+
+.registration-form__input {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.form-group__header {
-  margin-bottom: 20px;
-  color: var(--text-primary-color);
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
-  color: var(--text-primary-color);
-  font-size: 14px;
-}
-
-.form-group input {
+  padding: 10px;
   border: 1px solid var(--border-light-color);
   border-radius: 6px;
-  background: var(--header-bg-color);
-  color: var(--text-primary-color);
-  min-height: 35px;
-  width: 100%;
-  max-width: 300px;
-  padding: 10px;
   font-size: 14px;
+  color: var(--text-primary-color);
+  background-color: var(--header-bg-color);
   transition: border-color 0.2s;
 }
-
-.form-group input:focus {
+.registration-form__form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+.registration-form__input:focus {
   outline: none;
   border-color: var(--accent-color);
 }
@@ -70,20 +42,24 @@
 .error {
   color: #CF1322;
   font-size: 12px;
+  margin-top: 5px;
+  text-align: left;
 }
 
 .submit-btn {
-  background: var(--accent-color);
+  width: 100%;
+  max-width: 400px;
+  padding: 10px;
+  margin-top: 10px;
+  background-color: var(--accent-color);
   color: white;
   border: none;
-  padding: 10px 20px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   transition: background-color 0.2s;
 }
 
 .submit-btn:hover {
-  background: var(--accent-hover-color);
+  background-color: var(--accent-hover-color);
 }
-  
