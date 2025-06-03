@@ -1,19 +1,23 @@
 import React, { useState, useEffect } from "react";
 import './LanguageToggle.css';
 
-const LanguageToggle = () => {
-  const [isRussian, setIsRussian] = useState(localStorage.getItem("language") === "ru");
+const LanguageToggle = ({ onLanguageChange }) => {
+  const [isRussian, setIsRussian] = useState(
+    localStorage.getItem("language") === "ru"
+  );
 
   // Изменение языка и добавление data-атрибута к body
   useEffect(() => {
     if (isRussian) {
       document.body.dataset.language = "ru";
       localStorage.setItem("language", "ru");
+      if (onLanguageChange) onLanguageChange("ru");
     } else {
       document.body.dataset.language = "en";
       localStorage.setItem("language", "en");
+      if (onLanguageChange) onLanguageChange("en");
     }
-  }, [isRussian]);
+  }, [isRussian, onLanguageChange]);
 
   return (
     <div
