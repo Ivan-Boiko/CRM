@@ -33,20 +33,32 @@ const Scripts = () => {
     });
   };
 
-  const handleAddScript = () => {
+  const handleAddScript = async () => {
     if (newScript.title.trim()) {
+      const script = {
+        ...newScript,
+        date: new Date().toISOString(),
+      };
+      try {
+        await fetch('http://localhost:5000/api/scripts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(script),
+        });
+      } catch (err) {
+        console.error('Failed to save script', err);
+      }
       setScripts([
         {
           id: Date.now(),
-          ...newScript,
-          date: new Date().toLocaleString()
+          ...script,
         },
-        ...scripts
+        ...scripts,
       ]);
       setNewScript({
         title: '',
         description: '',
-        content: ''
+        content: '',
       });
       setIsModalOpen(false);
     }
