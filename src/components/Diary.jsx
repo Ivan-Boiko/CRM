@@ -19,18 +19,27 @@ const Diary = () => {
     });
   };
 
-  const handleAddEntry = () => {
+  const handleAddEntry = async () => {
     if (newEntry.text.trim()) {
+      const entry = {
+        text: newEntry.text,
+        date: new Date().toISOString(),
+      };
+      try {
+        await fetch('http://localhost:5000/api/diary', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(entry),
+        });
+      } catch (err) {
+        console.error('Failed to save entry', err);
+      }
       setEntries([
-        {
-          id: Date.now(),
-          text: newEntry.text,
-          date: new Date().toLocaleString()
-        },
-        ...entries
+        { id: Date.now(), ...entry },
+        ...entries,
       ]);
       setNewEntry({
-        text: ''
+        text: '',
       });
       setIsModalOpen(false);
     }

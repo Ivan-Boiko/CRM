@@ -27,21 +27,30 @@ const TaskTable = () => {
     });
   };
 
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (newTask.name.trim()) {
+      try {
+        await fetch('http://localhost:5000/api/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newTask),
+        });
+      } catch (err) {
+        console.error('Failed to save task', err);
+      }
       setTasks([
         ...tasks,
         {
           id: Date.now(),
-          ...newTask
-        }
+          ...newTask,
+        },
       ]);
       setNewTask({
         name: '',
         priority: 'medium',
         assigned: '',
         deadline: '',
-        status: 'todo'
+        status: 'todo',
       });
       setIsModalOpen(false);
     }
