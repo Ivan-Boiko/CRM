@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import './ThemeToggle.css';
 
-const ThemeToggle = () => {
-  const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem("theme") === "dark");
+const ThemeToggle = ({ onChange }) => {
+  const [isDarkMode, setIsDarkMode] = useState(
+    localStorage.getItem("theme") === "dark"
+  );
 
   // Изменение класса body при переключении темы
   useEffect(() => {
@@ -17,8 +19,19 @@ const ThemeToggle = () => {
     }
   }, [isDarkMode]);
 
+  const handleToggle = () => {
+    const nextMode = !isDarkMode;
+    setIsDarkMode(nextMode);
+    if (onChange) {
+      onChange(nextMode);
+    }
+  };
+
   return (
-    <div className={`theme-toggle ${isDarkMode ? "dark-contaner" : ""}`} onClick={() => setIsDarkMode(!isDarkMode)}>
+    <div
+      className={`theme-toggle ${isDarkMode ? "dark-contaner" : ""}`}
+      onClick={handleToggle}
+    >
       <div className={`toggle-circle ${isDarkMode ? "dark" : ""}`}>
         {isDarkMode ? "🌙" : "☀️"}
       </div>
