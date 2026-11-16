@@ -1,24 +1,54 @@
 // LoginForm.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import './LoginForm.css';
+import { useLanguage } from '../context/LanguageContext';
 
 function LoginForm({ onLogin, onRegister }) {
-    const handleRegisterClick = (e) => {
-        e.preventDefault(); // Prevent any default behavior
-        onRegister(); // Call the register function once
-    };
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { t } = useLanguage();
 
-    return (
-        <div className="login">
-            <h2 className="login__title">CRM</h2>
-            <form className="login__form" onSubmit={onLogin}>
-                <input className="login__input" type="text" placeholder="Логин" required />
-                <input className="login__input" type="password" placeholder="Пароль" required />
-                <button className="login__button" type="submit">Войти</button>
-            </form>
-            <button className="login__register-button" onClick={handleRegisterClick}>Регистрация</button>
-        </div>
-    );
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onLogin(email, password);
+  };
+
+  const handleRegisterClick = (e) => {
+    e.preventDefault();
+    onRegister();
+  };
+
+  return (
+    <div className="login">
+      <h2 className="login__title">CRM</h2>
+      <form className="login__form" onSubmit={handleSubmit}>
+        <input
+          className="login__input"
+          type="email"
+          name="email"
+          placeholder={t('login.email')}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          className="login__input"
+          type="password"
+          name="password"
+          placeholder={t('login.password')}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <button className="login__button" type="submit">
+          {t('login.submit')}
+        </button>
+      </form>
+      <button className="login__register-button" onClick={handleRegisterClick}>
+        {t('login.register')}
+      </button>
+    </div>
+  );
 }
 
 export default LoginForm;

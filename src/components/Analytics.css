@@ -28,6 +28,13 @@
   margin-bottom: 20px;
 }
 
+.analytics__empty {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-secondary-color);
+  font-size: 15px;
+}
+
 .analytics__summary-item {
   background-color: var(--card-bg-color);
   border-radius: 8px;

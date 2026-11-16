@@ -1,35 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React from 'react';
 import './LanguageToggle.css';
+import { useLanguage } from '../context/LanguageContext';
 
-const LanguageToggle = ({ onLanguageChange }) => {
-  const [isRussian, setIsRussian] = useState(
-    localStorage.getItem("language") === "ru"
-  );
-
-  // Изменение языка и добавление data-атрибута к body
-  useEffect(() => {
-    if (isRussian) {
-      document.body.dataset.language = "ru";
-      localStorage.setItem("language", "ru");
-      if (onLanguageChange) onLanguageChange("ru");
-    } else {
-      document.body.dataset.language = "en";
-      localStorage.setItem("language", "en");
-      if (onLanguageChange) onLanguageChange("en");
-    }
-  }, [isRussian, onLanguageChange]);
+const LanguageToggle = () => {
+  const { lang, setLang } = useLanguage();
+  const isRussian = lang === 'ru';
 
   return (
     <div
-      className={`language-toggle ${isRussian ? "russian-container" : ""}`}
-      onClick={() => setIsRussian(!isRussian)}
+      className={`language-toggle ${isRussian ? 'russian-container' : ''}`}
+      onClick={() => setLang(isRussian ? 'en' : 'ru')}
     >
-      <div className={`toggle-circle_lang ${isRussian ? "russian" : ""}`}>
-        {isRussian ? "ru" : "en"}
-      </div>
+      <div className={`toggle-circle_lang ${isRussian ? 'russian' : ''}`}>{lang}</div>
     </div>
   );
 };
 
 export default LanguageToggle;
-

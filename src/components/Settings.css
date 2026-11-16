@@ -27,6 +27,60 @@
   margin-bottom: 20px;
 }
 
+.settings__avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 10px 0;
+}
+
+.settings__avatar-preview {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: var(--primary-color, #007bff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px var(--shadow-color, rgba(0, 0, 0, 0.1));
+}
+
+.settings__avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.settings__avatar-preview span {
+  color: #ffffff;
+  font-size: 36px;
+  font-weight: 600;
+}
+
+.settings__avatar-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings__avatar-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.settings__avatar-remove {
+  color: #CF1322;
+  border-color: #CF1322;
+}
+
+.settings__avatar-remove:hover {
+  background-color: #FFF1F0;
+}
+
 .settings__section-title {
   font-size: 18px;
   color: var(--text-primary-color);

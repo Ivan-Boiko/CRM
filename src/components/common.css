@@ -111,28 +111,81 @@
 
 .form-input {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #E0E0E0;
-  border-radius: 6px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-light-color);
+  border-radius: 8px;
   font-size: 14px;
+  color: var(--text-primary-color);
+  background-color: var(--header-bg-color);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #00A86B;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.15);
 }
 
 .form-textarea {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #E0E0E0;
-  border-radius: 6px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-light-color);
+  border-radius: 8px;
   font-size: 14px;
+  color: var(--text-primary-color);
+  background-color: var(--header-bg-color);
   min-height: 100px;
   resize: vertical;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .form-textarea:focus {
   outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.15);
+}
+
+/* Стилизованные выпадающие списки */
+.form-select {
+  width: 100%;
+  padding: 10px 40px 10px 14px;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #2C3E50;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237F8C8D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px 16px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-select:hover {
   border-color: #00A86B;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #00A86B;
+  box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.15);
+}
+
+[data-theme="dark"] .form-select {
+  background-color: #2A2A2A;
+  color: #E0E0E0;
+  border-color: #444444;
+}
+
+[data-theme="dark"] .form-select:hover {
+  border-color: #00C17E;
+}
+
+[data-theme="dark"] .form-select:focus {
+  border-color: #00C17E;
+  box-shadow: 0 0 0 3px rgba(0, 193, 126, 0.2);
 }

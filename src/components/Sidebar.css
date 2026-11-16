@@ -22,6 +22,14 @@
   height: 45px;
   border-radius: 50%;
   object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background-color: var(--primary-color);
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .sidebar__user-info {

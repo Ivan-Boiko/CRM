@@ -1,87 +1,66 @@
 // MainPage.jsx
-import React, { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useCallback, useState } from 'react';
+import { useNavigate, Navigate } from 'react-router-dom';
 import Header from '../components/Header';
 import LoginForm from '../components/LoginForm';
 import RegistrationModal from '../components/RegistrationModal';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
+import { useLanguage } from '../context/LanguageContext';
 import './MainPage.css';
 
 function MainPage() {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+  const { user, login, register } = useAuth();
+  const { notify } = useToast();
+  const { t } = useLanguage();
 
-    const toggleTheme = () => {
-        document.body.classList.toggle('dark-theme');
-    };
+  const handleLogin = async (email, password) => {
+    try {
+      await login(email, password);
+      notify(t('toast.loginSuccess'), 'success');
+      navigate('/main');
+    } catch (err) {
+      notify(err.message, 'error');
+    }
+  };
 
-    const setLanguage = (lang) => {
-        console.log(`Language switched to: ${lang}`);
-    };
+  const handleRegistrationSubmit = useCallback(
+    async (formData) => {
+      try {
+        await register(formData.name, formData.email, formData.password);
+        notify(t('toast.registerSuccess'), 'success');
+        navigate('/main');
+      } catch (err) {
+        notify(err.message, 'error');
+      }
+    },
+    [register, notify, t, navigate]
+  );
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        const email = e.target[0].value;
-        const password = e.target[1].value;
-        try {
-            const response = await fetch('http://localhost:5000/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            });
-            if (response.ok) {
-                navigate('/main');
-            } else {
-                console.log('Login failed');
-            }
-        } catch (err) {
-            console.error('Login error', err);
-        }
-    };
+  // Уже авторизованного сразу отправляем в личный кабинет
+  if (user) {
+    return <Navigate to="/main" replace />;
+  }
 
-    const handleOpenModal = useCallback(() => {
-        if (!isModalOpen) {
-            setIsModalOpen(true);
-        }
-    }, [isModalOpen]);
-
-    const handleCloseModal = useCallback(() => {
-        setIsModalOpen(false);
-    }, []);
-
-    const handleRegistrationSubmit = useCallback(async (formData) => {
-        try {
-            const response = await fetch('http://localhost:5000/api/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
-            });
-            if (response.ok) {
-                console.log('Registration successful');
-            } else {
-                console.log('Registration failed');
-            }
-        } catch (err) {
-            console.error('Registration error', err);
-        }
-    }, []);
-
-    return (
-        <div className="page-container">
-            <Header toggleTheme={toggleTheme} setLanguage={setLanguage} />
-            <div className="main-layout">
-                <div className="main-content">
-                    <div className="content-wrapper">
-                        <LoginForm onLogin={handleLogin} onRegister={handleOpenModal} />
-                        <RegistrationModal 
-                            isOpen={isModalOpen} 
-                            onClose={handleCloseModal} 
-                            onSubmit={handleRegistrationSubmit} 
-                        />
-                    </div>
-                </div>
-            </div>
+  return (
+    <div className="page-container">
+      <Header />
+      <div className="main-layout">
+        <div className="main-content">
+          <div className="content-wrapper">
+            <LoginForm onLogin={handleLogin} onRegister={() => setIsModalOpen(true)} />
+            <RegistrationModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              onSubmit={handleRegistrationSubmit}
+            />
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 
 export default MainPage;

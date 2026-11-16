@@ -81,6 +81,56 @@
   margin: 5px 0;
 }
 
+.client-card__edit {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.client-card__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 15px;
+}
+
+.client-card__edit-btn {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #E0E0E0;
+  border-radius: 6px;
+  color: #2C3E50;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.client-card__edit-btn:hover {
+  background: #F8F9FA;
+}
+
+.client-card__edit-btn--danger {
+  color: #FF6B6B;
+  border-color: #FF6B6B;
+}
+
+.client-card__edit-btn--danger:hover {
+  background: rgba(255, 107, 107, 0.1);
+}
+
+.client-card__cancel {
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid #E0E0E0;
+  border-radius: 6px;
+  color: #2C3E50;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.client-card__cancel:hover {
+  background: #F8F9FA;
+}
+
 /* Modal styles */
 .modal-overlay {
   position: fixed;

@@ -1,79 +1,89 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import './common.css';
 import './Diary.css';
+import { apiFetch } from '../api';
+import { useToast } from '../context/ToastContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const Diary = () => {
   const [entries, setEntries] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(null);
-  const [newEntry, setNewEntry] = useState({
-    text: ''
-  });
+  const [editingId, setEditingId] = useState(null);
+  const [newEntry, setNewEntry] = useState({ text: '' });
   const [editText, setEditText] = useState('');
+  const { notify } = useToast();
+  const { t, formatDate } = useLanguage();
 
-  const handleInputChange = (e) => {
-    const { value } = e.target;
-    setNewEntry({
-      ...newEntry,
-      text: value
-    });
-  };
+  const loadEntries = useCallback(async () => {
+    try {
+      const data = await apiFetch('/diary');
+      setEntries(data);
+    } catch (err) {
+      notify(err.message, 'error');
+    }
+  }, [notify]);
+
+  useEffect(() => {
+    loadEntries();
+  }, [loadEntries]);
 
   const handleAddEntry = async () => {
-    if (newEntry.text.trim()) {
-      const entry = {
-        text: newEntry.text,
-        date: new Date().toISOString(),
-      };
-      try {
-        await fetch('http://localhost:5000/api/diary', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(entry),
-        });
-      } catch (err) {
-        console.error('Failed to save entry', err);
-      }
-      setEntries([
-        { id: Date.now(), ...entry },
-        ...entries,
-      ]);
-      setNewEntry({
-        text: '',
+    if (!newEntry.text.trim()) return;
+    try {
+      await apiFetch('/diary', {
+        method: 'POST',
+        body: { text: newEntry.text, date: new Date().toISOString() },
       });
+      notify(t('toast.entryAdded'), 'success');
+      setNewEntry({ text: '' });
       setIsModalOpen(false);
+      loadEntries();
+    } catch (err) {
+      notify(err.message, 'error');
     }
   };
 
   const handleEdit = (id, text) => {
-    setIsEditing(id);
+    setEditingId(id);
     setEditText(text);
   };
 
-  const saveEdit = (id) => {
-    setEntries(entries.map(entry => 
-      entry.id === id ? { ...entry, text: editText } : entry
-    ));
-    setIsEditing(null);
+  const saveEdit = async (id) => {
+    try {
+      await apiFetch(`/diary/${id}`, { method: 'PUT', body: { text: editText } });
+      notify(t('toast.entryUpdated'), 'success');
+      setEditingId(null);
+      loadEntries();
+    } catch (err) {
+      notify(err.message, 'error');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm(t('common.delete') + '?')) return;
+    try {
+      await apiFetch(`/diary/${id}`, { method: 'DELETE' });
+      notify(t('toast.deleted'), 'success');
+      loadEntries();
+    } catch (err) {
+      notify(err.message, 'error');
+    }
   };
 
   return (
     <div className="container-card diary">
       <div className="component-header">
-        <h2 className="component-title">Дневник</h2>
-        <button 
-          className="btn-primary"
-          onClick={() => setIsModalOpen(true)}
-        >
-          Добавить запись
+        <h2 className="component-title">{t('diary.title')}</h2>
+        <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
+          {t('diary.add')}
         </button>
       </div>
 
       {entries.length > 0 ? (
         <div className="diary__list">
-          {entries.map(entry => (
+          {entries.map((entry) => (
             <div key={entry.id} className="diary-card">
-              {isEditing === entry.id ? (
+              {editingId === entry.id ? (
                 <div className="diary-card__edit">
                   <textarea
                     className="diary-card__edit-textarea"
@@ -81,17 +91,11 @@ const Diary = () => {
                     onChange={(e) => setEditText(e.target.value)}
                   />
                   <div className="diary-card__edit-buttons">
-                    <button 
-                      className="diary-card__save-btn"
-                      onClick={() => saveEdit(entry.id)}
-                    >
-                      Сохранить
+                    <button className="diary-card__save-btn" onClick={() => saveEdit(entry.id)}>
+                      {t('common.save')}
                     </button>
-                    <button 
-                      className="diary-card__cancel-btn"
-                      onClick={() => setIsEditing(null)}
-                    >
-                      Отмена
+                    <button className="diary-card__cancel-btn" onClick={() => setEditingId(null)}>
+                      {t('common.cancel')}
                     </button>
                   </div>
                 </div>
@@ -99,14 +103,22 @@ const Diary = () => {
                 <>
                   <div className="diary-card__content">
                     <p className="diary-card__text">{entry.text}</p>
-                    <span className="diary-card__date">{entry.date}</span>
+                    <span className="diary-card__date">{formatDate(entry.date)}</span>
                   </div>
-                  <button 
-                    className="diary-card__edit-btn"
-                    onClick={() => handleEdit(entry.id, entry.text)}
-                  >
-                    Редактировать
-                  </button>
+                  <div className="diary-card__actions">
+                    <button
+                      className="diary-card__edit-btn"
+                      onClick={() => handleEdit(entry.id, entry.text)}
+                    >
+                      {t('common.edit')}
+                    </button>
+                    <button
+                      className="diary-card__edit-btn diary-card__edit-btn--danger"
+                      onClick={() => handleDelete(entry.id)}
+                    >
+                      {t('common.delete')}
+                    </button>
+                  </div>
                 </>
               )}
             </div>
@@ -114,7 +126,7 @@ const Diary = () => {
         </div>
       ) : (
         <div className="diary__empty">
-          <p>Дневник пуст</p>
+          <p>{t('diary.empty')}</p>
         </div>
       )}
 
@@ -122,39 +134,30 @@ const Diary = () => {
         <div className="modal-overlay">
           <div className="modal diary__modal">
             <div className="modal__header">
-              <h3>Добавить новую запись</h3>
-              <button 
-                className="modal__close"
-                onClick={() => setIsModalOpen(false)}
-              >
+              <h3>{t('diary.modal.add')}</h3>
+              <button className="modal__close" onClick={() => setIsModalOpen(false)}>
                 &times;
               </button>
             </div>
             <div className="modal__body">
               <div className="form-group">
-                <label htmlFor="text">Текст записи *</label>
+                <label htmlFor="text">{t('diary.field.text')} *</label>
                 <textarea
                   id="text"
                   value={newEntry.text}
-                  onChange={handleInputChange}
-                  placeholder="Напишите новую запись..."
+                  onChange={(e) => setNewEntry({ text: e.target.value })}
+                  placeholder={t('diary.placeholder')}
                   rows="6"
                   required
                 />
               </div>
             </div>
             <div className="modal__footer">
-              <button 
-                className="modal__cancel"
-                onClick={() => setIsModalOpen(false)}
-              >
-                Отмена
+              <button className="modal__cancel" onClick={() => setIsModalOpen(false)}>
+                {t('common.cancel')}
               </button>
-              <button 
-                className="modal__submit"
-                onClick={handleAddEntry}
-              >
-                Добавить
+              <button className="modal__submit" onClick={handleAddEntry}>
+                {t('common.add')}
               </button>
             </div>
           </div>

@@ -11,6 +11,7 @@
     margin: 0 auto;
     margin-bottom: 20px;
     background-color: var(--header-bg-color);
+    margin-top: 20px;
 }
 
 .header__theme-switcher {

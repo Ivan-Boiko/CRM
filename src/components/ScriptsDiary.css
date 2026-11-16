@@ -76,6 +76,25 @@
   background-color: var(--toggle-hover-bg);
 }
 
+.script-card__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.script-card__actions .script-card__edit-btn {
+  margin-top: 0;
+}
+
+.script-card__edit-btn--danger {
+  color: #FF6B6B;
+  border-color: #FF6B6B;
+}
+
+.script-card__edit-btn--danger:hover {
+  background-color: rgba(255, 107, 107, 0.1);
+}
+
 /* Edit form styles */
 .script-card__edit-form {
   width: 100%;
@@ -103,12 +122,19 @@
 .script-card__form-textarea {
   width: 100%;
   min-height: 200px;
-  padding: 10px;
+  padding: 10px 14px;
   border: 1px solid var(--border-light-color);
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 14px;
   font-family: monospace;
   resize: vertical;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.script-card__form-textarea:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.15);
 }
 
 .script-card__form-buttons {

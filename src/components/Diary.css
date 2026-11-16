@@ -62,12 +62,19 @@
 .diary-card__edit-textarea {
   width: 100%;
   min-height: 100px;
-  padding: 10px;
-  border: 1px solid #E0E0E0;
-  border-radius: 6px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-light-color);
+  border-radius: 8px;
   margin-bottom: 10px;
   font-size: 14px;
   resize: vertical;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.diary-card__edit-textarea:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.15);
 }
 
 .diary-card__edit-buttons {
@@ -113,6 +120,21 @@
 
 .diary-card__cancel-btn:hover {
   background-color: #F8F9FA;
+}
+
+.diary-card__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.diary-card__edit-btn--danger {
+  color: #FF6B6B;
+  border-color: #FF6B6B;
+}
+
+.diary-card__edit-btn--danger:hover {
+  background-color: rgba(255, 107, 107, 0.1);
 }
 
 /* Animation */

@@ -1,117 +1,148 @@
-import React, { useState, useEffect } from 'react';
-import { 
+import React, { useMemo, useState } from 'react';
+import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
 import './Analytics.css';
+import { useLanguage } from '../context/LanguageContext';
 
-const Analytics = () => {
-  // Временные данные для демонстрации (в реальном приложении данные будут приходить с сервера)
-  const [taskStats, setTaskStats] = useState({
-    completedOnTime: 0,
-    overdue: 0,
-    dueSoon: 0,
-    urgent: 0
-  });
-  
-  const [weeklyData, setWeeklyData] = useState([]);
-  const [monthlyData, setMonthlyData] = useState([]);
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const emptyBucket = (name) => ({
+  name,
+  completedOnTime: 0,
+  overdue: 0,
+  dueSoon: 0,
+  urgent: 0,
+});
+
+// Определяет категорию задачи для аналитики
+const categorize = (task, today) => {
+  const deadline = task.deadline ? new Date(task.deadline) : null;
+  if (deadline) deadline.setHours(0, 0, 0, 0);
+
+  if (task.status === 'done') return 'completedOnTime';
+  if (deadline && deadline < today) return 'overdue';
+  if (deadline && deadline - today <= 3 * DAY_MS) return 'dueSoon';
+  if (task.priority === 'high') return 'urgent';
+  return null;
+};
+
+const Analytics = ({ tasks }) => {
   const [selectedPeriod, setSelectedPeriod] = useState('week');
+  const { t, lang } = useLanguage();
+  const locale = lang === 'ru' ? 'ru-RU' : 'en-US';
 
-  // Имитация загрузки данных
-  useEffect(() => {
-    // Здесь будет запрос к API для получения реальных данных
-    // Временные данные для демонстрации
-    setTaskStats({
-      completedOnTime: 45,
-      overdue: 12,
-      dueSoon: 8,
-      urgent: 15
+  const { summary, weeklyData, monthlyData } = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const summaryCounts = { completedOnTime: 0, overdue: 0, dueSoon: 0, urgent: 0 };
+
+    // Неделя: Пн–Вс текущей недели
+    const startOfWeek = new Date(today);
+    const weekdayIndex = (today.getDay() + 6) % 7; // 0 = понедельник
+    startOfWeek.setDate(today.getDate() - weekdayIndex);
+    const weekdays = Array.from({ length: 7 }, (_, i) => {
+      const day = new Date(startOfWeek);
+      day.setDate(startOfWeek.getDate() + i);
+      return day;
+    });
+    const weekly = weekdays.map((day) =>
+      emptyBucket(new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(day))
+    );
+
+    // Месяц: последние 6 месяцев
+    const months = Array.from({ length: 6 }, (_, i) => {
+      return new Date(today.getFullYear(), today.getMonth() - (5 - i), 1);
+    });
+    const monthly = months.map((day) =>
+      emptyBucket(new Intl.DateTimeFormat(locale, { month: 'short' }).format(day))
+    );
+
+    tasks.forEach((task) => {
+      const category = categorize(task, today);
+      if (!category) return;
+      summaryCounts[category] += 1;
+
+      if (task.deadline) {
+        const deadline = new Date(task.deadline);
+        deadline.setHours(0, 0, 0, 0);
+
+        const weekIndex = weekdays.findIndex((day) => day.getTime() === deadline.getTime());
+        if (weekIndex >= 0) weekly[weekIndex][category] += 1;
+
+        const monthIndex = months.findIndex(
+          (month) =>
+            month.getFullYear() === deadline.getFullYear() && month.getMonth() === deadline.getMonth()
+        );
+        if (monthIndex >= 0) monthly[monthIndex][category] += 1;
+      }
     });
 
-    // Данные по дням недели
-    setWeeklyData([
-      { name: 'Пн', completedOnTime: 5, overdue: 2, dueSoon: 1, urgent: 3 },
-      { name: 'Вт', completedOnTime: 7, overdue: 1, dueSoon: 2, urgent: 2 },
-      { name: 'Ср', completedOnTime: 8, overdue: 3, dueSoon: 0, urgent: 4 },
-      { name: 'Чт', completedOnTime: 10, overdue: 2, dueSoon: 3, urgent: 1 },
-      { name: 'Пт', completedOnTime: 12, overdue: 1, dueSoon: 1, urgent: 3 },
-      { name: 'Сб', completedOnTime: 2, overdue: 1, dueSoon: 0, urgent: 1 },
-      { name: 'Вс', completedOnTime: 1, overdue: 2, dueSoon: 1, urgent: 1 }
-    ]);
+    return { summary: summaryCounts, weeklyData: weekly, monthlyData: monthly };
+  }, [tasks, locale]);
 
-    // Данные по месяцам
-    setMonthlyData([
-      { name: 'Янв', completedOnTime: 35, overdue: 10, dueSoon: 5, urgent: 12 },
-      { name: 'Фев', completedOnTime: 40, overdue: 8, dueSoon: 7, urgent: 10 },
-      { name: 'Мар', completedOnTime: 45, overdue: 12, dueSoon: 8, urgent: 15 },
-      { name: 'Апр', completedOnTime: 50, overdue: 7, dueSoon: 10, urgent: 8 },
-      { name: 'Май', completedOnTime: 55, overdue: 9, dueSoon: 6, urgent: 11 },
-      { name: 'Июн', completedOnTime: 48, overdue: 11, dueSoon: 9, urgent: 14 }
-    ]);
-  }, []);
-
-  // Данные для круговой диаграммы
   const pieData = [
-    { name: 'Выполнено в срок', value: taskStats.completedOnTime, color: '#00A86B' },
-    { name: 'Просрочено', value: taskStats.overdue, color: '#FF6B6B' },
-    { name: 'Скоро дедлайн', value: taskStats.dueSoon, color: '#FFD166' },
-    { name: 'Срочные', value: taskStats.urgent, color: '#F45D48' }
+    { name: t('analytics.completedOnTime'), value: summary.completedOnTime, color: '#00A86B' },
+    { name: t('analytics.overdue'), value: summary.overdue, color: '#FF6B6B' },
+    { name: t('analytics.dueSoon'), value: summary.dueSoon, color: '#FFD166' },
+    { name: t('analytics.urgent'), value: summary.urgent, color: '#F45D48' },
   ];
 
-  // Выбор данных в зависимости от периода
   const chartData = selectedPeriod === 'week' ? weeklyData : monthlyData;
+  const periodLabel = selectedPeriod === 'week' ? t('analytics.periodDays') : t('analytics.periodMonths');
 
   return (
     <div className="container-card analytics">
       <div className="component-header">
-        <h2 className="component-title">Аналитика задач</h2>
+        <h2 className="component-title">{t('analytics.title')}</h2>
         <div className="analytics__period-selector">
-          <button 
+          <button
             className={`btn-secondary ${selectedPeriod === 'week' ? 'active' : ''}`}
             onClick={() => setSelectedPeriod('week')}
           >
-            Неделя
+            {t('analytics.week')}
           </button>
-          <button 
+          <button
             className={`btn-secondary ${selectedPeriod === 'month' ? 'active' : ''}`}
             onClick={() => setSelectedPeriod('month')}
           >
-            Месяц
+            {t('analytics.month')}
           </button>
         </div>
       </div>
 
+      {tasks.length === 0 && <div className="analytics__empty">{t('analytics.empty')}</div>}
+
       <div className="analytics__summary">
         <div className="analytics__summary-item">
-          <h3>Всего задач</h3>
-          <p className="analytics__summary-value">
-            {taskStats.completedOnTime + taskStats.overdue + taskStats.dueSoon + taskStats.urgent}
-          </p>
+          <h3>{t('analytics.total')}</h3>
+          <p className="analytics__summary-value">{tasks.length}</p>
         </div>
         <div className="analytics__summary-item">
-          <h3>Выполнено в срок</h3>
+          <h3>{t('analytics.completedOnTime')}</h3>
           <p className="analytics__summary-value analytics__summary-value--success">
-            {taskStats.completedOnTime}
+            {summary.completedOnTime}
           </p>
         </div>
         <div className="analytics__summary-item">
-          <h3>Просрочено</h3>
+          <h3>{t('analytics.overdue')}</h3>
           <p className="analytics__summary-value analytics__summary-value--danger">
-            {taskStats.overdue}
+            {summary.overdue}
           </p>
         </div>
         <div className="analytics__summary-item">
-          <h3>Скоро дедлайн</h3>
+          <h3>{t('analytics.dueSoon')}</h3>
           <p className="analytics__summary-value analytics__summary-value--warning">
-            {taskStats.dueSoon}
+            {summary.dueSoon}
           </p>
         </div>
       </div>
 
       <div className="analytics__charts">
         <div className="analytics__chart-container">
-          <h3 className="analytics__chart-title">Распределение задач</h3>
+          <h3 className="analytics__chart-title">{t('analytics.distribution')}</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -135,39 +166,40 @@ const Analytics = () => {
         </div>
 
         <div className="analytics__chart-container">
-          <h3 className="analytics__chart-title">Динамика задач по {selectedPeriod === 'week' ? 'дням' : 'месяцам'}</h3>
+          <h3 className="analytics__chart-title">
+            {t('analytics.dynamics', { period: periodLabel })}
+          </h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart
-              data={chartData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-            >
+            <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="completedOnTime" name="Выполнено в срок" fill="#00A86B" />
-              <Bar dataKey="overdue" name="Просрочено" fill="#FF6B6B" />
-              <Bar dataKey="dueSoon" name="Скоро дедлайн" fill="#FFD166" />
-              <Bar dataKey="urgent" name="Срочные" fill="#F45D48" />
+              <Bar dataKey="completedOnTime" name={t('analytics.completedOnTime')} fill="#00A86B" />
+              <Bar dataKey="overdue" name={t('analytics.overdue')} fill="#FF6B6B" />
+              <Bar dataKey="dueSoon" name={t('analytics.dueSoon')} fill="#FFD166" />
+              <Bar dataKey="urgent" name={t('analytics.urgent')} fill="#F45D48" />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         <div className="analytics__chart-container">
-          <h3 className="analytics__chart-title">Тренд выполнения задач</h3>
+          <h3 className="analytics__chart-title">{t('analytics.trend')}</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart
-              data={chartData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-            >
+            <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="completedOnTime" name="Выполнено в срок" stroke="#00A86B" />
-              <Line type="monotone" dataKey="overdue" name="Просрочено" stroke="#FF6B6B" />
+              <Line
+                type="monotone"
+                dataKey="completedOnTime"
+                name={t('analytics.completedOnTime')}
+                stroke="#00A86B"
+              />
+              <Line type="monotone" dataKey="overdue" name={t('analytics.overdue')} stroke="#FF6B6B" />
             </LineChart>
           </ResponsiveContainer>
         </div>

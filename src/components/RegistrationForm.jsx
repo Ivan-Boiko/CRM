@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import "./RegistrationForm.css";
+import { useLanguage } from "../context/LanguageContext";
 
 const RegistrationForm = ({ onSubmit, onCancel }) => {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -19,13 +21,13 @@ const RegistrationForm = ({ onSubmit, onCancel }) => {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = "Имя обязательно.";
-    if (!formData.email.trim()) newErrors.email = "Email обязателен.";
-    if (!formData.password.trim()) newErrors.password = "Пароль обязателен.";
+    if (!formData.name.trim()) newErrors.name = t('register.nameRequired');
+    if (!formData.email.trim()) newErrors.email = t('register.emailRequired');
+    if (!formData.password.trim()) newErrors.password = t('register.passwordRequired');
     if (!formData.confirmPassword.trim())
-      newErrors.confirmPassword = "Подтверждение пароля обязательно.";
+      newErrors.confirmPassword = t('register.confirmRequired');
     else if (formData.password !== formData.confirmPassword)
-      newErrors.confirmPassword = "Пароли не совпадают.";
+      newErrors.confirmPassword = t('register.mismatch');
 
     return newErrors;
   };
@@ -42,7 +44,7 @@ const RegistrationForm = ({ onSubmit, onCancel }) => {
 
   return (
     <div className="registration-form">
-      <h2 className="registration-form__title">Регистрация</h2>
+      <h2 className="registration-form__title">{t('register.title')}</h2>
       <form className="registration-form__form" onSubmit={handleSubmit}>
         <div className="form-group">
           <input
@@ -50,7 +52,7 @@ const RegistrationForm = ({ onSubmit, onCancel }) => {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            placeholder="Имя"
+            placeholder={t('register.name')}
             className="registration-form__input"
           />
           {errors.name && <div className="error">{errors.name}</div>}
@@ -61,7 +63,7 @@ const RegistrationForm = ({ onSubmit, onCancel }) => {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="Email"
+            placeholder={t('register.email')}
             className="registration-form__input"
           />
           {errors.email && <div className="error">{errors.email}</div>}
@@ -72,7 +74,7 @@ const RegistrationForm = ({ onSubmit, onCancel }) => {
             name="password"
             value={formData.password}
             onChange={handleChange}
-            placeholder="Пароль"
+            placeholder={t('register.password')}
             className="registration-form__input"
           />
           {errors.password && <div className="error">{errors.password}</div>}
@@ -83,7 +85,7 @@ const RegistrationForm = ({ onSubmit, onCancel }) => {
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
-            placeholder="Подтвердите пароль"
+            placeholder={t('register.confirm')}
             className="registration-form__input"
           />
           {errors.confirmPassword && (
@@ -91,11 +93,11 @@ const RegistrationForm = ({ onSubmit, onCancel }) => {
           )}
         </div>
         <button type="submit" className="submit-btn">
-          Зарегистрироваться
+          {t('register.submit')}
         </button>
       </form>
       <button className="close-btn" onClick={onCancel}>
-        Отмена
+        {t('common.cancel')}
       </button>
     </div>
   );
