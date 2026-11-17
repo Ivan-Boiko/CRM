@@ -115,35 +115,43 @@ input.search-input:focus {
   background-color: var(--toggle-hover-bg, #e0e0e0);
 }
 
-/* Мобильная шапка: логотип и кнопки в первой строке, поиск — во всю ширину ниже */
+/* Мобильная шапка: две строки — логотип и кнопки, под ними поиск во всю ширину */
 @media (max-width: 768px) {
   .topbar {
-    flex-wrap: wrap;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'brand actions'
+      'search search';
+    align-items: center;
+    gap: 10px 12px;
     /* Сверху учитываем вырез/чёлку, по бокам — вырез в горизонтальной ориентации */
     padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 12px
       max(16px, env(safe-area-inset-left));
   }
 
-  /* Обёртка перестаёт быть отдельным блоком, чтобы поиск мог занять свою строку */
+  /* Обёртка перестаёт быть блоком, чтобы логотип и поиск стали элементами сетки */
   .topbar-left {
     display: contents;
   }
 
   .logo {
-    order: 1;
+    grid-area: brand;
+    min-width: 0;
     font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .topbar-right {
-    order: 2;
-    margin-left: auto;
-    gap: 12px;
+    grid-area: actions;
+    gap: 8px;
+    margin-left: 0;
   }
 
   .search-container {
-    order: 3;
-    flex: 1 1 100%;
+    grid-area: search;
   }
 
   .topbar input.search-input {
@@ -152,19 +160,30 @@ input.search-input:focus {
     min-height: 44px;
   }
 
-  /* Кнопки шапки не меньше 44 px по высоте */
-  .topbar__logout,
-  .notifications,
-  .profile-avatar {
-    min-height: 44px;
-  }
-
+  /* Кнопки шапки: ровные квадраты 44 px, чтобы строка не разъезжалась */
   .notifications {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+  }
+
+  .notification-icon {
+    font-size: 18px;
+  }
+
+  .profile-avatar {
+    width: 40px;
+    height: 40px;
+    min-height: 0;
+    font-size: 15px;
   }
 
   .topbar__logout {
-    padding: 10px 16px;
+    min-height: 44px;
+    padding: 0 14px;
+    font-size: 13px;
   }
 }
