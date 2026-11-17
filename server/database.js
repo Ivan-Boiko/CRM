@@ -68,6 +68,12 @@ export function initDb() {
   addColumnIfMissing('tasks', 'description', 'TEXT');
   addColumnIfMissing('tasks', 'comment', 'TEXT');
   addColumnIfMissing('users', 'avatar', 'TEXT');
+  // Привязка личного Telegram-бота: чат, имя, одноразовый код и срок его жизни
+  addColumnIfMissing('users', 'telegram_chat_id', 'TEXT');
+  addColumnIfMissing('users', 'telegram_username', 'TEXT');
+  addColumnIfMissing('users', 'telegram_link_code', 'TEXT');
+  addColumnIfMissing('users', 'telegram_link_expires', 'TEXT');
+  addColumnIfMissing('users', 'telegram_linked_at', 'TEXT');
   // Вид комментария: обычный ('comment') или причина возврата задачи в работу ('return')
   addColumnIfMissing('task_comments', 'kind', "TEXT DEFAULT 'comment'");
   // Подгруппа задачи («Работа», «Личное» и свои)

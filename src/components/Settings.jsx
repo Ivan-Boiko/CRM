@@ -1,10 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ThemeToggle from './ThemeToggle';
 import LanguageToggle from './LanguageToggle';
 import './Settings.css';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { apiFetch } from '../api';
 
 const AVATAR_SIZE = 128;
 
@@ -38,6 +39,10 @@ const Settings = () => {
   const fileInputRef = useRef(null);
   const [preview, setPreview] = useState(null);
   const [saving, setSaving] = useState(false);
+  // Необязательная привязка Telegram: статус с сервера и выданный код
+  const [telegram, setTelegram] = useState(null);
+  const [telegramLink, setTelegramLink] = useState(null);
+  const [telegramBusy, setTelegramBusy] = useState(false);
 
   const currentAvatar = preview ?? user?.avatar ?? null;
   const initial = (user?.name || '?').trim().charAt(0).toUpperCase();
@@ -82,6 +87,86 @@ const Settings = () => {
       notify(err.message, 'error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Статус Telegram загружаем один раз при открытии настроек
+  useEffect(() => {
+    let cancelled = false;
+    apiFetch('/telegram/status')
+      .then((data) => {
+        if (!cancelled) setTelegram(data);
+      })
+      .catch(() => {
+        if (!cancelled) setTelegram({ configured: false, linked: false });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Пока пользователь открывает бота, раз в 3 секунды проверяем, привязался ли чат
+  useEffect(() => {
+    if (!telegramLink) return undefined;
+    let ticks = 0;
+    const timer = setInterval(async () => {
+      ticks += 1;
+      try {
+        const data = await apiFetch('/telegram/status');
+        setTelegram(data);
+        if (data.linked) {
+          clearInterval(timer);
+          setTelegramLink(null);
+          notify(t('settings.telegramLinked'), 'success');
+          return;
+        }
+      } catch (err) {
+        // Сеть моргнула — попробуем на следующем тике
+      }
+      // Через 2 минуты перестаём опрашивать: код всё равно живёт 15 минут
+      if (ticks >= 40) {
+        clearInterval(timer);
+        setTelegramLink(null);
+      }
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [telegramLink, notify, t]);
+
+  const handleTelegramLink = async () => {
+    setTelegramBusy(true);
+    try {
+      const data = await apiFetch('/telegram/link', { method: 'POST' });
+      setTelegramLink(data);
+    } catch (err) {
+      notify(err.message, 'error');
+    } finally {
+      setTelegramBusy(false);
+    }
+  };
+
+  const handleTelegramUnlink = async () => {
+    setTelegramBusy(true);
+    try {
+      await apiFetch('/telegram/link', { method: 'DELETE' });
+      setTelegram((prev) => ({ ...prev, linked: false, username: null }));
+      setTelegramLink(null);
+      notify(t('settings.telegramDisconnected'), 'success');
+    } catch (err) {
+      notify(err.message, 'error');
+    } finally {
+      setTelegramBusy(false);
+    }
+  };
+
+  const handleTelegramTest = async () => {
+    setTelegramBusy(true);
+    try {
+      await apiFetch('/telegram/test', { method: 'POST' });
+      notify(t('settings.telegramTestSent'), 'success');
+    } catch (err) {
+      notify(err.message, 'error');
+    } finally {
+      setTelegramBusy(false);
     }
   };
 
@@ -152,6 +237,80 @@ const Settings = () => {
               <div className="settings__switch-label">{t('settings.languageLabel')}</div>
               <div className="settings__option-description">{t('settings.languageDesc')}</div>
             </div>
+          </div>
+        </div>
+
+        <div className="settings__section">
+          <h3 className="settings__section-title">{t('settings.notifications')}</h3>
+          <div className="settings__telegram">
+            <div className="settings__switch-label">Telegram</div>
+            <p className="settings__telegram-desc">{t('settings.telegramDesc')}</p>
+
+            {telegram && !telegram.configured && (
+              <div className="settings__telegram-status settings__telegram-status--muted">
+                {t('settings.telegramNotConfigured')}
+              </div>
+            )}
+
+            {telegram && telegram.configured && telegram.linked && (
+              <>
+                <div className="settings__telegram-status">
+                  {telegram.username
+                    ? t('settings.telegramLinkedAs', { username: telegram.username })
+                    : t('settings.telegramLinked')}
+                </div>
+                <div className="settings__telegram-actions">
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={handleTelegramTest}
+                    disabled={telegramBusy}
+                  >
+                    {t('settings.telegramTest')}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-secondary settings__telegram-remove"
+                    onClick={handleTelegramUnlink}
+                    disabled={telegramBusy}
+                  >
+                    {t('settings.telegramDisconnect')}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {telegram && telegram.configured && !telegram.linked && !telegramLink && (
+              <div className="settings__telegram-actions">
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={handleTelegramLink}
+                  disabled={telegramBusy}
+                >
+                  {t('settings.telegramConnect')}
+                </button>
+              </div>
+            )}
+
+            {telegramLink && (
+              <div className="settings__telegram-link">
+                <div className="settings__telegram-hint">{t('settings.telegramHint')}</div>
+                <div className="settings__telegram-actions">
+                  <a
+                    className="btn-primary settings__telegram-open"
+                    href={telegramLink.deeplink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {t('settings.telegramOpenBot')}
+                  </a>
+                  <span className="settings__telegram-code">
+                    {t('settings.telegramCode', { code: telegramLink.code })}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

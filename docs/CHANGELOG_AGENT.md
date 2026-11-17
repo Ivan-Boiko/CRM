@@ -1,5 +1,14 @@
 # Журнал изменений
 
+## 2026-11-17 — Необязательное подключение Telegram в настройках
+- Новый файл `server/telegram.js` — привязка личного бота: `getMe` (имя для ссылки), одноразовый код на 15 минут, long polling `getUpdates` с пропуском накопленных обновлений на старте, обработка `/start <код>` и `/stop`, `sendMessage`. Токен — только из `TELEGRAM_BOT_TOKEN`, в базе не хранится; без токена опрос не запускается.
+- `server/server.js` — импорт модуля, `initTelegram()` после `initDb()`, `stopTelegram()` при завершении, роуты `GET /api/telegram/status`, `POST /api/telegram/link` (503 без токена), `DELETE /api/telegram/link`, `POST /api/telegram/test` (400 без привязки, 502 при ошибке отправки).
+- `server/database.js` — миграции `users.telegram_chat_id`, `telegram_username`, `telegram_link_code`, `telegram_link_expires`, `telegram_linked_at`.
+- `src/components/Settings.jsx` — блок «Уведомления и Telegram»: статус, кнопка привязки со ссылкой `t.me/...` и кодом, автопроверка статуса раз в 3 секунды (не дольше 2 минут), «Проверить» и «Отключить».
+- `src/components/Settings.css` — стили блока, на ≤480 px кнопки в столбик на всю ширину.
+- `src/i18n.js` — подписи ru/en.
+- `.env.example`, `README.md`, `docs/DEPLOY.md` — `TELEGRAM_BOT_TOKEN` и инструкция: бот у @BotFather, токен в `.env`, привязка в настройках.
+
 ## 2026-11-17 — Иконки приложения CRM
 - `public/icons/` — новая папка: `icon.svg` и `icon-maskable.svg` (исходники), `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` (безопасная зона 80%), `apple-touch-icon.png` 180×180, `favicon-32.png` (буква C для мелкого размера). Знак — зелёный #00A86B с белой надписью CRM.
 - `public/manifest.json` — иконки CRA заменены на новые: 192/512 `any` и 512 `maskable`, удалена ссылка на `favicon.ico`.

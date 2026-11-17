@@ -6,6 +6,14 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import db, { initDb } from './database.js';
+import {
+  initTelegram,
+  stopTelegram,
+  getStatus,
+  createLinkCode,
+  unlink,
+  sendMessage,
+} from './telegram.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -76,6 +84,9 @@ app.use(
 app.use(express.json());
 
 initDb();
+
+// Необязательный Telegram: без TELEGRAM_BOT_TOKEN ничего не запускается
+initTelegram();
 
 // --- Вспомогательные функции ---
 
@@ -241,6 +252,40 @@ app.put('/api/me', auth, (req, res) => {
     .prepare('SELECT id, name, email, avatar FROM users WHERE id = ?')
     .get(req.user.id);
   res.json(user);
+});
+
+// --- Telegram (необязательная привязка личного бота) ---
+
+// Статус: настроен ли бот на сервере и привязан ли чат у текущего пользователя
+app.get('/api/telegram/status', auth, (req, res) => res.json(getStatus(req.user.id)));
+
+// Одноразовый код и ссылка t.me/<bot>?start=<код>
+app.post('/api/telegram/link', auth, (req, res) => {
+  const link = createLinkCode(req.user.id);
+  if (!link) {
+    return res.status(503).json({ message: 'Бот не настроен на сервере' });
+  }
+  res.json(link);
+});
+
+app.delete('/api/telegram/link', auth, (req, res) => {
+  unlink(req.user.id);
+  res.json({ linked: false });
+});
+
+// Проверочное сообщение в привязанный чат
+app.post('/api/telegram/test', auth, async (req, res) => {
+  const user = db.prepare('SELECT telegram_chat_id FROM users WHERE id = ?').get(req.user.id);
+  if (!user || !user.telegram_chat_id) {
+    return res.status(400).json({ message: 'Сначала привяжите Telegram' });
+  }
+  try {
+    await sendMessage(user.telegram_chat_id, 'Проверка связи: CRM');
+    res.json({ sent: true });
+  } catch (err) {
+    console.error('Telegram: не удалось отправить сообщение —', err.message);
+    res.status(502).json({ message: 'Не удалось отправить сообщение в Telegram' });
+  }
 });
 
 // --- Универсальный CRUD для пользовательских сущностей ---
@@ -442,6 +487,7 @@ const server = app.listen(PORT, () => {
 const shutdown = (signal) => {
   console.log(`${signal}: останавливаюсь`);
   server.close(() => {
+    stopTelegram();
     db.close();
     process.exit(0);
   });

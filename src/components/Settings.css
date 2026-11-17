@@ -170,6 +170,74 @@
   margin: 0 auto;
 }
 
+/* Необязательное подключение Telegram */
+.settings__telegram {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 15px 0 5px;
+}
+
+.settings__telegram-desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary-color);
+  max-width: 520px;
+}
+
+.settings__telegram-status {
+  font-size: 14px;
+  color: var(--text-primary-color);
+  overflow-wrap: anywhere;
+}
+
+.settings__telegram-status--muted {
+  color: var(--text-secondary-color);
+}
+
+.settings__telegram-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.settings__telegram-open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.settings__telegram-remove {
+  color: #CF1322;
+  border-color: #CF1322;
+}
+
+.settings__telegram-remove:hover {
+  background-color: #FFF1F0;
+}
+
+.settings__telegram-code {
+  font-family: monospace;
+  font-size: 13px;
+  color: var(--text-secondary-color);
+  background-color: var(--header-bg-color);
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+.settings__telegram-hint {
+  font-size: 13px;
+  color: var(--text-secondary-color);
+}
+
+.settings__telegram-link {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 @media (max-width: 1024px) {
   .settings__option {
     flex-direction: column;
@@ -184,5 +252,22 @@
   
   .settings__option-description {
     text-align: left;
+  }
+}
+
+/* На узком экране кнопки Telegram — в столбик на всю ширину */
+@media (max-width: 480px) {
+  .settings__telegram-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .settings__telegram-actions .btn-primary,
+  .settings__telegram-actions .btn-secondary {
+    width: 100%;
+  }
+
+  .settings__telegram-code {
+    text-align: center;
   }
 }

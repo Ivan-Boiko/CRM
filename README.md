@@ -98,6 +98,17 @@ npm start        # CRA, по умолчанию http://localhost:3000
 Docker + Caddy с автоматическим HTTPS, база на томе, бэкапы — пошагово в [docs/DEPLOY.md](docs/DEPLOY.md).
 Коротко: заполнить `.env` по `.env.example` и выполнить `docker compose up -d --build`.
 
+### Подключение Telegram (необязательно)
+
+Бот не нужен для работы CRM: без токена блок в настройках показывает «Бот не настроен на сервере», остальное работает как раньше.
+
+1. В Telegram откройте [@BotFather](https://t.me/BotFather), выполните `/newbot`, задайте имя и получите токен вида `123456:AA...`.
+2. Добавьте его в `.env` на сервере: `TELEGRAM_BOT_TOKEN=...` (пустая строка есть в `.env.example`) и перезапустите: `docker compose up -d`.
+3. В CRM откройте «Настройки → Уведомления и Telegram → Привязать Telegram», перейдите по ссылке и нажмите Start. Статус обновится сам в течение пары секунд.
+4. «Проверить» отправляет сообщение в чат, «Отключить» (или команда `/stop` в боте) убирает привязку.
+
+Один бот обслуживает все аккаунты инстанса: у каждого пользователя свой `chat_id`. Токен хранится только в `.env`, сервер опрашивает Telegram long polling'ом — публичный вебхук не нужен. Код привязки одноразовый и живёт 15 минут.
+
 ### Проверка с телефона по локальной сети
 
 1. Узнать IPv4 компьютера в его Wi-Fi: `ipconfig` (Windows) или `ip addr` / `ifconfig` (macOS, Linux). Пример: `192.168.31.136`.
@@ -135,6 +146,10 @@ SQLite (database.js: db.prepare(...).run/all/get)
 | POST | `/api/login` | Вход: `email, password` → `{token, user}` |
 | GET | `/api/me` | Профиль текущего пользователя (требует токен) |
 | PUT | `/api/me` | Обновление профиля: `name` и/или `avatar` (требует токен) |
+| GET | `/api/telegram/status` | Статус бота: `{ configured, linked, username, botUsername }` |
+| POST | `/api/telegram/link` | Одноразовый код и ссылка на бота; 503, если `TELEGRAM_BOT_TOKEN` не задан |
+| DELETE | `/api/telegram/link` | Отвязать Telegram |
+| POST | `/api/telegram/test` | Проверочное сообщение в привязанный чат |
 | GET/POST/PUT/DELETE | `/api/tasks[/:id]` | Задачи (CRUD, только свои `user_id`) |
 | GET/POST/PUT/DELETE | `/api/diary[/:id]` | Дневник |
 
@@ -144,7 +159,7 @@ SQLite (database.js: db.prepare(...).run/all/get)
 ### Схема БД (SQLite)
 
 ```sql
-users    (id PK, name, email UNIQUE, password, avatar)
+users    (id PK, name, email UNIQUE, password, avatar, telegram_chat_id, telegram_username, telegram_link_code, telegram_link_expires, telegram_linked_at)
 tasks    (id PK, user_id FK, name, description, priority, deadline, status, comment, group_id FK)
 task_groups (id PK, user_id FK, name, created_at) — подгруппы задач
 task_comments (id PK, task_id FK, text, kind: comment|return, created_at)

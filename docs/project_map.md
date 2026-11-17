@@ -56,7 +56,7 @@
 - StatusSelect.jsx / StatusSelect.css — выпадающий список статуса в строке таблицы (кнопка-бейдж + меню в портале, без нативного select)
 - Diary.jsx / Diary.css — дневник записей
 - Analytics.jsx / Analytics.css — аналитика (Recharts)
-- Settings.jsx / Settings.css — настройки (профиль, тема, язык)
+- Settings.jsx / Settings.css — настройки (профиль, тема, язык, необязательное подключение Telegram: статус, ссылка на бота, проверка и отключение)
 
 #### Мобильные компоненты
 - mobile/BottomNav.jsx / mobile/BottomNav.css — нижняя таб-панель на телефонах (≤768 px) вместо сайдбара: Задачи / Дневник / Аналитика / Настройки, фиксирована внизу, с safe-area
@@ -90,6 +90,11 @@
 - POST /api/register — регистрация (403, если `ALLOW_REGISTRATION=false`)
 - GET /api/me — профиль текущего пользователя
 - PUT /api/me — обновление профиля
+- GET /api/telegram/status — `{ configured, linked, username, botUsername }`
+- POST /api/telegram/link — одноразовый код и ссылка на бота `{ code, deeplink, expiresAt, botUsername }`; 503, если `TELEGRAM_BOT_TOKEN` не задан
+- DELETE /api/telegram/link — отвязать Telegram
+- POST /api/telegram/test — проверочное сообщение в привязанный чат; 400 без привязки, 502 при ошибке отправки
+- Привязка Telegram живёт в `server/telegram.js` (getMe, long polling getUpdates, `/start <код>`, `/stop`, sendMessage)
 - GET/POST/PUT/DELETE /api/tasks — задачи (GET отдаёт задачи вместе с массивом `comments`)
 - GET /api/task-groups — подгруппы задач («Работа», «Личное» создаются автоматически)
 - POST /api/task-groups — создать подгруппу ({ name })
@@ -103,7 +108,7 @@
 - `Dockerfile` — многоступенчатая сборка: React-клиент → зависимости сервера → рантайм `node:20-slim`, пользователь `node`, том `/data` для базы, healthcheck
 - `docker-compose.yml` — сервисы `app` (Express, порт 5000 только внутри сети) и `caddy` (80/443, HTTPS); тома `crm-data`, `caddy-data`, `caddy-config`
 - `deploy/Caddyfile` — домен из `DOMAIN`, автосертификат Let's Encrypt, HSTS и security-заголовки, реверс-прокси на `app:5000`
-- `.env.example` — шаблон переменных (`DOMAIN`, `JWT_SECRET`, `CORS_ORIGINS`, `DB_PATH`, `CLIENT_BUILD_DIR`); `.env` в git не попадает
+- `.env.example` — шаблон переменных (`DOMAIN`, `JWT_SECRET`, `CORS_ORIGINS`, `DB_PATH`, `CLIENT_BUILD_DIR`, необязательный `TELEGRAM_BOT_TOKEN`); `.env` в git не попадает
 - `.dockerignore` — контекст сборки без node_modules, build и локальной базы
 - `server/scripts/backup-db.js` — онлайн-бэкап SQLite через `db.backup()` с ротацией (`BACKUP_DIR`, `BACKUP_KEEP`)
 - `docs/DEPLOY.md` — пошаговая инструкция: сервер, `.env`, запуск, перенос базы, cron-бэкапы, обновления, разбор проблем
