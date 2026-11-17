@@ -36,10 +36,6 @@
     padding-bottom: calc(16px + env(safe-area-inset-bottom));
   }
 
-  .main-layout {
-    flex: 1;
-  }
-
   .main-content {
     width: 100%;
   }

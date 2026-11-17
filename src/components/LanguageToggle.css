@@ -11,7 +11,8 @@
     position: relative;
     transition: background-color 0.3s ease;
     padding: 0;
-    background-color: var(--primary-color, #007bff);
+    /* en — включённое состояние: круг справа, плашка акцентная */
+    background-color: var(--accent-color, #00A86B);
     color: var(--text-color);
   }
   
@@ -25,14 +26,19 @@
     border-radius: 50%;
     position: absolute;
     top: 5px;
-    left: 5px;
-    transition: all 0.7s ease;
+    left: calc(100% - 45px);
+    transition: left 0.3s ease, background-color 0.3s ease;
     font-size: 17px;
     color: var(--text-color);
   }
-  /* Русский включён — плашка акцентная, круг остаётся на месте */
+
+  .language-toggle.russian-container .toggle-circle_lang {
+    left: 5px;
+  }
+  /* ru — базовое состояние: круг слева, плашка синяя, как у темы в светлом режиме */
   .language-toggle.russian-container {
-    background-color: var(--accent-color, #00A86B);
+    /* Синий фиксированный: --primary-color в тёмной теме становится фиолетовым */
+    background-color: #007BFF;
   }
 
   .language-toggle:hover {
@@ -40,5 +46,5 @@
   }
 
   .language-toggle.russian-container:hover {
-    background-color: var(--accent-hover-color, #009960);
+    background-color: #0056B3;
   }

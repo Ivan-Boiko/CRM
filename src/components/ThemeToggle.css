@@ -35,8 +35,14 @@
     position: absolute;
     top: 5px;
     left: 5px;
-    transition: all 0.7s ease;
+    /* Круг плавно едет к правому краю, когда включена тёмная тема */
+    transition: left 0.3s ease, background-color 0.3s ease;
     font-size: 17px;
+  }
+
+  /* Включено — круг справа; так же ведёт себя переключатель языка */
+  .toggle-circle.dark {
+    left: calc(100% - 45px);
   }
 
   /* Текст переключателя */
