@@ -1,5 +1,11 @@
 # Журнал изменений
 
+## 2026-11-17 — Нижняя таб-панель на телефонах
+- Новые файлы `src/components/mobile/BottomNav.jsx` и `BottomNav.css` — нижняя навигация для ≤768 px: четыре таба (Задачи / Дневник / Аналитика / Настройки) по 56 px высотой, иконка + подпись, активный — зелёный с полоской сверху, панель фиксирована внизу, `padding-bottom: env(safe-area-inset-bottom)`.
+- `MainPageLk.jsx` — `BottomNav` рендерится рядом с `Sidebar`; что показывать, решают стили.
+- `Sidebar.css` — на ≤768 px сайдбар скрыт (раньше занимал ~247 px сверху).
+- `MainPageLk.css` — на ≤768 px у `.page-lk` нижний отступ `calc(56px + env(safe-area-inset-bottom))`, чтобы панель не перекрывала контент. Планшеты (768–1200) и десктоп не менялись.
+
 ## 2026-11-17 — P0 мобильной версии: PWA-мета, safe-area, тач-таргеты
 - `public/index.html` — вместо заглушек CRA: `lang="ru"`, заголовок «CRM — задачи и дневник», описание, `viewport-fit=cover`, `theme-color` для светлой/тёмной темы, `apple-mobile-web-app-*`, `apple-touch-icon`, `format-detection`.
 - `public/manifest.json` — имя «CRM — задачи и дневник», `start_url: /main`, `scope: /`, `display: standalone`, цвета, иконки 192/512.

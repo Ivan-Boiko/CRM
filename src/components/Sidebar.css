@@ -155,6 +155,13 @@
   }
 }
 
+/* На телефонах меню уезжает вниз отдельной панелью (BottomNav), сайдбар скрыт */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+}
+
 .sidebar__menu-item--active .sidebar__menu-title {
   font-weight: 500;
 }

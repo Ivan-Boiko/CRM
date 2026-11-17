@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
+import BottomNav from '../components/mobile/BottomNav';
 import TopBar from '../components/TopBar';
 import TaskTable from '../components/TaskTable';
 import Archive from '../components/Archive';
@@ -111,6 +112,8 @@ const MainPageLk = () => {
           </div>
         </div>
       </div>
+      {/* На телефонах меню внизу; на планшетах и десктопе оно скрыто стилями */}
+      <BottomNav onMenuClick={setActiveItemId} activeItemId={activeItemId} />
     </div>
   );
 };

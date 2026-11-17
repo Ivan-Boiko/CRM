@@ -41,4 +41,11 @@
   }
 }
 
+/* На телефонах снизу фиксированная таб-панель: оставляем под неё место */
+@media (max-width: 768px) {
+  .page-lk {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom));
+  }
+}
+
 

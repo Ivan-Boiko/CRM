@@ -58,6 +58,9 @@
 - Analytics.jsx / Analytics.css — аналитика (Recharts)
 - Settings.jsx / Settings.css — настройки (профиль, тема, язык)
 
+#### Мобильные компоненты
+- mobile/BottomNav.jsx / mobile/BottomNav.css — нижняя таб-панель на телефонах (≤768 px) вместо сайдбара: Задачи / Дневник / Аналитика / Настройки, фиксирована внизу, с safe-area
+
 #### Shared
 - ProtectedRoute.jsx — wrapper для роута, требует user в auth
 - ActionIcons.jsx — SVG-иконки действий: карандаш, крестик, стрелка возврата
