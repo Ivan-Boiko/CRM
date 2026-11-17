@@ -2,13 +2,44 @@ import express from 'express';
 import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import db, { initDb } from './database.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-app.use(cors());
+// В production без своего секрета токены можно подделать — лучше не стартовать
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+  console.error('JWT_SECRET не задан: укажите его в .env (openssl rand -hex 32)');
+  process.exit(1);
+}
+
+// CORS только для своих адресов: CORS_ORIGINS=https://crm.example.com
+// Если переменная не задана (локальная разработка) — пускаем клиент CRA с порта 3000
+const DEV_ORIGINS = ['http://localhost:3000', 'http://127.0.0.1:3000'];
+const allowedOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map((origin) => origin.trim().replace(/\/$/, ''))
+  .filter(Boolean);
+
+const normalizeOrigin = (origin) => origin.trim().replace(/\/$/, '');
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Запросы без Origin — curl, healthcheck, запросы с того же домена
+      if (!origin) return callback(null, true);
+      const list = allowedOrigins.length > 0 ? allowedOrigins : DEV_ORIGINS;
+      return list.includes(normalizeOrigin(origin))
+        ? callback(null, true)
+        : callback(new Error(`CORS: источник ${origin} не разрешён`));
+    },
+  })
+);
 app.use(express.json());
 
 initDb();
@@ -35,7 +66,17 @@ function auth(req, res, next) {
 
 // --- Аутентификация ---
 
+// Регистрацию можно закрыть после создания своего аккаунта: ALLOW_REGISTRATION=false
+const ALLOW_REGISTRATION = (process.env.ALLOW_REGISTRATION || 'true').toLowerCase() !== 'false';
+
+// Публичная настройка для клиента: показывать ли кнопку «Регистрация»
+app.get('/api/config', (req, res) => res.json({ registrationEnabled: ALLOW_REGISTRATION }));
+
 app.post('/api/register', (req, res) => {
+  if (!ALLOW_REGISTRATION) {
+    return res.status(403).json({ message: 'Регистрация закрыта' });
+  }
+
   const { name, email, password } = req.body;
   if (!name || !email || !password) {
     return res.status(400).json({ message: 'Заполните все поля' });
@@ -256,13 +297,52 @@ app.post('/api/tasks/:id/comments', auth, (req, res) => {
   res.status(201).json(comment);
 });
 
+// --- Статика собранного клиента ---
+
+app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+
+// Неизвестный метод API не должен проваливаться в index.html
+app.use('/api', (req, res) => res.status(404).json({ message: 'Неизвестный метод API' }));
+
+const clientBuildDir = process.env.CLIENT_BUILD_DIR || path.join(__dirname, '..', 'build');
+const clientIndex = path.join(clientBuildDir, 'index.html');
+
+if (fs.existsSync(clientIndex)) {
+  // Файлы с хэшем в имени можно кэшировать надолго, index.html — нет
+  app.use(
+    '/static',
+    express.static(path.join(clientBuildDir, 'static'), { immutable: true, maxAge: '1y' })
+  );
+  app.use(express.static(clientBuildDir, { index: false, maxAge: '1h' }));
+  // Любой не-API адрес отдаёт React-приложение (клиентский роутинг)
+  app.get(/^\/(?!api\/|static\/).*/, (req, res) => res.sendFile(clientIndex));
+} else {
+  console.warn(`Сборка клиента не найдена (${clientIndex}). Выполните npm run build.`);
+}
+
 // --- Обработчик ошибок ---
 
 app.use((err, req, res, next) => {
+  // Запрещённый источник CORS — это не поломка сервера, отвечаем 403 без стека
+  if (typeof err.message === 'string' && err.message.startsWith('CORS:')) {
+    return res.status(403).json({ message: err.message });
+  }
   console.error(err);
   res.status(500).json({ message: 'Ошибка сервера' });
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
+
+// Корректное завершение (docker stop): дожидаемся закрытия соединений и базы
+const shutdown = (signal) => {
+  console.log(`${signal}: останавливаюсь`);
+  server.close(() => {
+    db.close();
+    process.exit(0);
+  });
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));

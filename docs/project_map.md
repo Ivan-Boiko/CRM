@@ -2,7 +2,8 @@
 
 ## Общие сведения
 - **Технологии**: React 18, React Router 6, Recharts, CRA (create-react-app)
-- **Бэкенд**: Node.js/Express на localhost:5000 (API URL через env переменную `REACT_APP_API_URL`)
+- **Бэкенд**: Node.js/Express; локально — `localhost:5000` (`REACT_APP_API_URL` из `.env.development`), в production тот же Express отдаёт собранный React и API на одном домене (адрес API не задаётся)
+- **Деплой**: Docker + docker-compose + Caddy — см. `docs/DEPLOY.md`
 - **Стили**: Inline CSS, файлы `.css` рядом с компонентами
 - **Комментарии**: ru, код: en
 
@@ -73,8 +74,10 @@
 | * | → / (redirect) | - |
 
 ## API Endpoints
+- GET /api/health — проверка живости (docker healthcheck)
+- GET /api/config — публичные настройки для клиента: `{ registrationEnabled }` (переменная `ALLOW_REGISTRATION`)
 - POST /api/login — авторизация
-- POST /api/register — регистрация
+- POST /api/register — регистрация (403, если `ALLOW_REGISTRATION=false`)
 - GET /api/me — профиль текущего пользователя
 - PUT /api/me — обновление профиля
 - GET/POST/PUT/DELETE /api/tasks — задачи (GET отдаёт задачи вместе с массивом `comments`)
@@ -85,3 +88,12 @@
 - PUT /api/tasks/:id — смена статуса (в т.ч. прямо из таблицы и при возврате в работу)
 - GET/POST/PUT/DELETE /api/diary — дневник
 - (полный список — в server/server.js)
+
+## Деплой
+- `Dockerfile` — многоступенчатая сборка: React-клиент → зависимости сервера → рантайм `node:20-slim`, пользователь `node`, том `/data` для базы, healthcheck
+- `docker-compose.yml` — сервисы `app` (Express, порт 5000 только внутри сети) и `caddy` (80/443, HTTPS); тома `crm-data`, `caddy-data`, `caddy-config`
+- `deploy/Caddyfile` — домен из `DOMAIN`, автосертификат Let's Encrypt, HSTS и security-заголовки, реверс-прокси на `app:5000`
+- `.env.example` — шаблон переменных (`DOMAIN`, `JWT_SECRET`, `CORS_ORIGINS`, `DB_PATH`, `CLIENT_BUILD_DIR`); `.env` в git не попадает
+- `.dockerignore` — контекст сборки без node_modules, build и локальной базы
+- `server/scripts/backup-db.js` — онлайн-бэкап SQLite через `db.backup()` с ротацией (`BACKUP_DIR`, `BACKUP_KEEP`)
+- `docs/DEPLOY.md` — пошаговая инструкция: сервер, `.env`, запуск, перенос базы, cron-бэкапы, обновления, разбор проблем

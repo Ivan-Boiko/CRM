@@ -1,0 +1,29 @@
+# Всё, что не нужно образу: зависимости, сборка, локальная база, служебные файлы
+node_modules
+server/node_modules
+build
+coverage
+.git
+.gitignore
+.clinerules
+.cloud-attachments
+.freebuff
+docs
+backups
+data
+
+# Локальная база и её WAL-файлы — в контейнер попадать не должны
+server/crm.db
+server/crm.db-wal
+server/crm.db-shm
+server/crm.db-journal
+
+# Секреты и локальные настройки
+.env
+.env.local
+.env.*.local
+
+# Временные файлы
+*.log
+*.png
+.DS_Store

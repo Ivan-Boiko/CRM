@@ -1,5 +1,16 @@
 # Журнал изменений
 
+## 2026-11-17 — Регистрация закрывается переменной окружения
+- `server/server.js` — `ALLOW_REGISTRATION=false` отключает регистрацию: `POST /api/register` отвечает 403 «Регистрация закрыта»; новый `GET /api/config` отдаёт `{ registrationEnabled }`, чтобы клиент знал настройку.
+- `src/pages/MainPage.jsx` — при загрузке страницы входа запрашивает `/api/config` и передаёт `showRegister` в `LoginForm`.
+- `src/components/LoginForm.jsx` — кнопка «Регистрация» скрывается, когда регистрация закрыта.
+- `.env.example`, `docs/DEPLOY.md` — переменная `ALLOW_REGISTRATION` и рекомендация закрыть регистрацию сразу после создания своего аккаунта.
+
+## 2026-11-17 — Подготовка к запуску на VPS
+- `server/server.js` — Express отдаёт собранный React (`CLIENT_BUILD_DIR`, по умолчанию `../build`): `express.static` + fallback на `index.html` для клиентского роутинга; статика `/static/*` кэшируется на год; неизвестные `/api/*` отвечают JSON 404 вместо index.html; добавлен `GET /api/health`; CORS ограничен списком `CORS_ORIGINS` (без переменной в разработке разрешён клиент с `localhost:3000`), чужой источник получает 403; в production без `JWT_SECRET` сервер не стартует; корректное завершение по `SIGTERM`/`SIGINT` для docker.
+- `src/api.js` — по умолчанию адрес API пустой (запросы на свой домен); `.env.development` задаёт `http://localhost:5000` для локальной разработки.
+- Новые файлы деплоя: `Dockerfile` (сборка клиента + зависимости сервера + рантайм от `node`, непривилегированный пользователь, `/data` для базы, healthcheck), `docker-compose.yml` (app + Caddy, том `crm-data`), `deploy/Caddyfile` (HTTPS, HSTS, реверс-прокси на `app:5000`), `.env.example`, `.dockerignore`, `server/scripts/backup-db.js` (онлайн-бэкап SQLite с ротацией), `docs/DEPLOY.md` (пошаговый деплой, перенос базы, бэкапы, обновление, разбор проблем).
+
 ## 2026-11-17 — Тёмная тема: проверка и правки цветов
 - `src/App.jsx` — сохранённая тема применяется при старте приложения. Раньше `data-theme` ставил только `ThemeToggle` в «Настройках», поэтому после перезагрузки на странице задач тёмная тема терялась.
 - `common.css` — тёмные варианты модалок (фон `--card-bg-color`, заголовок, крестик, разделители шапки/футера), подписей полей, текста подтверждения и `.btn-secondary` (были белыми).

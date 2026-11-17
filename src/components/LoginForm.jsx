@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import './LoginForm.css';
 import { useLanguage } from '../context/LanguageContext';
 
-function LoginForm({ onLogin, onRegister }) {
+// showRegister выключается, когда регистрация закрыта на сервере
+function LoginForm({ onLogin, onRegister, showRegister = true }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { t } = useLanguage();
@@ -44,9 +45,11 @@ function LoginForm({ onLogin, onRegister }) {
           {t('login.submit')}
         </button>
       </form>
-      <button className="login__register-button" onClick={handleRegisterClick}>
-        {t('login.register')}
-      </button>
+      {showRegister ? (
+        <button className="login__register-button" onClick={handleRegisterClick}>
+          {t('login.register')}
+        </button>
+      ) : null}
     </div>
   );
 }

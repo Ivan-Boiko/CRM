@@ -1,0 +1,39 @@
+# CRM на VPS: приложение + Caddy с автоматическим HTTPS.
+# Порты наружу открывает только Caddy, само приложение доступно внутри сети docker.
+
+services:
+  app:
+    build: .
+    image: crm-app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DB_PATH: /data/crm.db
+      CLIENT_BUILD_DIR: /app/build
+    volumes:
+      # База и бэкапы живут на томе и переживают пересборку образа
+      - crm-data:/data
+    expose:
+      - "5000"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      DOMAIN: ${DOMAIN:-crm.example.com}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  crm-data:
+  caddy-data:
+  caddy-config:

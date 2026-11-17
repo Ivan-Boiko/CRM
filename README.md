@@ -88,9 +88,15 @@ npm install
 npm start        # CRA, по умолчанию http://localhost:3000
 ```
 
-> Прокси в `package.json` не настроен — клиент обращается к API по абсолютному адресу
-> `http://localhost:5000` (можно переопределить через `REACT_APP_API_URL`).
-> CORS на сервере открыт всем (dev-режим).
+> В разработке адрес API берётся из `.env.development` (`REACT_APP_API_URL=http://localhost:5000`).
+> В production клиент и API живут на одном домене: Express отдаёт и `build/`, и `/api/*`,
+> поэтому адрес API не задаётся. CORS пускает только источники из `CORS_ORIGINS`
+> (без переменной — только `localhost:3000` для разработки).
+
+### Деплой на сервер
+
+Docker + Caddy с автоматическим HTTPS, база на томе, бэкапы — пошагово в [docs/DEPLOY.md](docs/DEPLOY.md).
+Коротко: заполнить `.env` по `.env.example` и выполнить `docker compose up -d --build`.
 
 ---
 

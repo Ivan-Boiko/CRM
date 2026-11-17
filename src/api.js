@@ -1,5 +1,7 @@
 // Базовый хелпер для работы с API: единая точка для адреса, токена и ошибок.
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+// В production клиент и API живут на одном домене (Express отдаёт сборку), поэтому
+// по умолчанию адрес пустой. В разработке адрес задаёт .env.development.
+const BASE_URL = process.env.REACT_APP_API_URL || '';
 
 // Событие «сессия истекла». Его слушает AuthContext: сбрасывает пользователя,
 // после чего ProtectedRoute уводит на страницу входа.
