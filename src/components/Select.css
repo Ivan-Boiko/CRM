@@ -209,3 +209,20 @@
 [data-theme="dark"] .select__option--selected {
   background-color: rgba(0, 193, 126, 0.2);
 }
+
+/* Мобильные тач-таргеты: кнопка и пункты не меньше 44 px */
+@media (max-width: 1200px) {
+  .select__button {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .select__option {
+    min-height: 48px;
+    font-size: 16px;
+  }
+
+  .select__menu {
+    max-height: min(360px, 60vh);
+  }
+}

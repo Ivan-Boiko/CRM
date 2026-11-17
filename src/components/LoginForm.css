@@ -77,4 +77,43 @@
 .login__register-button:hover {
     text-decoration: underline;
 }
+
+/* Переключатели темы и языка — рядом, в одной строке по центру карточки */
+.login__controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+/* Телефон: форма и кнопка на всю ширину, поля не меньше 16 px/48 px */
+@media (max-width: 768px) {
+    .login {
+        box-sizing: border-box;
+        padding: 24px 16px;
+    }
+
+    .login__form {
+        width: 100%;
+        padding: 0;
+    }
+
+    .login__input {
+        font-size: 16px;
+        min-height: 48px;
+    }
+
+    .login__button {
+        width: 100%;
+        max-width: 100%;
+        min-height: 48px;
+        font-size: 16px;
+    }
+
+    .login__register-button {
+        min-height: 44px;
+        font-size: 16px;
+    }
+}
   

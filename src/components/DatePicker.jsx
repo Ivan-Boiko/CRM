@@ -4,8 +4,8 @@ import './DatePicker.css';
 import { useLanguage } from '../context/LanguageContext';
 
 // Размеры календаря нужны, чтобы открыть его вверх, если снизу нет места
-const CALENDAR_WIDTH = 300;
-const CALENDAR_HEIGHT = 336;
+const CALENDAR_WIDTH = 340;
+const CALENDAR_HEIGHT = 400;
 
 // Значение хранится как ISO-строка YYYY-MM-DD — в таком виде его ждёт сервер
 const parseISO = (value) => {
@@ -73,7 +73,9 @@ const DatePicker = ({ id, value, onChange, ariaLabel }) => {
     const width = Math.min(CALENDAR_WIDTH, window.innerWidth - 16);
     const left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8));
     const opensUp = window.innerHeight - rect.bottom < CALENDAR_HEIGHT + 12;
-    const top = opensUp ? Math.max(8, rect.top - CALENDAR_HEIGHT - 6) : rect.bottom + 6;
+    const preferred = opensUp ? rect.top - CALENDAR_HEIGHT - 6 : rect.bottom + 6;
+    // На маленьком экране прижимаем календарь к верху, чтобы низ не уехал за экран
+    const top = Math.max(8, Math.min(preferred, window.innerHeight - CALENDAR_HEIGHT - 8));
     setCalendarStyle({ top, left, width });
   }, []);
 

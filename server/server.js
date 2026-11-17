@@ -28,6 +28,23 @@ const allowedOrigins = (process.env.CORS_ORIGINS || '')
 
 const normalizeOrigin = (origin) => origin.trim().replace(/\/$/, '');
 
+// В разработке телефон заходит по адресу вида http://192.168.x.x:3000 —
+// разрешаем локальные сети, чтобы можно было смотреть приложение на устройстве
+const isLocalNetworkOrigin = (origin) => {
+  try {
+    const { hostname } = new URL(origin);
+    return (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      /^10\./.test(hostname) ||
+      /^192\.168\./.test(hostname) ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(hostname)
+    );
+  } catch (err) {
+    return false;
+  }
+};
+
 // Предохранитель: в production без CORS_ORIGINS браузерные запросы с сайта
 // получат 403 (сработал бы dev-список), поэтому громко предупреждаем при старте
 if (process.env.NODE_ENV === 'production' && allowedOrigins.length === 0) {
@@ -45,10 +62,14 @@ app.use(
     origin(origin, callback) {
       // Запросы без Origin — curl, healthcheck, запросы с того же домена
       if (!origin) return callback(null, true);
+      const normalized = normalizeOrigin(origin);
       const list = allowedOrigins.length > 0 ? allowedOrigins : DEV_ORIGINS;
-      return list.includes(normalizeOrigin(origin))
-        ? callback(null, true)
-        : callback(new Error(`CORS: источник ${origin} не разрешён`));
+      if (list.includes(normalized)) return callback(null, true);
+      // В production по-прежнему только явный список CORS_ORIGINS
+      if (process.env.NODE_ENV !== 'production' && isLocalNetworkOrigin(normalized)) {
+        return callback(null, true);
+      }
+      return callback(new Error(`CORS: источник ${origin} не разрешён`));
     },
   })
 );

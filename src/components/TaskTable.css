@@ -587,6 +587,30 @@
     order: -1;
     align-self: flex-end;
     margin-bottom: 4px;
+    gap: 8px;
+  }
+
+  /* Пальцем нужно попасть в кнопки действий */
+  .tasks__icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* У фильтра кнопка тоже не меньше 44 px (specificity выше, чем у Select.css) */
+  .task-filter__select .select__button {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .tasks__group-header {
+    min-height: 48px;
+    font-size: 14px;
+  }
+
+  /* Кнопка-бейдж статуса в карточке */
+  .tasks__status {
+    min-height: 44px;
+    padding: 8px 16px;
   }
 
   .tasks-tabs {

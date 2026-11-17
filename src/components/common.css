@@ -253,6 +253,61 @@
   background-color: #333333;
 }
 
+/* Мобильные тач-таргеты: крестик и кнопки модалок не меньше 44 px */
+@media (max-width: 1200px) {
+  .modal__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin: -8px -8px -8px 0;
+  }
+
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger {
+    min-height: 44px;
+  }
+}
+
+/* Мобильные модалки: шапка и футер всегда на экране, прокручивается только тело. */
+/* 100dvh, потому что 100% от layout viewport уходит под панель браузера. */
+@media (max-width: 1200px) {
+  .modal-overlay {
+    height: 100vh;
+    height: 100dvh;
+    box-sizing: border-box;
+    align-items: flex-start;
+    padding: max(8px, env(safe-area-inset-top)) 8px 8px;
+  }
+
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .modal__header,
+  .modal__footer {
+    flex: 0 0 auto;
+  }
+
+  .modal__footer {
+    /* Кнопки не должны залезать на жестовую полосу iPhone */
+    padding-bottom: max(15px, env(safe-area-inset-bottom));
+  }
+
+  .modal__body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 [data-theme="dark"] .form-select {
   background-color: #2A2A2A;
   color: #E0E0E0;

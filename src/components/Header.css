@@ -58,5 +58,27 @@
     color: var(--accent-color);
 }
 
+/* Телефон: шапка во всю ширину, иначе переключатели наезжают на название */
+@media (max-width: 768px) {
+    .header {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+        padding: 8px 12px;
+        gap: 8px;
+        margin-top: max(12px, env(safe-area-inset-top));
+    }
+
+    .header_title {
+        flex: 1 1 auto;
+        text-align: center;
+        font-size: 18px;
+    }
+
+    .header_button {
+        font-size: 18px;
+    }
+}
+
 
   

@@ -1,6 +1,8 @@
 // LoginForm.jsx
 import React, { useState } from 'react';
 import './LoginForm.css';
+import ThemeToggle from './ThemeToggle';
+import LanguageToggle from './LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
 
 // showRegister выключается, когда регистрация закрыта на сервере
@@ -50,6 +52,11 @@ function LoginForm({ onLogin, onRegister, showRegister = true }) {
           {t('login.register')}
         </button>
       ) : null}
+      {/* Тема и язык живут в карточке: шапка на странице входа больше не показывается */}
+      <div className="login__controls">
+        <ThemeToggle />
+        <LanguageToggle />
+      </div>
     </div>
   );
 }

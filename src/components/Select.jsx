@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import './Select.css';
 
 // Примерная высота одного пункта меню — по ней считается, влезает ли меню под кнопку
-const OPTION_HEIGHT = 38;
+const OPTION_HEIGHT = 44;
 const MENU_PADDING = 6;
 
 // Красивый выпадающий список: кнопка выглядит как поле формы, меню — карточка в portal.
@@ -28,7 +28,9 @@ const Select = ({ id, value, options, onChange, ariaLabel, className = '' }) => 
     const width = Math.min(Math.max(rect.width, 160), 380, window.innerWidth - 16);
     const left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8));
     const opensUp = window.innerHeight - rect.bottom < menuHeight + 12;
-    const top = opensUp ? Math.max(8, rect.top - menuHeight - 6) : rect.bottom + 6;
+    const preferred = opensUp ? rect.top - menuHeight - 6 : rect.bottom + 6;
+    // Меню не должно уезжать за нижний край экрана (важно на телефоне)
+    const top = Math.max(8, Math.min(preferred, window.innerHeight - menuHeight - 8));
     setMenuStyle({ top, left, width });
   }, [menuHeight]);
 

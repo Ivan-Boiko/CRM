@@ -94,12 +94,64 @@
   color: var(--text-color);
 }
 
+/* На телефоне меню сверху — компактное, чтобы список задач виднелся сразу */
 @media (max-width: 1200px) {
   .sidebar {
     box-sizing: border-box;
     width: 100%;
     margin-right: 0;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
+    padding: 10px 12px;
+  }
+
+  .sidebar__user {
+    padding-bottom: 8px;
+  }
+
+  .sidebar__avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
+  }
+
+  .sidebar__user-info {
+    margin-left: 10px;
+  }
+
+  .sidebar__user-title {
+    font-size: 14px;
+  }
+
+  .sidebar__user-subtitle {
+    margin-top: 2px;
+    font-size: 12px;
+  }
+
+  .sidebar__menu {
+    gap: 2px;
+  }
+
+  /* Пункт меню 44 px: палец попадает, а меню занимает минимум высоты */
+  .sidebar__menu-item {
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 6px 10px;
+  }
+
+  .sidebar__menu-icon {
+    margin-right: 8px;
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  .sidebar__menu-title {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+
+  .sidebar__user-title,
+  .sidebar__user-subtitle {
+    line-height: 1.2;
   }
 }
 

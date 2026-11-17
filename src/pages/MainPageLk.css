@@ -1,7 +1,11 @@
 .page-lk {
+  /* 100vh на телефоне включает скрытую панель браузера, 100dvh — только видимую */
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  /* Отступ от жестовой полосы iOS внизу */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .page-lk__layout {

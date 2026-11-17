@@ -121,3 +121,15 @@
 [data-theme="dark"] .status-select__option--active {
   background-color: rgba(0, 193, 126, 0.2);
 }
+
+/* Мобильные тач-таргеты */
+@media (max-width: 1200px) {
+  .status-select__button {
+    min-height: 44px;
+  }
+
+  .status-select__option {
+    min-height: 48px;
+    font-size: 16px;
+  }
+}

@@ -140,21 +140,16 @@ const Settings = () => {
 
         <div className="settings__section">
           <h3 className="settings__section-title">{t('settings.appearance')}</h3>
-          <div className="settings__option">
-            <div className="settings__option-label">{t('settings.theme')}</div>
-            <div className="settings__option-control">
+          {/* Тема и язык стоят рядом в одной строке — так же, как в карточке входа */}
+          <div className="settings__switches">
+            <div className="settings__switch">
               <ThemeToggle />
+              <div className="settings__switch-label">{t('settings.theme')}</div>
               <div className="settings__option-description">{t('settings.themeDesc')}</div>
             </div>
-          </div>
-        </div>
-
-        <div className="settings__section">
-          <h3 className="settings__section-title">{t('settings.language')}</h3>
-          <div className="settings__option">
-            <div className="settings__option-label">{t('settings.languageLabel')}</div>
-            <div className="settings__option-control">
+            <div className="settings__switch">
               <LanguageToggle />
+              <div className="settings__switch-label">{t('settings.languageLabel')}</div>
               <div className="settings__option-description">{t('settings.languageDesc')}</div>
             </div>
           </div>

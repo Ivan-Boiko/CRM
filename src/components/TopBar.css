@@ -120,7 +120,9 @@ input.search-input:focus {
   .topbar {
     flex-wrap: wrap;
     gap: 12px;
-    padding: 12px 16px;
+    /* Сверху учитываем вырез/чёлку, по бокам — вырез в горизонтальной ориентации */
+    padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 12px
+      max(16px, env(safe-area-inset-left));
   }
 
   /* Обёртка перестаёт быть отдельным блоком, чтобы поиск мог занять свою строку */
@@ -147,5 +149,22 @@ input.search-input:focus {
   .topbar input.search-input {
     box-sizing: border-box;
     width: 100%;
+    min-height: 44px;
+  }
+
+  /* Кнопки шапки не меньше 44 px по высоте */
+  .topbar__logout,
+  .notifications,
+  .profile-avatar {
+    min-height: 44px;
+  }
+
+  .notifications {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .topbar__logout {
+    padding: 10px 16px;
   }
 }

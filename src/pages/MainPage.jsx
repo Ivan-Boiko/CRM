@@ -1,7 +1,6 @@
 // MainPage.jsx
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import Header from '../components/Header';
 import LoginForm from '../components/LoginForm';
 import RegistrationModal from '../components/RegistrationModal';
 import { useAuth } from '../context/AuthContext';
@@ -62,7 +61,6 @@ function MainPage() {
 
   return (
     <div className="page-container">
-      <Header />
       <div className="main-layout">
         <div className="main-content">
           <div className="content-wrapper">
