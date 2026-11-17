@@ -20,15 +20,134 @@
   width: 100%;
 }
 
+/* Переключатель «Задачи / Архив» в шапке раздела */
+.tasks-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+}
+
+.tasks-tabs__tab {
+  position: relative;
+  padding: 0 0 6px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: inherit;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-secondary-color, #7F8C8D);
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.tasks-tabs__tab:hover {
+  color: var(--text-color);
+}
+
+.tasks-tabs__tab--active {
+  color: var(--text-color);
+  border-bottom-color: var(--accent-color, #00A86B);
+}
+
+.tasks-tabs__tab:focus-visible {
+  outline: 2px solid var(--accent-color, #00A86B);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Шапка: вкладки слева, фильтр и кнопка — справа сверху */
+.tasks__header {
+  align-items: flex-start;
+}
+
+.tasks__header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.task-filter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.task-filter__label {
+  font-size: 13px;
+  color: var(--text-secondary-color, #7F8C8D);
+  white-space: nowrap;
+}
+
+.task-filter__select {
+  width: auto;
+  min-width: 260px;
+}
+
+/* У фильтра кнопка чуть ниже формы задачи */
+.task-filter__select .select__button {
+  min-height: 36px;
+  padding: 8px 36px 8px 12px;
+  font-size: 13px;
+}
+
+/* Подгруппы в списке задач: заголовок секции сворачивает её содержимое */
+.tasks__group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  background-color: #F5F8F6;
+  border: none;
+  border-bottom: 1px solid var(--border-light-color, #F5F5F5);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-color, #2C3E50);
+  text-align: left;
+  cursor: pointer;
+}
+
+.tasks__group-header:hover {
+  background-color: #EDF5F0;
+}
+
+.tasks__group-chevron {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-secondary-color, #7F8C8D);
+  transition: transform 0.15s ease;
+}
+
+.tasks__group-chevron--collapsed {
+  transform: rotate(-90deg);
+}
+
+.tasks__group-title {
+  flex: 1 1 auto;
+}
+
+.tasks__group-count {
+  font-weight: 500;
+  color: var(--text-secondary-color, #7F8C8D);
+}
+
 /* Строка */
 .tasks__row {
   display: flex;
   align-items: center;
   width: 100%;
+  position: relative;
+  box-sizing: border-box;
   border-bottom: 1px solid var(--border-light-color, #F5F5F5);
   transition: background-color 0.2s ease;
   margin: 0;
-  padding: 0;
+  /* Резерв под иконки действий справа: колонки заканчиваются до них */
+  padding: 0 84px 0 0;
   list-style: none;
   cursor: pointer;
 }
@@ -62,15 +181,8 @@
   padding: 14px 16px;
   min-width: 0;
   gap: 6px;
-}
-
-.tasks__cell--header {
-  font-weight: 600;
-  color: var(--text-secondary-color, #7F8C8D);
-}
-
-.tasks__cell-label {
-  display: none;
+  /* Длинные строки без пробелов переносятся, а не вылезают на соседние колонки */
+  overflow-wrap: anywhere;
 }
 
 .tasks__cell--name {
@@ -78,11 +190,92 @@
 }
 
 .tasks__cell-name {
-  font-weight: 500;
-  color: var(--text-primary-color, #2C3E50);
+  flex: 1 1 auto;
+  min-width: 0;
+  /* Одна строка с многоточием: длинное имя не ломает строку таблицы */
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+/* Подпись поля нужна только в мобильных карточках — в таблице её заменяет заголовок */
+.tasks__cell-label {
+  display: none;
+}
+
+/* Действия: иконки справа сверху строки */
+.tasks__actions {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  display: flex;
+  gap: 6px;
+}
+
+.tasks__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--border-light-color, #E0E0E0);
+  border-radius: 6px;
+  color: var(--text-secondary-color, #7F8C8D);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.tasks__icon-btn:hover {
+  background-color: var(--toggle-hover-bg, #e0e0e0);
+  color: var(--text-color);
+}
+
+.tasks__icon-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.tasks__icon-btn--danger:hover {
+  background-color: #FFF1F0;
+  border-color: #CF1322;
+  color: #CF1322;
+}
+
+[data-theme="dark"] .tasks__icon-btn--danger:hover {
+  background-color: rgba(207, 19, 34, 0.2);
+}
+
+/* Тёмная тема: заголовки подгрупп и бейджи статусов */
+[data-theme="dark"] .tasks__group-header {
+  background-color: #232323;
+  border-bottom-color: var(--border-light-color, #444444);
+  color: var(--text-color, #ffffff);
+}
+
+[data-theme="dark"] .tasks__group-header:hover {
+  background-color: #2A2A2A;
+}
+
+[data-theme="dark"] .tasks__status--todo {
+  background-color: #2E2E2E;
+  color: #C9C9C9;
+}
+
+[data-theme="dark"] .tasks__status--in-progress {
+  background-color: rgba(24, 144, 255, 0.18);
+  color: #6EB8FF;
+}
+
+[data-theme="dark"] .tasks__status--done {
+  background-color: rgba(82, 196, 26, 0.18);
+  color: #7FD94F;
+}
+
+.tasks__cell--header {
+  font-weight: 600;
+  color: var(--text-secondary-color, #7F8C8D);
 }
 
 /* Приоритет */
@@ -130,36 +323,141 @@
   color: #52C41A;
 }
 
-/* Действия */
-.tasks__cell--actions {
-  flex: 0 0 auto;
-  gap: 8px;
-  justify-content: center;
+/* Комментарии в модалке просмотра задачи */
+.tasks__view-comments {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
 }
 
-.tasks__action-btn {
-  background: none;
+.tasks__view-comment {
+  padding: 10px 12px;
   border: 1px solid var(--border-light-color, #E0E0E0);
-  border-radius: 6px;
-  padding: 4px 12px;
+  border-radius: 8px;
+  background-color: var(--card-bg-color, #FAFAFA);
+}
+
+/* Причина возврата выделяется, чтобы была видна сразу при открытии задачи */
+.tasks__view-comment--return {
+  border-color: #F5C2C7;
+  background-color: #FFF5F5;
+}
+
+.tasks__view-comment-badge {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background-color: #CF1322;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.tasks__view-comment-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary-color, #2C3E50);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.tasks__view-comment-date {
+  display: block;
+  margin-top: 6px;
   font-size: 12px;
-  color: var(--text-color);
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+  color: var(--text-secondary-color, #7F8C8D);
+}
+
+.tasks__view-comments-empty {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary-color, #7F8C8D);
+}
+
+.tasks__view-comment-label {
+  display: block;
+  margin: 16px 0 6px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-secondary-color, #7F8C8D);
+}
+
+.tasks__view-comment-input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 64px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-light-color, #E0E0E0);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text-primary-color, #2C3E50);
+  background-color: var(--header-bg-color);
+  resize: vertical;
+}
+
+.tasks__view-comment-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.15);
+}
+
+.tasks__view-comment-submit {
+  margin-top: 10px;
+}
+
+/* Поле подгруппы в форме задачи */
+.task-group-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.task-group-field .select {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.task-group-field__add {
   white-space: nowrap;
 }
 
-.tasks__action-btn:hover {
-  background-color: var(--toggle-hover-bg, #e0e0e0);
+.task-group-new {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
 }
 
-.tasks__action-btn--danger {
-  color: #CF1322;
-  border-color: #CF1322;
+.task-group-new input {
+  flex: 1 1 auto;
 }
 
-.tasks__action-btn--danger:hover {
-  background-color: #FFF1F0;
+@media (max-width: 520px) {
+  /* На узком экране селект и корзина остаются в строке, кнопка создания уходит ниже */
+  .task-group-field {
+    flex-wrap: wrap;
+  }
+
+  .task-group-field .select {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+  }
+
+  .task-group-field__add {
+    flex: 1 1 100%;
+    order: 3;
+  }
 }
 
 /* Пустое состояние */
@@ -168,6 +466,12 @@
   text-align: center;
   color: var(--text-secondary-color, #7F8C8D);
   font-size: 14px;
+}
+
+/* Кнопка добавления задачи под списком */
+.tasks__footer {
+  display: flex;
+  justify-content: center;
 }
 
 /* Анимация модалки */
@@ -212,6 +516,11 @@
   gap: 4px;
 }
 
+/* Отделяем блок комментариев от сетки полей */
+.tasks__view-grid + .tasks__view-section {
+  margin-top: 20px;
+}
+
 .tasks__view-label {
   font-size: 12px;
   color: var(--text-secondary-color, #7F8C8D);
@@ -220,8 +529,8 @@
   letter-spacing: 0.3px;
 }
 
-/* === Мобильная версия === */
-@media (max-width: 768px) {
+/* === Мобильная версия и планшеты: строки превращаются в карточки === */
+@media (max-width: 1200px) {
   .tasks__row--header {
     display: none;
   }
@@ -258,6 +567,7 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 2px;
+    padding-right: 0;
   }
 
   .tasks__cell--name .tasks__cell-label {
@@ -265,15 +575,47 @@
   }
 
   .tasks__cell-name {
+    flex: none;
     white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
     font-size: 16px;
   }
 
-  .tasks__cell--actions {
-    justify-content: flex-end;
-    padding-top: 8px;
-    border-top: 1px solid var(--border-light-color, #F0F0F0);
-    margin-top: 4px;
+  .tasks__actions {
+    position: static;
+    order: -1;
+    align-self: flex-end;
+    margin-bottom: 4px;
+  }
+
+  .tasks-tabs {
+    gap: 16px;
+  }
+
+  .tasks-tabs__tab {
+    font-size: 20px;
+  }
+
+  .tasks__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .tasks__header-right {
+    align-items: stretch;
+  }
+
+  .task-filter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .task-filter__select {
+    width: 100%;
+    min-width: 0;
   }
 
   .tasks__view-grid {

@@ -1,6 +1,14 @@
 // Базовый хелпер для работы с API: единая точка для адреса, токена и ошибок.
 const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
+// Событие «сессия истекла». Его слушает AuthContext: сбрасывает пользователя,
+// после чего ProtectedRoute уводит на страницу входа.
+export const UNAUTHORIZED_EVENT = 'auth:unauthorized';
+
+// Логин и регистрация тоже отвечают 401 при неверных данных — для них
+// глобальный сброс сессии не нужен, сообщение об ошибке показывается как есть.
+const AUTH_PATHS = ['/login', '/register'];
+
 export function getToken() {
   return localStorage.getItem('token');
 }
@@ -11,6 +19,14 @@ export function setToken(token) {
   } else {
     localStorage.removeItem('token');
   }
+}
+
+// Чистит токен и сообщает приложению об истёкшей сессии.
+// Повторные 401 от параллельных запросов игнорируются, если токена уже нет.
+function handleUnauthorized() {
+  if (!getToken()) return;
+  setToken(null);
+  window.dispatchEvent(new Event(UNAUTHORIZED_EVENT));
 }
 
 /**
@@ -46,6 +62,10 @@ export async function apiFetch(path, { method = 'GET', body } = {}) {
   }
 
   if (!response.ok) {
+    // Истёкшая сессия: токен недействителен — сбрасываем его глобально
+    if (response.status === 401 && !AUTH_PATHS.some((authPath) => path.startsWith(authPath))) {
+      handleUnauthorized();
+    }
     const error = new Error((data && data.message) || `Ошибка запроса (${response.status})`);
     error.status = response.status;
     throw error;

@@ -1,0 +1,181 @@
+.archive__list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.archive-card {
+  border: 1px solid var(--border-light-color, #E0E0E0);
+  border-radius: 8px;
+  padding: 16px;
+  background-color: var(--main-bg-color);
+}
+
+.archive-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.archive-card__actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Возврат задачи в работу */
+.tasks__icon-btn--return:hover {
+  border-color: var(--accent-color, #00A86B);
+  color: var(--accent-color, #00A86B);
+  background-color: #F0FBF6;
+}
+
+.return-dialog {
+  max-width: 460px;
+}
+
+.return-dialog__task {
+  margin: 0 0 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary-color, #2C3E50);
+  overflow-wrap: anywhere;
+}
+
+.return-dialog__label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--text-secondary-color, #7F8C8D);
+}
+
+.return-dialog__input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 80px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-light-color, #E0E0E0);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text-primary-color, #2C3E50);
+  background-color: var(--header-bg-color);
+  resize: vertical;
+}
+
+.return-dialog__input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.15);
+}
+
+.archive-card__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.archive-card__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-color);
+  word-break: break-word;
+}
+
+.archive-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.archive-card__meta-item {
+  font-size: 13px;
+  color: var(--text-secondary-color, #7F8C8D);
+}
+
+.archive-card__description {
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-color);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.archive-card__label {
+  display: block;
+  margin: 14px 0 6px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-secondary-color, #7F8C8D);
+}
+
+.archive-card__comment {
+  width: 100%;
+  min-height: 64px;
+  resize: vertical;
+}
+
+/* Список комментариев: у задачи их может быть много */
+.archive-comments {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.archive-comment {
+  padding: 10px 12px;
+  border: 1px solid var(--border-light-color, #E0E0E0);
+  border-radius: 8px;
+  background-color: var(--card-bg-color, #FAFAFA);
+}
+
+.archive-comment__text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-color);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.archive-comment__date {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-secondary-color, #7F8C8D);
+}
+
+.archive-comments__empty {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary-color, #7F8C8D);
+}
+
+.archive-card__save {
+  margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .archive-card {
+    padding: 14px;
+  }
+}
+
+/* На узких экранах шапка архива складывается, иначе фильтр наезжает на вкладки */
+@media (max-width: 1200px) {
+  .archive__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+}

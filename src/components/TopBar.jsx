@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
 
-const TopBar = () => {
+const TopBar = ({ search = '', onSearch }) => {
   const { user, logout } = useAuth();
   const { notify } = useToast();
   const { t } = useLanguage();
@@ -25,8 +25,11 @@ const TopBar = () => {
         <div className="search-container">
           <input
             type="text"
+            value={search}
+            onChange={(e) => onSearch?.(e.target.value)}
             placeholder={t('topbar.search')}
             className="search-input"
+            aria-label={t('topbar.search')}
           />
         </div>
       </div>

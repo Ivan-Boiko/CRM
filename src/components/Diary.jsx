@@ -2,15 +2,18 @@ import React, { useCallback, useEffect, useState } from 'react';
 import './common.css';
 import './Diary.css';
 import { apiFetch } from '../api';
+import ConfirmDialog from './ConfirmDialog';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
 
-const Diary = () => {
+const Diary = ({ search = '' }) => {
   const [entries, setEntries] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [newEntry, setNewEntry] = useState({ text: '' });
   const [editText, setEditText] = useState('');
+  // Запись, ожидающая подтверждения удаления
+  const [pendingDelete, setPendingDelete] = useState(null);
   const { notify } = useToast();
   const { t, formatDate } = useLanguage();
 
@@ -59,8 +62,8 @@ const Diary = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm(t('common.delete') + '?')) return;
+  // Удаление подтверждается модальным окном, а не системным диалогом браузера
+  const removeEntry = async (id) => {
     try {
       await apiFetch(`/diary/${id}`, { method: 'DELETE' });
       notify(t('toast.deleted'), 'success');
@@ -69,6 +72,18 @@ const Diary = () => {
       notify(err.message, 'error');
     }
   };
+
+  const confirmDelete = () => {
+    const entry = pendingDelete;
+    setPendingDelete(null);
+    if (entry) removeEntry(entry.id);
+  };
+
+  // Клиентская фильтрация по строке поиска из TopBar
+  const query = search.trim().toLowerCase();
+  const visibleEntries = query
+    ? entries.filter((entry) => entry.text && String(entry.text).toLowerCase().includes(query))
+    : entries;
 
   return (
     <div className="container-card diary">
@@ -79,9 +94,9 @@ const Diary = () => {
         </button>
       </div>
 
-      {entries.length > 0 ? (
+      {visibleEntries.length > 0 ? (
         <div className="diary__list">
-          {entries.map((entry) => (
+          {visibleEntries.map((entry) => (
             <div key={entry.id} className="diary-card">
               {editingId === entry.id ? (
                 <div className="diary-card__edit">
@@ -114,7 +129,7 @@ const Diary = () => {
                     </button>
                     <button
                       className="diary-card__edit-btn diary-card__edit-btn--danger"
-                      onClick={() => handleDelete(entry.id)}
+                      onClick={() => setPendingDelete(entry)}
                     >
                       {t('common.delete')}
                     </button>
@@ -126,7 +141,7 @@ const Diary = () => {
         </div>
       ) : (
         <div className="diary__empty">
-          <p>{t('diary.empty')}</p>
+          <p>{query ? t('common.searchEmpty') : t('diary.empty')}</p>
         </div>
       )}
 
@@ -163,6 +178,16 @@ const Diary = () => {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        title={t('confirm.deleteEntryTitle')}
+        message={pendingDelete ? `${pendingDelete.text}\n${t('confirm.deleteText')}` : ''}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </div>
   );
 };

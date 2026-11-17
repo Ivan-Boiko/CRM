@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { apiFetch, getToken, setToken } from '../api';
+import { apiFetch, getToken, setToken, UNAUTHORIZED_EVENT } from '../api';
 
 const AuthContext = createContext(null);
 
@@ -28,6 +28,14 @@ export function AuthProvider({ children }) {
     return () => {
       active = false;
     };
+  }, []);
+
+  // Глобальная обработка истёкшей сессии: api.js уже почистил токен и прислал событие.
+  // После сброса user ProtectedRoute уводит на страницу входа.
+  useEffect(() => {
+    const handleUnauthorized = () => setUser(null);
+    window.addEventListener(UNAUTHORIZED_EVENT, handleUnauthorized);
+    return () => window.removeEventListener(UNAUTHORIZED_EVENT, handleUnauthorized);
   }, []);
 
   const login = async (email, password) => {

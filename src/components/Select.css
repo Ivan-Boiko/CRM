@@ -1,0 +1,211 @@
+/* Красивый выпадающий список вместо нативного select */
+.select {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.select__button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 10px 40px 10px 14px;
+  box-sizing: border-box;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  background-color: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  color: #2C3E50;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.select__button:hover {
+  border-color: var(--accent-color, #00A86B);
+}
+
+.select__button:focus-visible,
+.select__button--open {
+  outline: none;
+  border-color: var(--accent-color, #00A86B);
+  box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.15);
+}
+
+.select__value {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.select__chevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  color: #7F8C8D;
+  transform: translateY(-50%);
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.select__button--open .select__chevron {
+  color: var(--accent-color, #00A86B);
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* Меню рендерится в portal с position: fixed — его не обрезают таблица и модалки */
+.select__menu {
+  position: fixed;
+  z-index: 1300;
+  margin: 0;
+  padding: 6px;
+  box-sizing: border-box;
+  max-height: 320px;
+  overflow-y: auto;
+  list-style: none;
+  background: #ffffff;
+  border: 1px solid #E8ECEA;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
+  animation: select-menu-in 0.12s ease-out;
+}
+
+@keyframes select-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.select__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  font-family: inherit;
+  font-size: 14px;
+  color: #2C3E50;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.select__option--active {
+  background-color: rgba(0, 168, 107, 0.08);
+}
+
+.select__option--selected {
+  background-color: rgba(0, 168, 107, 0.12);
+  font-weight: 600;
+}
+
+.select__option:focus-visible {
+  outline: 2px solid var(--accent-color, #00A86B);
+  outline-offset: -2px;
+}
+
+.select__option-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.select__check {
+  margin-left: auto;
+  color: var(--accent-color, #00A86B);
+  font-weight: 700;
+}
+
+/* Точки-маркеры приоритета и статуса */
+.select__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.select__dot--high {
+  background-color: #E74C3C;
+}
+
+.select__dot--medium {
+  background-color: #F0A500;
+}
+
+.select__dot--low {
+  background-color: #52C41A;
+}
+
+.select__dot--todo {
+  background-color: #8C8C8C;
+}
+
+.select__dot--in-progress {
+  background-color: #1890FF;
+}
+
+.select__dot--done {
+  background-color: #52C41A;
+}
+
+/* Тёмная тема */
+[data-theme="dark"] .select__button {
+  /* Как остальные поля формы в тёмной теме */
+  background-color: var(--header-bg-color, #1e1e1e);
+  border-color: var(--border-light-color, #444444);
+  color: var(--text-primary-color, #E0E0E0);
+}
+
+[data-theme="dark"] .select__button:hover,
+[data-theme="dark"] .select__button:focus-visible,
+[data-theme="dark"] .select__button--open {
+  border-color: #00C17E;
+}
+
+[data-theme="dark"] .select__button:focus-visible,
+[data-theme="dark"] .select__button--open {
+  box-shadow: 0 0 0 3px rgba(0, 193, 126, 0.2);
+}
+
+[data-theme="dark"] .select__chevron {
+  color: #9AA5A0;
+}
+
+[data-theme="dark"] .select__menu {
+  /* Чуть светлее модалки, иначе меню сливается с ней */
+  background: #333333;
+  border-color: #4A4A4A;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .select__option {
+  color: #E0E0E0;
+}
+
+[data-theme="dark"] .select__option--active {
+  background-color: rgba(0, 193, 126, 0.14);
+}
+
+[data-theme="dark"] .select__option--selected {
+  background-color: rgba(0, 193, 126, 0.2);
+}

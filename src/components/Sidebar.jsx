@@ -9,11 +9,9 @@ const Sidebar = ({ onMenuClick, activeItemId }) => {
 
   const menuItems = [
     { id: 1, title: t('nav.tasks'), icon: '✓' },
-    { id: 2, title: t('nav.scripts'), icon: '📝' },
-    { id: 3, title: t('nav.diary'), icon: '📔' },
-    { id: 4, title: t('nav.clients'), icon: '➜' },
-    { id: 5, title: t('nav.analytics'), icon: '📊' },
-    { id: 6, title: t('nav.settings'), icon: '⚙️' },
+    { id: 2, title: t('nav.diary'), icon: '📔' },
+    { id: 3, title: t('nav.analytics'), icon: '📊' },
+    { id: 4, title: t('nav.settings'), icon: '⚙️' },
   ];
 
   const initial = (user?.name || '?').trim().charAt(0).toUpperCase();

@@ -25,7 +25,8 @@
   position: relative;
 }
 
-input.search-input {
+/* Специфичность выше, чем у глобального input[type="text"] { width: 100% } из global.css */
+.topbar input.search-input {
   width: 300px;
   padding: 8px 15px;
   background-color: #F5F5F5;
@@ -112,4 +113,39 @@ input.search-input:focus {
 
 .topbar__logout:hover {
   background-color: var(--toggle-hover-bg, #e0e0e0);
+}
+
+/* Мобильная шапка: логотип и кнопки в первой строке, поиск — во всю ширину ниже */
+@media (max-width: 768px) {
+  .topbar {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  /* Обёртка перестаёт быть отдельным блоком, чтобы поиск мог занять свою строку */
+  .topbar-left {
+    display: contents;
+  }
+
+  .logo {
+    order: 1;
+    font-size: 15px;
+  }
+
+  .topbar-right {
+    order: 2;
+    margin-left: auto;
+    gap: 12px;
+  }
+
+  .search-container {
+    order: 3;
+    flex: 1 1 100%;
+  }
+
+  .topbar input.search-input {
+    box-sizing: border-box;
+    width: 100%;
+  }
 }

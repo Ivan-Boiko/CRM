@@ -1,5 +1,5 @@
 // App.jsx
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import MainPage from "./pages/MainPage";
 import MainPageLk from "./pages/MainPageLk";
@@ -9,7 +9,17 @@ import { LanguageProvider } from "./context/LanguageContext";
 import { ToastProvider } from "./context/ToastContext";
 import "./pages/global.css";
 
+// Тема хранится в localStorage: применяем её сразу при старте, иначе после
+// перезагрузки на любой странице остаётся светлая тема до захода в настройки
+const applyStoredTheme = () => {
+  document.body.dataset.theme = localStorage.getItem("theme") === "dark" ? "dark" : "";
+};
+
 const App = () => {
+  useEffect(() => {
+    applyStoredTheme();
+  }, []);
+
   return (
     <LanguageProvider>
       <ToastProvider>

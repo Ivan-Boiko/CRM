@@ -1,0 +1,233 @@
+/* Календарь дедлайна: кнопка повторяет поле формы, календарь — карточку списков */
+.date-picker {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.date-picker__button {
+  justify-content: space-between;
+}
+
+.date-picker__value {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.date-picker__value--empty {
+  color: var(--text-secondary-color, #A6B0AC);
+  opacity: 0.8;
+}
+
+.date-picker__icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  color: #7F8C8D;
+  transform: translateY(-50%);
+}
+
+.date-picker__button.select__button--open .date-picker__icon {
+  color: var(--accent-color, #00A86B);
+}
+
+/* Календарь рендерится в portal — модалка его не обрезает */
+.date-picker__calendar {
+  position: fixed;
+  z-index: 1300;
+  box-sizing: border-box;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #E8ECEA;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
+  animation: date-picker-in 0.12s ease-out;
+}
+
+@keyframes date-picker-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.date-picker__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.date-picker__month {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2C3E50;
+  text-transform: capitalize;
+}
+
+.date-picker__nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: #7F8C8D;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.date-picker__nav:hover {
+  background-color: rgba(0, 168, 107, 0.1);
+  color: var(--accent-color, #00A86B);
+}
+
+.date-picker__nav:focus-visible {
+  outline: 2px solid var(--accent-color, #00A86B);
+  outline-offset: -2px;
+}
+
+.date-picker__weekdays,
+.date-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.date-picker__weekday {
+  padding: 4px 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #93A19B;
+  text-align: center;
+}
+
+.date-picker__day {
+  height: 34px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: #2C3E50;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.date-picker__day:hover {
+  background-color: rgba(0, 168, 107, 0.1);
+}
+
+.date-picker__day--outside {
+  color: #BFC8C4;
+}
+
+.date-picker__day--today {
+  border-color: rgba(0, 168, 107, 0.45);
+  font-weight: 600;
+}
+
+.date-picker__day--selected,
+.date-picker__day--selected:hover {
+  background-color: var(--accent-color, #00A86B);
+  border-color: var(--accent-color, #00A86B);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.date-picker__day:focus-visible {
+  outline: 2px solid var(--accent-color, #00A86B);
+  outline-offset: -2px;
+}
+
+.date-picker__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #EEF2F0;
+}
+
+.date-picker__action {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: #5D6D66;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.date-picker__action:hover:not(:disabled) {
+  background-color: rgba(0, 168, 107, 0.1);
+}
+
+.date-picker__action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.date-picker__action--accent {
+  color: var(--accent-color, #00A86B);
+  font-weight: 600;
+}
+
+.date-picker__action:focus-visible {
+  outline: 2px solid var(--accent-color, #00A86B);
+  outline-offset: -2px;
+}
+
+/* Тёмная тема */
+[data-theme="dark"] .date-picker__calendar {
+  /* Чуть светлее модалки, чтобы календарь читался как отдельная карточка */
+  background: #333333;
+  border-color: #4A4A4A;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .date-picker__month,
+[data-theme="dark"] .date-picker__day {
+  color: #E0E0E0;
+}
+
+[data-theme="dark"] .date-picker__day--outside {
+  color: #6B7672;
+}
+
+[data-theme="dark"] .date-picker__weekday {
+  color: #93A19B;
+}
+
+[data-theme="dark"] .date-picker__footer {
+  border-top-color: #3C3C3C;
+}
+
+[data-theme="dark"] .date-picker__action {
+  color: #C9D3CF;
+}
+
+[data-theme="dark"] .date-picker__nav {
+  color: #9AA5A0;
+}
+
+[data-theme="dark"] .date-picker__nav:hover,
+[data-theme="dark"] .date-picker__day:hover {
+  background-color: rgba(0, 193, 126, 0.16);
+}

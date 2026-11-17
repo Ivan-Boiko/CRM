@@ -39,6 +39,11 @@
   background-color: #009960;
 }
 
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .btn-secondary {
   background-color: white;
   color: #2C3E50;
@@ -51,6 +56,21 @@
 
 .btn-secondary:hover {
   background-color: #F8F9FA;
+}
+
+.btn-danger {
+  background-color: #CF1322;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 10px 20px;
+  transition: background-color 0.2s;
+}
+
+.btn-danger:hover {
+  background-color: #A50E1D;
 }
 
 /* Removing duplicate modal styles - these are now in RegistrationModal.css */
@@ -75,6 +95,9 @@
   margin: 0;
   font-size: 18px;
   color: #2C3E50;
+  /* Длинное название не должно вылезать за пределы модалки */
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .modal__close {
@@ -95,6 +118,21 @@
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+}
+
+/* Подтверждение действия */
+.confirm-dialog {
+  max-width: 420px;
+}
+
+.confirm-dialog__message {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #2C3E50;
+  overflow-wrap: anywhere;
+  /* Перенос строки разделяет название задачи и предупреждение */
+  white-space: pre-line;
 }
 
 /* Common form styles */
@@ -173,6 +211,46 @@
   outline: none;
   border-color: #00A86B;
   box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.15);
+}
+
+/* Тёмная тема: модальные окна и кнопки */
+[data-theme="dark"] .modal {
+  background: var(--card-bg-color, #2A2A2A);
+  color: var(--text-color, #ffffff);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .modal__header,
+[data-theme="dark"] .modal__footer {
+  border-color: var(--border-light-color, #444444);
+}
+
+[data-theme="dark"] .modal__header h3 {
+  color: var(--text-primary-color, #E0E0E0);
+}
+
+[data-theme="dark"] .modal__close {
+  color: var(--text-secondary-color, #A0A0A0);
+}
+
+[data-theme="dark"] .modal__close:hover {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .form-group label,
+[data-theme="dark"] .form-label,
+[data-theme="dark"] .confirm-dialog__message {
+  color: var(--text-primary-color, #E0E0E0);
+}
+
+[data-theme="dark"] .btn-secondary {
+  background-color: #2A2A2A;
+  color: var(--text-primary-color, #E0E0E0);
+  border-color: var(--border-light-color, #444444);
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+  background-color: #333333;
 }
 
 [data-theme="dark"] .form-select {

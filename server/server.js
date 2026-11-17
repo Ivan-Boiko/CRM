@@ -101,13 +101,13 @@ app.put('/api/me', auth, (req, res) => {
 
 // --- Универсальный CRUD для пользовательских сущностей ---
 
-function crud(route, table, fields, requiredField) {
+function crud(route, table, fields, requiredField, decorateRow) {
   // Список записей текущего пользователя
   app.get(`/api/${route}`, auth, (req, res) => {
     const rows = db
       .prepare(`SELECT * FROM ${table} WHERE user_id = ? ORDER BY id DESC`)
       .all(req.user.id);
-    res.json(rows);
+    res.json(decorateRow ? rows.map(decorateRow) : rows);
   });
 
   // Создание записи
@@ -133,7 +133,10 @@ function crud(route, table, fields, requiredField) {
     if (!existing) return res.status(404).json({ message: 'Запись не найдена' });
 
     const setClause = fields.map((f) => `${f} = ?`).join(', ');
-    const values = fields.map((f) => req.body[f] ?? existing[f]);
+    // Явно переданный null (например, сброс подгруппы) сохраняем, а не подменяем старым значением
+    const values = fields.map((f) =>
+      Object.prototype.hasOwnProperty.call(req.body, f) ? req.body[f] : existing[f]
+    );
     db.prepare(`UPDATE ${table} SET ${setClause} WHERE id = ? AND user_id = ?`).run(
       ...values,
       req.params.id,
@@ -153,10 +156,105 @@ function crud(route, table, fields, requiredField) {
   });
 }
 
-crud('tasks', 'tasks', ['name', 'description', 'priority', 'assigned', 'deadline', 'status'], 'name');
-crud('scripts', 'scripts', ['title', 'description', 'content', 'date'], 'title');
+// --- Подгруппы задач ---
+
+// Новому пользователю сразу создаём две базовые подгруппы
+function ensureTaskGroups(userId) {
+  const { count } = db
+    .prepare('SELECT COUNT(*) AS count FROM task_groups WHERE user_id = ?')
+    .get(userId);
+  if (count > 0) return;
+  const insert = db.prepare('INSERT INTO task_groups (user_id, name, created_at) VALUES (?, ?, ?)');
+  const now = new Date().toISOString();
+  insert.run(userId, 'Работа', now);
+  insert.run(userId, 'Личное', now);
+}
+
+const taskGroupNameStmt = db.prepare(
+  'SELECT name FROM task_groups WHERE id = ? AND user_id = ?'
+);
+
+app.get('/api/task-groups', auth, (req, res) => {
+  ensureTaskGroups(req.user.id);
+  const groups = db
+    .prepare('SELECT id, name FROM task_groups WHERE user_id = ? ORDER BY id ASC')
+    .all(req.user.id);
+  res.json(groups);
+});
+
+app.post('/api/task-groups', auth, (req, res) => {
+  const name = String(req.body.name || '').trim();
+  if (!name) return res.status(400).json({ message: 'Введите название подгруппы' });
+
+  ensureTaskGroups(req.user.id);
+  const exists = db
+    .prepare('SELECT id FROM task_groups WHERE user_id = ? AND LOWER(name) = LOWER(?)')
+    .get(req.user.id, name);
+  if (exists) return res.status(409).json({ message: 'Такая подгруппа уже есть' });
+
+  const info = db
+    .prepare('INSERT INTO task_groups (user_id, name, created_at) VALUES (?, ?, ?)')
+    .run(req.user.id, name, new Date().toISOString());
+  res.status(201).json(
+    db.prepare('SELECT id, name FROM task_groups WHERE id = ?').get(info.lastInsertRowid)
+  );
+});
+
+app.delete('/api/task-groups/:id', auth, (req, res) => {
+  const group = db
+    .prepare('SELECT id FROM task_groups WHERE id = ? AND user_id = ?')
+    .get(req.params.id, req.user.id);
+  if (!group) return res.status(404).json({ message: 'Подгруппа не найдена' });
+
+  // Задачи не удаляем — они просто остаются без подгруппы
+  db.prepare('UPDATE tasks SET group_id = NULL WHERE group_id = ? AND user_id = ?').run(
+    group.id,
+    req.user.id
+  );
+  db.prepare('DELETE FROM task_groups WHERE id = ?').run(group.id);
+  res.json({ message: 'Удалено' });
+});
+
+// Комментарии задачи хранятся отдельно: у задачи их может быть сколько угодно
+const taskCommentsStmt = db.prepare(
+  'SELECT id, text, COALESCE(kind, ?) AS kind, created_at AS createdAt FROM task_comments WHERE task_id = ? ORDER BY id ASC'
+);
+const DEFAULT_COMMENT_KIND = 'comment';
+const withComments = (task) => ({
+  ...task,
+  comments: taskCommentsStmt.all('comment', task.id),
+  groupName: task.group_id ? taskGroupNameStmt.get(task.group_id, task.user_id)?.name || null : null,
+});
+
+crud(
+  'tasks',
+  'tasks',
+  ['name', 'description', 'priority', 'deadline', 'status', 'comment', 'group_id'],
+  'name',
+  withComments
+);
 crud('diary', 'diary', ['text', 'date'], 'text');
-crud('clients', 'clients', ['name', 'description', 'phone', 'email'], 'name');
+
+// Добавление комментария к задаче
+app.post('/api/tasks/:id/comments', auth, (req, res) => {
+  const task = db
+    .prepare('SELECT id FROM tasks WHERE id = ? AND user_id = ?')
+    .get(req.params.id, req.user.id);
+  if (!task) return res.status(404).json({ message: 'Задача не найдена' });
+
+  const text = String(req.body.text || '').trim();
+  if (!text) return res.status(400).json({ message: 'Введите текст комментария' });
+
+  // kind = 'return' — комментарий появился при возврате задачи из архива
+  const kind = req.body.kind === 'return' ? 'return' : DEFAULT_COMMENT_KIND;
+  const info = db
+    .prepare('INSERT INTO task_comments (task_id, text, kind, created_at) VALUES (?, ?, ?, ?)')
+    .run(task.id, text, kind, new Date().toISOString());
+  const comment = db
+    .prepare('SELECT id, text, COALESCE(kind, ?) AS kind, created_at AS createdAt FROM task_comments WHERE id = ?')
+    .get(DEFAULT_COMMENT_KIND, info.lastInsertRowid);
+  res.status(201).json(comment);
+});
 
 // --- Обработчик ошибок ---
 

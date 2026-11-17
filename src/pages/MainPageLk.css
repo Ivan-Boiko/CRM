@@ -12,6 +12,8 @@
 
 .page-lk__content {
   flex: 1;
+  /* Не даём длинному содержимому (например, названию задачи) распирать всю страницу */
+  min-width: 0;
   border: 1px solid var(--border-light-color);
   border-left: none;
   border-top: none;
@@ -22,6 +24,17 @@
   flex-direction: column;
 }
 
-.page-lk__filters {
-  margin-bottom: 20px;
+/* Ниже 1200 px сайдбар встаёт над контентом, иначе таблице задач не хватает ширины */
+@media (max-width: 1200px) {
+  .page-lk__layout {
+    flex-direction: column;
+  }
+
+  /* В колонке контент не тянется вниз: иначе под карточками остаётся пустое поле */
+  .page-lk__content {
+    flex: 0 0 auto;
+    width: 100%;
+  }
 }
+
+

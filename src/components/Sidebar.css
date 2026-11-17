@@ -94,6 +94,15 @@
   color: var(--text-color);
 }
 
+@media (max-width: 1200px) {
+  .sidebar {
+    box-sizing: border-box;
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 12px;
+  }
+}
+
 .sidebar__menu-item--active .sidebar__menu-title {
   font-weight: 500;
 }

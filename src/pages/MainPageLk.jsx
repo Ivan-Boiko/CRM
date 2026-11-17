@@ -2,21 +2,28 @@ import React, { useCallback, useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import TaskTable from '../components/TaskTable';
-import FilterButtons from '../components/FilterButtons';
-import Scripts from '../components/ScriptsDiary';
+import Archive from '../components/Archive';
+import { applyTaskFilter } from '../components/TaskFilter';
 import Diary from '../components/Diary';
-import Clients from '../components/Clients';
 import Analytics from '../components/Analytics';
 import Settings from '../components/Settings';
 import { apiFetch } from '../api';
 import { useToast } from '../context/ToastContext';
+import { useLanguage } from '../context/LanguageContext';
 import './MainPageLk.css';
 
 const MainPageLk = () => {
   const [activeItemId, setActiveItemId] = useState(1);
+  // Вкладка внутри раздела «Задачи»: активные задачи или архив
+  const [tasksTab, setTasksTab] = useState('active');
   const [tasks, setTasks] = useState([]);
-  const [filters, setFilters] = useState({ status: 'all', priority: 'all', dateSort: 'none' });
+  // Подгруппы задач: «Работа», «Личное» и свои
+  const [groups, setGroups] = useState([]);
+  // Сортировка задач; по умолчанию — по приоритетам
+  const [taskFilter, setTaskFilter] = useState('priority');
+  const [search, setSearch] = useState('');
   const { notify } = useToast();
+  const { t } = useLanguage();
 
   const loadTasks = useCallback(async () => {
     try {
@@ -27,41 +34,80 @@ const MainPageLk = () => {
     }
   }, [notify]);
 
+  const loadGroups = useCallback(async () => {
+    try {
+      const data = await apiFetch('/task-groups');
+      setGroups(data);
+    } catch (err) {
+      notify(err.message, 'error');
+    }
+  }, [notify]);
+
   useEffect(() => {
     loadTasks();
-  }, [loadTasks]);
+    loadGroups();
+  }, [loadTasks, loadGroups]);
 
-  // Фильтрация и сортировка задач по выбранным параметрам
-  const visibleTasks = [...tasks]
-    .filter((task) => filters.status === 'all' || task.status === filters.status)
-    .filter((task) => filters.priority === 'all' || task.priority === filters.priority)
-    .sort((a, b) => {
-      if (filters.dateSort === 'none') return 0;
-      const aTime = a.deadline ? new Date(a.deadline).getTime() : 0;
-      const bTime = b.deadline ? new Date(b.deadline).getTime() : 0;
-      return filters.dateSort === 'asc' ? aTime - bTime : bTime - aTime;
-    });
+  // В архиве нет фильтра по статусу — сбрасываем его на приоритеты при переходе
+  const handleTasksTabChange = (id) => {
+    if (id === 'archive' && taskFilter === 'status') setTaskFilter('priority');
+    setTasksTab(id);
+  };
+
+  // Строка поиска из TopBar: регистронезависимый поиск по нескольким полям
+  const query = search.trim().toLowerCase();
+
+  // Активные задачи: поиск из TopBar + сортировка выбранным фильтром
+  const visibleTasks = applyTaskFilter(
+    tasks
+      .filter((task) => task.status !== 'done')
+      .filter((task) =>
+        query
+          ? [task.name, task.description].some(
+              (value) => value && String(value).toLowerCase().includes(query)
+            )
+          : true
+      ),
+    taskFilter
+  );
 
   return (
     <div className="page-lk">
-      <TopBar />
+      <TopBar search={search} onSearch={setSearch} />
       <div className="page-lk__layout">
         <Sidebar onMenuClick={setActiveItemId} activeItemId={activeItemId} />
         <div className="page-lk__content">
           <div className="page-lk__wrapper">
             {activeItemId === 1 && (
               <>
-                <div className="page-lk__filters">
-                  <FilterButtons filters={filters} onChange={setFilters} />
-                </div>
-                <TaskTable tasks={visibleTasks} onRefresh={loadTasks} />
+                {tasksTab === 'active' ? (
+                  <TaskTable
+                    tasks={visibleTasks}
+                    groups={groups}
+                    onGroupsChanged={loadGroups}
+                    onRefresh={loadTasks}
+                    emptyText={query ? t('common.searchEmpty') : undefined}
+                    tab={tasksTab}
+                    onTabChange={handleTasksTabChange}
+                    filter={taskFilter}
+                    onFilterChange={setTaskFilter}
+                  />
+                ) : (
+                  <Archive
+                    tasks={tasks}
+                    search={search}
+                    onRefresh={loadTasks}
+                    tab={tasksTab}
+                    onTabChange={handleTasksTabChange}
+                    filter={taskFilter}
+                    onFilterChange={setTaskFilter}
+                  />
+                )}
               </>
             )}
-            {activeItemId === 2 && <Scripts />}
-            {activeItemId === 3 && <Diary />}
-            {activeItemId === 4 && <Clients />}
-            {activeItemId === 5 && <Analytics tasks={tasks} />}
-            {activeItemId === 6 && <Settings />}
+            {activeItemId === 2 && <Diary search={search} />}
+            {activeItemId === 3 && <Analytics tasks={tasks} />}
+            {activeItemId === 4 && <Settings />}
           </div>
         </div>
       </div>

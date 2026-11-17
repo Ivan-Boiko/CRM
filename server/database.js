@@ -46,30 +46,49 @@ export function initDb() {
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
-    CREATE TABLE IF NOT EXISTS scripts (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      title TEXT,
-      description TEXT,
-      content TEXT,
-      date TEXT,
-      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS clients (
+    CREATE TABLE IF NOT EXISTS task_groups (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
       name TEXT NOT NULL,
-      description TEXT,
-      phone TEXT,
-      email TEXT,
+      created_at TEXT NOT NULL,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS task_comments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      task_id INTEGER NOT NULL,
+      text TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
+    );
+
   `);
 
   // Миграции для существующих баз
   addColumnIfMissing('tasks', 'description', 'TEXT');
+  addColumnIfMissing('tasks', 'comment', 'TEXT');
   addColumnIfMissing('users', 'avatar', 'TEXT');
+  // Вид комментария: обычный ('comment') или причина возврата задачи в работу ('return')
+  addColumnIfMissing('task_comments', 'kind', "TEXT DEFAULT 'comment'");
+  // Подгруппа задачи («Работа», «Личное» и свои)
+  addColumnIfMissing('tasks', 'group_id', 'INTEGER');
+
+  // Старый одиночный комментарий задачи переносим в таблицу комментариев
+  const legacyComments = db
+    .prepare("SELECT id, comment FROM tasks WHERE comment IS NOT NULL AND TRIM(comment) <> ''")
+    .all();
+  const hasComments = db.prepare('SELECT 1 FROM task_comments WHERE task_id = ? LIMIT 1');
+  const insertComment = db.prepare(
+    'INSERT INTO task_comments (task_id, text, created_at) VALUES (?, ?, ?)'
+  );
+  for (const task of legacyComments) {
+    if (!hasComments.get(task.id)) {
+      insertComment.run(task.id, task.comment.trim(), new Date().toISOString());
+    }
+  }
+
+  // Лишние пробелы и переводы строк по краям комментариев убираем
+  db.exec("UPDATE task_comments SET text = TRIM(text, char(32) || char(9) || char(10) || char(13))");
 }
 
 export default db;
