@@ -53,6 +53,7 @@ export const translations = {
     'tasks.modal.add': 'Добавить новую задачу',
     'tasks.modal.edit': 'Редактировать задачу',
     'tasks.field.namePlaceholder': 'Введите название задачи',
+    'tasks.field.deadlineTime': 'Время дедлайна',
     'tasks.field.description': 'Описание',
     'tasks.field.descriptionPlaceholder': 'Опишите задачу подробнее...',
     'tasks.empty': 'Задач пока нет',
@@ -141,6 +142,13 @@ export const translations = {
     'settings.telegramDisconnect': 'Отключить',
     'settings.telegramDisconnected': 'Telegram отключён',
 
+    'notifications.title': 'Уведомления',
+    'notifications.empty': 'Пока нет уведомлений',
+    'notifications.markAll': 'Прочитать все',
+    'notifications.in6h': 'Дедлайн через 6 часов',
+    'notifications.in1h': 'Дедлайн через час',
+    'notifications.deadline': 'Срок: {date}',
+
     'toast.loginSuccess': 'Вы вошли в систему',
     'toast.registerSuccess': 'Регистрация успешна',
     'toast.loggedOut': 'Вы вышли из системы',
@@ -216,6 +224,7 @@ export const translations = {
     'tasks.modal.add': 'Add a new task',
     'tasks.modal.edit': 'Edit task',
     'tasks.field.namePlaceholder': 'Enter the task name',
+    'tasks.field.deadlineTime': 'Deadline time',
     'tasks.field.description': 'Description',
     'tasks.field.descriptionPlaceholder': 'Describe the task in more detail...',
     'tasks.empty': 'No tasks yet',
@@ -303,6 +312,13 @@ export const translations = {
     'settings.telegramTestSent': 'Message sent to Telegram',
     'settings.telegramDisconnect': 'Disconnect',
     'settings.telegramDisconnected': 'Telegram disconnected',
+
+    'notifications.title': 'Notifications',
+    'notifications.empty': 'No notifications yet',
+    'notifications.markAll': 'Mark all as read',
+    'notifications.in6h': 'Deadline in 6 hours',
+    'notifications.in1h': 'Deadline in an hour',
+    'notifications.deadline': 'Due: {date}',
 
     'toast.loginSuccess': 'You are logged in',
     'toast.registerSuccess': 'Registration successful',

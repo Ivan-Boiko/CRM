@@ -150,6 +150,9 @@ SQLite (database.js: db.prepare(...).run/all/get)
 | POST | `/api/telegram/link` | Одноразовый код и ссылка на бота; 503, если `TELEGRAM_BOT_TOKEN` не задан |
 | DELETE | `/api/telegram/link` | Отвязать Telegram |
 | POST | `/api/telegram/test` | Проверочное сообщение в привязанный чат |
+| GET | `/api/notifications?tz=Europe/Moscow` | Уведомления колокольчика `{ items, unread }`; `tz` сохраняется в `users.timezone` |
+| POST | `/api/notifications/:id/read` | Отметить уведомление прочитанным |
+| POST | `/api/notifications/read-all` | Прочитать все уведомления |
 | GET/POST/PUT/DELETE | `/api/tasks[/:id]` | Задачи (CRUD, только свои `user_id`) |
 | GET/POST/PUT/DELETE | `/api/diary[/:id]` | Дневник |
 
@@ -159,8 +162,9 @@ SQLite (database.js: db.prepare(...).run/all/get)
 ### Схема БД (SQLite)
 
 ```sql
-users    (id PK, name, email UNIQUE, password, avatar, telegram_chat_id, telegram_username, telegram_link_code, telegram_link_expires, telegram_linked_at)
-tasks    (id PK, user_id FK, name, description, priority, deadline, status, comment, group_id FK)
+users    (id PK, name, email UNIQUE, password, avatar, timezone, telegram_chat_id, telegram_username, telegram_link_code, telegram_link_expires, telegram_linked_at)
+tasks    (id PK, user_id FK, name, description, priority, deadline, deadline_time, status, comment, group_id FK)
+notifications (id PK, user_id FK, task_id, kind: 6h|1h, task_name, deadline, deadline_time, dedupe_key, created_at, read_at) — напоминания колокольчика
 task_groups (id PK, user_id FK, name, created_at) — подгруппы задач
 task_comments (id PK, task_id FK, text, kind: comment|return, created_at)
 diary    (id PK, user_id FK, text, date)
@@ -209,6 +213,12 @@ diary    (id PK, user_id FK, text, date)
 - **Статус задачи** меняется прямо в таблице — выпадающим меню в колонке «Статус», без открытия редактирования.
 - **Подгруппы задач** — в форме задачи выбирается «Работа», «Личное» или своя подгруппа: её можно создать тут же, а ненужную — удалить (задачи останутся в «Без подгруппы»). Список разбит на сворачиваемые секции по подгруппам. Кнопка «Добавить задачу» — под списком, по центру.
 - **Возврат из архива** — кнопка со стрелкой рядом с крестиком: открывается окно с обязательной причиной возврата, задача получает статус «В процессе» и возвращается в «Задачи», а причина сохраняется комментарием с `kind = 'return'` и выделяется в окне просмотра задачи.
+
+### Напоминания о дедлайнах
+- У задачи есть дата и необязательное время дедлайна (пусто = `23:59`). Время видно в строке задачи и в карточке: «20.11.2026, 18:00».
+- Сервер раз в минуту проверяет активные задачи и создаёт уведомления за 6 часов и за час до срока (`server/notifications.js`). Время считается по часовому поясу браузера, который приходит вместе с запросом уведомлений (`users.timezone`); без него — Europe/Moscow.
+- Ключ `kind:task_id:deadline+time` не даёт продублировать напоминание; если срок перенесли — придёт новое. Задача, созданная позже шести часов до срока, получит только «час».
+- Колокольчик в шапке показывает бейдж непрочитанных и список (на телефоне — лист снизу). Тап открывает карточку задачи, «Прочитать все» сбрасывает счётчик. Клиент опрашивает сервер раз в минуту и при возвращении на вкладку.
 
 ### Поля ввода (глобальные стили)
 - Все `input`/`textarea`/`select` во всём приложении получают современный вид из [global.css](file:///c:/Users/Ivan/Desktop/CRM/CRM/src/pages/global.css) — скругление 8px, единые отступы, зелёная рамка и свечение при фокусе, поддержка тёмной темы.

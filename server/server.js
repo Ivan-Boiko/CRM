@@ -14,6 +14,7 @@ import {
   unlink,
   sendMessage,
 } from './telegram.js';
+import { runReminderTick, saveTimezone } from './notifications.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -87,6 +88,10 @@ initDb();
 
 // Необязательный Telegram: без TELEGRAM_BOT_TOKEN ничего не запускается
 initTelegram();
+
+// Напоминания о дедлайнах: каждый тик создаёт записи для колокольчика
+const reminderTimer = setInterval(runReminderTick, 60 * 1000);
+runReminderTick();
 
 // --- Вспомогательные функции ---
 
@@ -288,6 +293,47 @@ app.post('/api/telegram/test', auth, async (req, res) => {
   }
 });
 
+// --- Уведомления (колокольчик) ---
+
+// Список уведомлений и число непрочитанных.
+// Часовой пояс приходит из браузера — по нему считаются 6 часов и час до дедлайна
+app.get('/api/notifications', auth, (req, res) => {
+  saveTimezone(req.user.id, req.query.tz);
+
+  const items = db
+    .prepare(
+      `SELECT id, task_id, kind, task_name, deadline, deadline_time, created_at, read_at
+         FROM notifications
+        WHERE user_id = ?
+        ORDER BY created_at DESC, id DESC
+        LIMIT 50`
+    )
+    .all(req.user.id)
+    .map((row) => ({ ...row, read: Boolean(row.read_at) }));
+
+  const { unread } = db
+    .prepare('SELECT COUNT(*) AS unread FROM notifications WHERE user_id = ? AND read_at IS NULL')
+    .get(req.user.id);
+
+  res.json({ items, unread });
+});
+
+app.post('/api/notifications/:id/read', auth, (req, res) => {
+  // Повторное прочтение и чужую запись не считаем ошибкой: для клиента итог один
+  db.prepare(
+    'UPDATE notifications SET read_at = ? WHERE id = ? AND user_id = ? AND read_at IS NULL'
+  ).run(new Date().toISOString(), req.params.id, req.user.id);
+  res.json({ read: true });
+});
+
+app.post('/api/notifications/read-all', auth, (req, res) => {
+  db.prepare('UPDATE notifications SET read_at = ? WHERE user_id = ? AND read_at IS NULL').run(
+    new Date().toISOString(),
+    req.user.id
+  );
+  res.json({ read: true });
+});
+
 // --- Универсальный CRUD для пользовательских сущностей ---
 
 function crud(route, table, fields, requiredField, decorateRow) {
@@ -418,7 +464,7 @@ const withComments = (task) => ({
 crud(
   'tasks',
   'tasks',
-  ['name', 'description', 'priority', 'deadline', 'status', 'comment', 'group_id'],
+  ['name', 'description', 'priority', 'deadline', 'deadline_time', 'status', 'comment', 'group_id'],
   'name',
   withComments
 );
@@ -487,6 +533,7 @@ const server = app.listen(PORT, () => {
 const shutdown = (signal) => {
   console.log(`${signal}: останавливаюсь`);
   server.close(() => {
+    clearInterval(reminderTimer);
     stopTelegram();
     db.close();
     process.exit(0);

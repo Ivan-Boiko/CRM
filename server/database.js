@@ -62,6 +62,28 @@ export function initDb() {
       FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      task_id INTEGER,
+      kind TEXT NOT NULL,
+      task_name TEXT NOT NULL,
+      deadline TEXT,
+      deadline_time TEXT,
+      dedupe_key TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      read_at TEXT,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+  `);
+
+  // Один и тот же порог по одной и той же задаче не должен срабатывать дважды
+  db.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_notifications_dedupe
+      ON notifications(user_id, dedupe_key);
+    CREATE INDEX IF NOT EXISTS idx_notifications_user
+      ON notifications(user_id, created_at DESC);
   `);
 
   // Миграции для существующих баз
@@ -74,6 +96,10 @@ export function initDb() {
   addColumnIfMissing('users', 'telegram_link_code', 'TEXT');
   addColumnIfMissing('users', 'telegram_link_expires', 'TEXT');
   addColumnIfMissing('users', 'telegram_linked_at', 'TEXT');
+  // Время дедлайна: без него нельзя отсчитать 6 часов и час до срока
+  addColumnIfMissing('tasks', 'deadline_time', 'TEXT');
+  // Часовой пояс браузера (IANA): по нему сервер считает время напоминаний
+  addColumnIfMissing('users', 'timezone', 'TEXT');
   // Вид комментария: обычный ('comment') или причина возврата задачи в работу ('return')
   addColumnIfMissing('task_comments', 'kind', "TEXT DEFAULT 'comment'");
   // Подгруппа задачи («Работа», «Личное» и свои)

@@ -1,5 +1,15 @@
 # Журнал изменений
 
+## 2026-11-17 — Напоминания о дедлайнах и колокольчик
+- Новый файл `server/notifications.js` — тик раз в минуту создаёт напоминания «за 6 часов» и «за час» до дедлайна; время считается по часовому поясу пользователя (`users.timezone`, фолбэк `Europe/Moscow`), дубли отсекает `dedupe_key` (`kind:task:deadlineTtime`), записи старше 90 дней удаляются. Если задача появилась позже шести часов — придёт только «час».
+- `server/server.js` — `setInterval(runReminderTick, 60 * 1000)` и первый тик при старте, `clearInterval` при завершении; роуты `GET /api/notifications` (список + `unread`, сохраняет `tz` из запроса), `POST /api/notifications/:id/read`, `POST /api/notifications/read-all`; `deadline_time` добавлен в поля CRUD задач.
+- `server/database.js` — таблица `notifications` с уникальным индексом `(user_id, dedupe_key)`, колонки `tasks.deadline_time` и `users.timezone`.
+- Новые файлы `src/components/NotificationsBell.jsx` и `NotificationsBell.css` — колокольчик с бейджем непрочитанных, панель со списком (на ≤768 px — лист снизу над таб-панелью), «Прочитать все», тап по записи помечает прочитанной и открывает задачу; опрос раз в минуту и при возвращении на вкладку.
+- `TopBar.jsx` / `TopBar.css` — вместо эмодзи рендерится `NotificationsBell`, стили колокольчика перенесены из `TopBar.css` в компонент.
+- `TaskTable.jsx` — поле «Время дедлайна» (`type="time"`, неактивно без даты), время в строке таблицы и в карточке просмотра, открытие задачи по `focusTaskId` из уведомления.
+- `MainPageLk.jsx` — переход из уведомления в раздел «Задачи» и передача `focusTaskId` в `TaskTable`.
+- `src/i18n.js` — подписи колокольчика и времени дедлайна (ru/en).
+
 ## 2026-11-17 — Необязательное подключение Telegram в настройках
 - Новый файл `server/telegram.js` — привязка личного бота: `getMe` (имя для ссылки), одноразовый код на 15 минут, long polling `getUpdates` с пропуском накопленных обновлений на старте, обработка `/start <код>` и `/stop`, `sendMessage`. Токен — только из `TELEGRAM_BOT_TOKEN`, в базе не хранится; без токена опрос не запускается.
 - `server/server.js` — импорт модуля, `initTelegram()` после `initDb()`, `stopTelegram()` при завершении, роуты `GET /api/telegram/status`, `POST /api/telegram/link` (503 без токена), `DELETE /api/telegram/link`, `POST /api/telegram/test` (400 без привязки, 502 при ошибке отправки).

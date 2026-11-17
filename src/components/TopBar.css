@@ -75,16 +75,6 @@ input.search-input:focus {
   background-color: #009960;
 }
 */
-.notifications {
-  cursor: pointer;
-  padding: 8px;
-  color: #2C3E50;
-}
-
-.notification-icon {
-  font-size: 20px;
-}
-
 .profile-avatar {
   width: 35px;
   height: 35px;
@@ -158,20 +148,6 @@ input.search-input:focus {
     box-sizing: border-box;
     width: 100%;
     min-height: 44px;
-  }
-
-  /* Кнопки шапки: ровные квадраты 44 px, чтобы строка не разъезжалась */
-  .notifications {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-  }
-
-  .notification-icon {
-    font-size: 18px;
   }
 
   .profile-avatar {

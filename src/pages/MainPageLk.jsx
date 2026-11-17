@@ -23,6 +23,8 @@ const MainPageLk = () => {
   // Сортировка задач; по умолчанию — по приоритетам
   const [taskFilter, setTaskFilter] = useState('priority');
   const [search, setSearch] = useState('');
+  // Задача, которую нужно открыть после клика по уведомлению
+  const [focusTaskId, setFocusTaskId] = useState(null);
   const { notify } = useToast();
   const { t } = useLanguage();
 
@@ -49,6 +51,14 @@ const MainPageLk = () => {
     loadGroups();
   }, [loadTasks, loadGroups]);
 
+  // Клик по уведомлению в колокольчике: переходим в задачи и открываем карточку
+  const handleOpenTaskFromNotification = useCallback((taskId) => {
+    if (!taskId) return;
+    setActiveItemId(1);
+    setTasksTab('active');
+    setFocusTaskId(taskId);
+  }, []);
+
   // В архиве нет фильтра по статусу — сбрасываем его на приоритеты при переходе
   const handleTasksTabChange = (id) => {
     if (id === 'archive' && taskFilter === 'status') setTaskFilter('priority');
@@ -74,7 +84,11 @@ const MainPageLk = () => {
 
   return (
     <div className="page-lk">
-      <TopBar search={search} onSearch={setSearch} />
+      <TopBar
+        search={search}
+        onSearch={setSearch}
+        onOpenTask={handleOpenTaskFromNotification}
+      />
       <div className="page-lk__layout">
         <Sidebar onMenuClick={setActiveItemId} activeItemId={activeItemId} />
         <div className="page-lk__content">
@@ -92,6 +106,8 @@ const MainPageLk = () => {
                     onTabChange={handleTasksTabChange}
                     filter={taskFilter}
                     onFilterChange={setTaskFilter}
+                    focusTaskId={focusTaskId}
+                    onFocusHandled={() => setFocusTaskId(null)}
                   />
                 ) : (
                   <Archive

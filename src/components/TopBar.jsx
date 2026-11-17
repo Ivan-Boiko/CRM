@@ -3,8 +3,9 @@ import './TopBar.css';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
+import NotificationsBell from './NotificationsBell';
 
-const TopBar = ({ search = '', onSearch }) => {
+const TopBar = ({ search = '', onSearch, onOpenTask }) => {
   const { user, logout } = useAuth();
   const { notify } = useToast();
   const { t } = useLanguage();
@@ -34,9 +35,7 @@ const TopBar = ({ search = '', onSearch }) => {
         </div>
       </div>
       <div className="topbar-right">
-        <div className="notifications">
-          <span className="notification-icon">🔔</span>
-        </div>
+        <NotificationsBell onOpenTask={onOpenTask} />
         <div className="user-profile">
           {user?.avatar ? (
             <img className="profile-avatar" src={user.avatar} alt={user.name || 'avatar'} />

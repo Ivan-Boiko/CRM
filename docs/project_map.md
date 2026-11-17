@@ -38,7 +38,8 @@
 
 #### Layout
 - Header.jsx / Header.css — верхняя панель (поиск, logout, theme toggle)
-- TopBar.jsx / TopBar.css — панель личного кабинета (заголовок, theme toggle, language toggle)
+- TopBar.jsx / TopBar.css — панель личного кабинета (заголовок, theme toggle, language toggle, колокольчик уведомлений)
+- NotificationsBell.jsx / NotificationsBell.css — колокольчик: бейдж непрочитанных, панель напоминаний (на телефоне — лист снизу), переход к задаче
 - Sidebar.jsx / Sidebar.css — боковое меню (навигация по разделам 1-4: задачи, дневник, аналитика, настройки)
 
 #### Forms
@@ -95,6 +96,10 @@
 - DELETE /api/telegram/link — отвязать Telegram
 - POST /api/telegram/test — проверочное сообщение в привязанный чат; 400 без привязки, 502 при ошибке отправки
 - Привязка Telegram живёт в `server/telegram.js` (getMe, long polling getUpdates, `/start <код>`, `/stop`, sendMessage)
+- GET /api/notifications — `{ items, unread }`, до 50 последних; параметр `tz` сохраняется в `users.timezone`
+- POST /api/notifications/:id/read — отметить прочитанным
+- POST /api/notifications/read-all — прочитать все
+- Напоминания за 6 часов и за час до дедлайна создаёт `server/notifications.js` по тику раз в минуту
 - GET/POST/PUT/DELETE /api/tasks — задачи (GET отдаёт задачи вместе с массивом `comments`)
 - GET /api/task-groups — подгруппы задач («Работа», «Личное» создаются автоматически)
 - POST /api/task-groups — создать подгруппу ({ name })

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import './common.css';
 import './TaskTable.css';
 import { apiFetch } from '../api';
@@ -17,6 +17,7 @@ const EMPTY_TASK = {
   description: '',
   priority: 'medium',
   deadline: '',
+  deadline_time: '',
   status: 'todo',
   group_id: '',
 };
@@ -31,6 +32,8 @@ const TaskTable = ({
   onTabChange,
   filter,
   onFilterChange,
+  focusTaskId,
+  onFocusHandled,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
@@ -72,6 +75,18 @@ const TaskTable = ({
     setCommentDraft('');
   };
 
+  // Переход из колокольчика: открываем карточку задачи по id
+  useEffect(() => {
+    if (!focusTaskId) return;
+    const task = tasks.find((item) => item.id === focusTaskId);
+    if (task) {
+      setViewingTask(task);
+      setCommentDraft('');
+      setIsViewOpen(true);
+    }
+    onFocusHandled?.();
+  }, [focusTaskId, tasks, onFocusHandled]);
+
   // Комментарии можно оставлять и у активной задачи — прямо в окне просмотра
   const handleAddComment = async () => {
     const text = commentDraft.trim();
@@ -103,6 +118,7 @@ const TaskTable = ({
       description: task.description || '',
       priority: task.priority || 'medium',
       deadline: task.deadline || '',
+      deadline_time: task.deadline_time || '',
       status: task.status || 'todo',
       group_id: task.group_id || '',
     });
@@ -298,7 +314,10 @@ const TaskTable = ({
                 </div>
                 <div className="tasks__cell">
                   <span className="tasks__cell-label">{t('tasks.col.deadline')}</span>
-                  <span>{formatDate(task.deadline)}</span>
+                  <span>
+                    {formatDate(task.deadline)}
+                    {task.deadline_time ? `, ${task.deadline_time}` : ''}
+                  </span>
                 </div>
                 <div className="tasks__cell" onClick={(e) => e.stopPropagation()}>
                   <span className="tasks__cell-label">{t('tasks.col.status')}</span>
@@ -445,6 +464,16 @@ const TaskTable = ({
                 />
               </div>
               <div className="form-group">
+                <label htmlFor="deadline_time">{t('tasks.field.deadlineTime')}</label>
+                <input
+                  id="deadline_time"
+                  type="time"
+                  value={form.deadline_time}
+                  onChange={(e) => setForm((prev) => ({ ...prev, deadline_time: e.target.value }))}
+                  disabled={!form.deadline}
+                />
+              </div>
+              <div className="form-group">
                 <label htmlFor="status">{t('tasks.col.status')}</label>
                 <Select
                   id="status"
@@ -501,7 +530,10 @@ const TaskTable = ({
                 </div>
                 <div className="tasks__view-item">
                   <div className="tasks__view-label">{t('tasks.col.deadline')}</div>
-                  <div>{formatDate(viewingTask.deadline)}</div>
+                  <div>
+                    {formatDate(viewingTask.deadline)}
+                    {viewingTask.deadline_time ? `, ${viewingTask.deadline_time}` : ''}
+                  </div>
                 </div>
                 <div className="tasks__view-item">
                   <div className="tasks__view-label">{t('tasks.group')}</div>
