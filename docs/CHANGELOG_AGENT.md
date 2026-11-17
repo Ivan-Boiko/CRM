@@ -1,5 +1,10 @@
 # Журнал изменений
 
+## 2026-11-17 — Предохранитель CORS и лимит попыток входа
+- `server/server.js` — при старте в production с пустым `CORS_ORIGINS` явное предупреждение в логах (браузерные запросы с домена получат 403); `app.set('trust proxy', 1)`, чтобы за Caddy видеть реальный IP клиента.
+- `server/server.js` — лимит неудачных входов в памяти процесса: `LOGIN_MAX_ATTEMPTS` (5) попыток на «IP + email» и `LOGIN_MAX_ATTEMPTS_IP` (20) на IP целиком за `LOGIN_WINDOW_MINUTES` (15) минут; дальше `429` с `Retry-After`, успешный вход сбрасывает только счётчик аккаунта (не адреса), просроченные записи чистятся.
+- `.env.example`, `docs/DEPLOY.md` — новые переменные и разбор `429` / предупреждения CORS.
+
 ## 2026-11-17 — Регистрация закрывается переменной окружения
 - `server/server.js` — `ALLOW_REGISTRATION=false` отключает регистрацию: `POST /api/register` отвечает 403 «Регистрация закрыта»; новый `GET /api/config` отдаёт `{ registrationEnabled }`, чтобы клиент знал настройку.
 - `src/pages/MainPage.jsx` — при загрузке страницы входа запрашивает `/api/config` и передаёт `showRegister` в `LoginForm`.

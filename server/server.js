@@ -28,6 +28,18 @@ const allowedOrigins = (process.env.CORS_ORIGINS || '')
 
 const normalizeOrigin = (origin) => origin.trim().replace(/\/$/, '');
 
+// Предохранитель: в production без CORS_ORIGINS браузерные запросы с сайта
+// получат 403 (сработал бы dev-список), поэтому громко предупреждаем при старте
+if (process.env.NODE_ENV === 'production' && allowedOrigins.length === 0) {
+  console.warn(
+    'ВНИМАНИЕ: CORS_ORIGINS не задан. Сервер разрешит только http://localhost:3000, а запросы с вашего домена получат 403. Укажите в .env: CORS_ORIGINS=https://ваш-домен'
+  );
+}
+
+// За обратным прокси (Caddy) реальный адрес клиента приходит в X-Forwarded-For:
+// без этого все запросы выглядели бы как запросы из контейнера прокси
+app.set('trust proxy', 1);
+
 app.use(
   cors({
     origin(origin, callback) {
@@ -93,15 +105,85 @@ app.post('/api/register', (req, res) => {
   res.status(201).json({ token: signToken(user), user });
 });
 
+// --- Защита от подбора пароля ---
+// Два счётчика неудачных попыток в памяти процесса:
+//  • пара «IP + email» — чтобы не перебирать пароль к одному аккаунту;
+//  • IP целиком — чтобы с одного адреса не перебирать сразу много аккаунтов.
+// Оба считают в окне LOGIN_WINDOW_MINUTES минут, дальше вход отвечает 429.
+const LOGIN_MAX_ATTEMPTS = Math.max(1, Number(process.env.LOGIN_MAX_ATTEMPTS) || 5);
+const LOGIN_MAX_ATTEMPTS_IP = Math.max(1, Number(process.env.LOGIN_MAX_ATTEMPTS_IP) || 20);
+const LOGIN_WINDOW_MS = Math.max(1, Number(process.env.LOGIN_WINDOW_MINUTES) || 15) * 60 * 1000;
+const loginAttempts = new Map();
+
+const loginKey = (req, email) => `email:${req.ip}|${String(email).trim().toLowerCase()}`;
+const loginIpKey = (req) => `ip:${req.ip}`;
+
+// Запись попыток внутри текущего окна; истёкшая считается новой
+const getAttempts = (key) => {
+  const record = loginAttempts.get(key);
+  if (!record || Date.now() - record.startedAt >= LOGIN_WINDOW_MS) return null;
+  return record;
+};
+
+const registerFailedAttempt = (key) => {
+  const record = getAttempts(key);
+  if (record) {
+    record.count += 1;
+    return record.count;
+  }
+
+  loginAttempts.set(key, { startedAt: Date.now(), count: 1 });
+
+  // Чистим просроченные записи, чтобы карта не росла бесконечно
+  if (loginAttempts.size > 1000) {
+    const now = Date.now();
+    loginAttempts.forEach((value, entryKey) => {
+      if (now - value.startedAt >= LOGIN_WINDOW_MS) loginAttempts.delete(entryKey);
+    });
+  }
+
+  return 1;
+};
+
+// 429 с заголовком Retry-After до конца текущего окна
+const tooManyAttempts = (res, record, message) => {
+  const retryAfterSec = Math.ceil((LOGIN_WINDOW_MS - (Date.now() - record.startedAt)) / 1000);
+  res.set('Retry-After', String(retryAfterSec));
+  return res.status(429).json({
+    message: `${message} Попробуйте через ${Math.max(1, Math.ceil(retryAfterSec / 60))} мин.`,
+  });
+};
+
 app.post('/api/login', (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ message: 'Заполните все поля' });
   }
+
+  const key = loginKey(req, email);
+  const ipKey = loginIpKey(req);
+  const attempts = getAttempts(key);
+  const ipAttempts = getAttempts(ipKey);
+
+  // Сначала общий лимит на адрес: он защищает от перебора по многим аккаунтам
+  if (ipAttempts && ipAttempts.count >= LOGIN_MAX_ATTEMPTS_IP) {
+    return tooManyAttempts(res, ipAttempts, 'Слишком много неудачных попыток входа с этого адреса.');
+  }
+  if (attempts && attempts.count >= LOGIN_MAX_ATTEMPTS) {
+    return tooManyAttempts(res, attempts, 'Слишком много попыток входа.');
+  }
+
   const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
   if (!user || !bcrypt.compareSync(password, user.password)) {
+    registerFailedAttempt(key);
+    registerFailedAttempt(ipKey);
     return res.status(401).json({ message: 'Неверный email или пароль' });
   }
+
+  // Успешный вход сбрасывает счётчик по аккаунту, но не общий счётчик адреса:
+  // иначе подобравший один свой пароль сбрасывал бы лимит
+  loginAttempts.delete(key);
+
   res.json({
     token: signToken(user),
     user: { id: user.id, name: user.name, email: user.email, avatar: user.avatar || null },
