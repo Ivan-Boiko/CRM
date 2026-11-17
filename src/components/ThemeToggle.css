@@ -3,20 +3,21 @@
     display: flex;
     align-items: center;
     cursor: pointer;
-    justify-content: flex-end;
-    width: 50px;
+    /* Круг всегда слева — так же, как у переключателя языка */
+    justify-content: flex-start;
+    box-sizing: border-box;
+    width: 80px;
     height: 50px;
     border-radius: 25px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     position: relative;
     transition: background-color 0.3s ease;
-    padding:0 15px;
-    transition: all 0.7s ease;
+    padding: 0;
     background-color: var(--primary-color);
   }
+  /* Тёмная тема включена — плашка становится акцентной, круг остаётся на месте */
   .theme-toggle.dark-contaner {
-    justify-content: flex-start;
-    background-color: var(--primary-color);
+    background-color: var(--accent-color);
   }
   .theme-toggle.dark-contaner > .toggle-text {
     color: var(--text-color);
@@ -47,10 +48,6 @@
     transition: all 1s ease;
   }
   
-  /* Темная тема - положение круга справа */
-  .toggle-circle.dark {
-    left: calc(100% - 45px);
-  }
   
   
   .theme-toggle:hover {
@@ -58,7 +55,7 @@
   }
   
   .theme-toggle.dark-contaner:hover {
-    background-color: var(--second-bg-color);
+    background-color: var(--accent-hover-color, #009960);
   }
 
  

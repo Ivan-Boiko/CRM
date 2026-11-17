@@ -2,15 +2,16 @@
     display: flex;
     align-items: center;
     cursor: pointer;
-    justify-content: flex-end;
-    width: 50px;
+    /* Круг всегда слева — так же, как у переключателя темы */
+    justify-content: flex-start;
+    box-sizing: border-box;
+    width: 80px;
     height: 50px;
     border-radius: 25px;
     position: relative;
     transition: background-color 0.3s ease;
-    padding:0 15px;
-    transition: all 0.7s ease;
-    background-color: var(--primary-color, #222222);
+    padding: 0;
+    background-color: var(--primary-color, #007bff);
     color: var(--text-color);
   }
   
@@ -29,18 +30,15 @@
     font-size: 17px;
     color: var(--text-color);
   }
-  .toggle-circle_lang.russian {
-    left: calc(100% - 45px);
-  }
-  
-  .language-toggle.russian-container .toggle-text {
-    color: var(--header-bg-color);
+  /* Русский включён — плашка акцентная, круг остаётся на месте */
+  .language-toggle.russian-container {
+    background-color: var(--accent-color, #00A86B);
   }
 
-  .theme-toggle:hover {
+  .language-toggle:hover {
     background-color: var(--toggle-hover-bg, #e0e0e0);
   }
-  
-  .theme-toggle.dark-contaner:hover {
-    background-color: var(--second-bg-color);
+
+  .language-toggle.russian-container:hover {
+    background-color: var(--accent-hover-color, #009960);
   }
