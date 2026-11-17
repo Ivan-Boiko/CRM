@@ -2,7 +2,9 @@
 <html lang="ru">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <!-- Знак CRM: 32 px для вкладки, 192 px для ярлыков и старых Android -->
+    <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/icons/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="%PUBLIC_URL%/icons/icon-192.png" />
     <!-- viewport-fit=cover — чтобы страница учитывала вырез и скругления экрана -->
     <meta
       name="viewport"
@@ -16,7 +18,8 @@
     />
 
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <!-- iOS ставит эту картинку на домашний экран; 180×180 без прозрачности -->
+    <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/icons/apple-touch-icon.png" />
 
     <!-- Запуск с домашнего экрана iOS как отдельное приложение -->
     <meta name="apple-mobile-web-app-capable" content="yes" />

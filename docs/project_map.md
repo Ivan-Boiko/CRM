@@ -69,6 +69,13 @@
 - LanguageToggle.jsx / LanguageToggle.css — переключатель языка (ru/en)
 - ThemeToggle.jsx / ThemeToggle.css — переключатель темы (светлая/тёмная)
 
+## Статика
+- public/icons/icon.svg, icon-maskable.svg — исходники знака CRM (зелёный #00A86B, белая надпись)
+- public/icons/icon-192.png, icon-512.png — иконки `any` для манифеста
+- public/icons/icon-maskable-512.png — maskable-иконка (надпись в безопасной зоне 80%)
+- public/icons/apple-touch-icon.png — 180×180 для домашнего экрана iOS
+- public/icons/favicon-32.png — иконка вкладки (буква C)
+
 ## Роуты
 | Путь | Компонент | Требуется auth |
 |------|-----------|---------------|

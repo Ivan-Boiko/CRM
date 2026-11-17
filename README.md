@@ -22,7 +22,7 @@
 
 ```
 CRM/
-├── public/                 # статика CRA (favicon, logo192/512, manifest)
+├── public/                 # статика: icons/ (знак CRM в PNG и SVG), manifest.json
 ├── server/                 # Бэкенд
 │   ├── server.js           # Express-приложение и все API-роуты (auth + CRUD)
 │   ├── database.js         # better-sqlite3 + initDb + миграции addColumnIfMissing

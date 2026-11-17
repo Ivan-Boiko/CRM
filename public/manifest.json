@@ -12,21 +12,22 @@
   "theme_color": "#00A86B",
   "icons": [
     {
-      "src": "logo192.png",
+      "src": "icons/icon-192.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any"
     },
     {
-      "src": "logo512.png",
+      "src": "icons/icon-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any"
     },
     {
-      "src": "favicon.ico",
-      "type": "image/x-icon",
-      "sizes": "64x64 32x32 24x24 16x16"
+      "src": "icons/icon-maskable-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
     }
   ]
 }

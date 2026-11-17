@@ -1,5 +1,11 @@
 # Журнал изменений
 
+## 2026-11-17 — Иконки приложения CRM
+- `public/icons/` — новая папка: `icon.svg` и `icon-maskable.svg` (исходники), `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` (безопасная зона 80%), `apple-touch-icon.png` 180×180, `favicon-32.png` (буква C для мелкого размера). Знак — зелёный #00A86B с белой надписью CRM.
+- `public/manifest.json` — иконки CRA заменены на новые: 192/512 `any` и 512 `maskable`, удалена ссылка на `favicon.ico`.
+- `public/index.html` — вместо `favicon.ico` и `logo192.png` подключены `icons/favicon-32.png`, `icons/icon-192.png` и `icons/apple-touch-icon.png` (180×180).
+- Удалены `public/logo192.png`, `public/logo512.png`, `public/favicon.ico` (логотипы CRA).
+
 ## 2026-11-17 — Нижняя таб-панель на телефонах
 - Новые файлы `src/components/mobile/BottomNav.jsx` и `BottomNav.css` — нижняя навигация для ≤768 px: четыре таба (Задачи / Дневник / Аналитика / Настройки) по 56 px высотой, иконка + подпись, активный — зелёный с полоской сверху, панель фиксирована внизу, `padding-bottom: env(safe-area-inset-bottom)`.
 - `MainPageLk.jsx` — `BottomNav` рендерится рядом с `Sidebar`; что показывать, решают стили.
