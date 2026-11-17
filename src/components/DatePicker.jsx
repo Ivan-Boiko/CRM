@@ -41,6 +41,10 @@ const buildMonthDays = (viewDate) => {
   return Array.from({ length: 42 }, (_, index) => new Date(year, month, 1 - offset + index));
 };
 
+// Часы и минуты для собственного выбора времени — без нативного окна браузера
+const HOURS = Array.from({ length: 24 }, (_, index) => String(index).padStart(2, '0'));
+const MINUTES = Array.from({ length: 60 }, (_, index) => String(index).padStart(2, '0'));
+
 const WEEKDAYS = {
   ru: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
   en: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
@@ -50,6 +54,12 @@ const WEEKDAYS = {
 const DatePicker = ({ id, value, onChange, ariaLabel, time = '', onTimeChange }) => {
   const { t, lang, formatDate } = useLanguage();
   const [open, setOpen] = useState(false);
+  // Раскрыта ли панель выбора времени внутри календаря
+  const [timeOpen, setTimeOpen] = useState(false);
+  const hoursRef = useRef(null);
+  const minutesRef = useRef(null);
+  // Текущее время в ref: нужно только при открытии панели, без перескролла на каждый выбор
+  const timeRef = useRef(time);
   const [calendarStyle, setCalendarStyle] = useState(null);
   const [viewDate, setViewDate] = useState(() => parseISO(value) || new Date());
   const rootRef = useRef(null);
@@ -123,6 +133,32 @@ const DatePicker = ({ id, value, onChange, ariaLabel, time = '', onTimeChange })
     onChange(toISO(day));
   };
 
+  // Без даты время не выбираем — панель закрываем
+  useEffect(() => {
+    if (!value) setTimeOpen(false);
+  }, [value]);
+
+  useEffect(() => {
+    timeRef.current = time;
+  }, [time]);
+
+  // При открытии панели прокручиваем колонки к выбранному часу и минуте
+  useEffect(() => {
+    if (!timeOpen) return;
+    const current = timeRef.current;
+    const hour = current ? Number(current.slice(0, 2)) : 0;
+    const minute = current ? Number(current.slice(3, 5)) : 0;
+    if (hoursRef.current) hoursRef.current.scrollTop = Math.max(0, hour * 40 - 60);
+    if (minutesRef.current) minutesRef.current.scrollTop = Math.max(0, minute * 40 - 60);
+  }, [timeOpen]);
+
+  // Собираем время из двух колонок: «18» + «30» → «18:30»
+  const pickTimePart = (part, next) => {
+    const hours = part === 'hours' ? next : (time ? time.slice(0, 2) : '00');
+    const minutes = part === 'minutes' ? next : (time ? time.slice(3, 5) : '00');
+    onTimeChange?.(`${hours}:${minutes}`);
+  };
+
   const shiftMonth = (delta) => {
     setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + delta, 1));
   };
@@ -194,18 +230,76 @@ const DatePicker = ({ id, value, onChange, ariaLabel, time = '', onTimeChange })
 
           {/* Время выбирается здесь же, чтобы дедлайн задавался одним действием */}
           <div className="date-picker__time">
-            <label className="date-picker__time-label" htmlFor={`${id}-time`}>
-              {t('tasks.field.deadlineTime')}
-            </label>
-            <input
-              id={`${id}-time`}
-              type="time"
-              className="date-picker__time-input"
-              value={time}
-              onChange={(e) => onTimeChange?.(e.target.value)}
+            <span className="date-picker__time-label">{t('tasks.field.deadlineTime')}</span>
+            <button
+              type="button"
+              className={[
+                'date-picker__time-button',
+                timeOpen ? 'date-picker__time-button--open' : '',
+                time ? 'date-picker__time-button--filled' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              onClick={() => setTimeOpen((prev) => !prev)}
               disabled={!value}
-            />
+              aria-expanded={timeOpen}
+              aria-label={t('tasks.field.deadlineTime')}
+            >
+              {time || '--:--'}
+            </button>
           </div>
+
+          {timeOpen && value && (
+            <div className="date-picker__time-panel">
+              <div className="date-picker__time-labels" aria-hidden="true">
+                <span>{t('date.hours')}</span>
+                <span>{t('date.minutes')}</span>
+              </div>
+              <div className="date-picker__time-columns">
+                <div className="date-picker__time-column" ref={hoursRef} role="listbox" aria-label={t('date.hours')}>
+                  {HOURS.map((hour) => {
+                    const isSelected = time ? time.slice(0, 2) === hour : false;
+                    return (
+                      <button
+                        key={hour}
+                        type="button"
+                        role="option"
+                        aria-selected={isSelected}
+                        className={`date-picker__time-option${isSelected ? ' date-picker__time-option--selected' : ''}`}
+                        onClick={() => pickTimePart('hours', hour)}
+                      >
+                        {hour}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="date-picker__time-column" ref={minutesRef} role="listbox" aria-label={t('date.minutes')}>
+                  {MINUTES.map((minute) => {
+                    const isSelected = time ? time.slice(3, 5) === minute : false;
+                    return (
+                      <button
+                        key={minute}
+                        type="button"
+                        role="option"
+                        aria-selected={isSelected}
+                        className={`date-picker__time-option${isSelected ? ' date-picker__time-option--selected' : ''}`}
+                        onClick={() => pickTimePart('minutes', minute)}
+                      >
+                        {minute}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <button
+                type="button"
+                className="date-picker__time-done"
+                onClick={() => setTimeOpen(false)}
+              >
+                {t('date.done')}
+              </button>
+            </div>
+          )}
 
           <div className="date-picker__footer">
             <button
