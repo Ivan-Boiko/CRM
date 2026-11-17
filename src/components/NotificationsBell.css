@@ -141,6 +141,16 @@
   color: var(--text-primary-color, #2c3e50);
 }
 
+/* Напоминание по уже прошедшему сроку */
+.notifications__item-meta--passed {
+  color: #cf1322;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .notifications__item-meta--passed {
+  color: #ff7875;
+}
+
 .notifications__item-deadline {
   font-size: 12px;
   color: var(--text-secondary-color, #7f8c8d);

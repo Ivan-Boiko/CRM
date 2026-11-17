@@ -135,6 +135,20 @@
   color: #BFC8C4;
 }
 
+/* Прошедшие дни недоступны: дедлайн в прошлом не имеет смысла */
+.date-picker__day--past,
+.date-picker__day--past:hover {
+  background: none;
+  color: #C7CFCB;
+  cursor: not-allowed;
+}
+
+[data-theme="dark"] .date-picker__day--past,
+[data-theme="dark"] .date-picker__day--past:hover {
+  background: none;
+  color: #5C6561;
+}
+
 .date-picker__day--today {
   border-color: rgba(0, 168, 107, 0.45);
   font-weight: 600;
@@ -151,6 +165,38 @@
 .date-picker__day:focus-visible {
   outline: 2px solid var(--accent-color, #00A86B);
   outline-offset: -2px;
+}
+
+/* Время дедлайна — в том же календаре, рядом с датой */
+.date-picker__time {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #EEF2F0;
+}
+
+.date-picker__time-label {
+  font-size: 13px;
+  color: #5D6D66;
+}
+
+.date-picker__time-input {
+  width: 118px;
+  min-width: 0;
+  padding: 6px 8px;
+  box-sizing: border-box;
+  font-size: 13px;
+}
+
+[data-theme="dark"] .date-picker__time {
+  border-top-color: #3C3C3C;
+}
+
+[data-theme="dark"] .date-picker__time-label {
+  color: #C9D3CF;
 }
 
 .date-picker__footer {
@@ -234,6 +280,11 @@
 
 /* Мобильные тач-таргеты: дни, стрелки и кнопки календаря — 44 px */
 @media (max-width: 1200px) {
+  .date-picker__time-input {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
   .date-picker__day {
     height: 44px;
     font-size: 15px;

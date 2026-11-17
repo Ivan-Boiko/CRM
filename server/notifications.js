@@ -22,6 +22,19 @@ export function isValidTimezone(value) {
   }
 }
 
+export function getUserTimezone(userId) {
+  const row = db.prepare('SELECT timezone FROM users WHERE id = ?').get(userId);
+  return isValidTimezone(row && row.timezone) ? row.timezone : 'Europe/Moscow';
+}
+
+// Прошёл ли дедлайн в поясе пользователя: та же шкала минут, что и у напоминаний
+export function isDeadlineInPast(deadline, time, timezone) {
+  const value = deadlineMinutes(deadline, time);
+  if (value === null) return false;
+  const now = localNow(isValidTimezone(timezone) ? timezone : 'Europe/Moscow');
+  return value < localDateMinutes(now);
+}
+
 export function saveTimezone(userId, value) {
   if (!isValidTimezone(value)) return;
   db.prepare(

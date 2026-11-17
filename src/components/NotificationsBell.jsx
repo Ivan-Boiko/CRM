@@ -101,6 +101,13 @@ const NotificationsBell = ({ onOpenTask }) => {
     return `${date}${item.deadline_time ? `, ${item.deadline_time}` : ''}`;
   };
 
+  // Срок уже прошёл: старое «через 6 часов» было бы неправдой
+  const isPassed = (item) => {
+    if (!item.deadline) return false;
+    const at = new Date(`${item.deadline}T${item.deadline_time || '23:59'}:00`);
+    return !Number.isNaN(at.getTime()) && at.getTime() < Date.now();
+  };
+
   return (
     <div className="notifications" ref={rootRef}>
       <button
@@ -142,8 +149,14 @@ const NotificationsBell = ({ onOpenTask }) => {
                     onClick={() => handleItemClick(item)}
                   >
                     <span className="notifications__item-title">{item.task_name}</span>
-                    <span className="notifications__item-meta">
-                      {t(item.kind === '6h' ? 'notifications.in6h' : 'notifications.in1h')}
+                    <span
+                      className={`notifications__item-meta${
+                        isPassed(item) ? ' notifications__item-meta--passed' : ''
+                      }`}
+                    >
+                      {isPassed(item)
+                        ? t('notifications.overdue')
+                        : t(item.kind === '6h' ? 'notifications.in6h' : 'notifications.in1h')}
                     </span>
                     <span className="notifications__item-deadline">
                       {t('notifications.deadline', { date: deadlineLabel(item) })}

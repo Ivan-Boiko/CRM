@@ -54,6 +54,7 @@ export const translations = {
     'tasks.modal.edit': 'Редактировать задачу',
     'tasks.field.namePlaceholder': 'Введите название задачи',
     'tasks.field.deadlineTime': 'Время дедлайна',
+    'tasks.deadlinePast': 'Дедлайн не может быть в прошлом',
     'tasks.field.description': 'Описание',
     'tasks.field.descriptionPlaceholder': 'Опишите задачу подробнее...',
     'tasks.empty': 'Задач пока нет',
@@ -146,6 +147,7 @@ export const translations = {
     'notifications.empty': 'Пока нет уведомлений',
     'notifications.markAll': 'Прочитать все',
     'notifications.in6h': 'Дедлайн через 6 часов',
+    'notifications.overdue': 'Срок прошёл',
     'notifications.in1h': 'Дедлайн через час',
     'notifications.deadline': 'Срок: {date}',
 
@@ -225,6 +227,7 @@ export const translations = {
     'tasks.modal.edit': 'Edit task',
     'tasks.field.namePlaceholder': 'Enter the task name',
     'tasks.field.deadlineTime': 'Deadline time',
+    'tasks.deadlinePast': 'Deadline cannot be in the past',
     'tasks.field.description': 'Description',
     'tasks.field.descriptionPlaceholder': 'Describe the task in more detail...',
     'tasks.empty': 'No tasks yet',
@@ -317,6 +320,7 @@ export const translations = {
     'notifications.empty': 'No notifications yet',
     'notifications.markAll': 'Mark all as read',
     'notifications.in6h': 'Deadline in 6 hours',
+    'notifications.overdue': 'Deadline passed',
     'notifications.in1h': 'Deadline in an hour',
     'notifications.deadline': 'Due: {date}',
 

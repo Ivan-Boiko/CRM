@@ -134,6 +134,22 @@ const TaskTable = ({
 
   const handleSubmit = async () => {
     if (!form.name.trim()) return;
+
+    // Дедлайн в прошлом не сохраняем: напоминания по нему уже не сработают.
+    // Если дата не менялась (правим старую просроченную задачу) — пропускаем проверку
+    if (form.deadline) {
+      const original = editingId ? tasks.find((task) => task.id === editingId) : null;
+      const unchanged =
+        original &&
+        form.deadline === (original.deadline || '') &&
+        (form.deadline_time || '') === (original.deadline_time || '');
+      const deadlineAt = new Date(`${form.deadline}T${form.deadline_time || '23:59'}:00`);
+      if (!unchanged && !Number.isNaN(deadlineAt.getTime()) && deadlineAt.getTime() < Date.now()) {
+        notify(t('tasks.deadlinePast'), 'error');
+        return;
+      }
+    }
+
     // Пустое значение — «без подгруппы»
     const payload = {
       ...form,
@@ -459,18 +475,17 @@ const TaskTable = ({
                 <DatePicker
                   id="deadline"
                   value={form.deadline}
-                  onChange={(value) => setForm((prev) => ({ ...prev, deadline: value }))}
+                  time={form.deadline_time}
+                  onChange={(value) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      deadline: value,
+                      // Без даты время не нужно
+                      deadline_time: value ? prev.deadline_time : '',
+                    }))
+                  }
+                  onTimeChange={(value) => setForm((prev) => ({ ...prev, deadline_time: value }))}
                   ariaLabel={t('tasks.col.deadline')}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="deadline_time">{t('tasks.field.deadlineTime')}</label>
-                <input
-                  id="deadline_time"
-                  type="time"
-                  value={form.deadline_time}
-                  onChange={(e) => setForm((prev) => ({ ...prev, deadline_time: e.target.value }))}
-                  disabled={!form.deadline}
                 />
               </div>
               <div className="form-group">

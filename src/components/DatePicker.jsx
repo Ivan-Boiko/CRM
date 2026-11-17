@@ -5,7 +5,8 @@ import { useLanguage } from '../context/LanguageContext';
 
 // Размеры календаря нужны, чтобы открыть его вверх, если снизу нет места
 const CALENDAR_WIDTH = 340;
-const CALENDAR_HEIGHT = 400;
+// Строка выбора времени добавляет высоту, поэтому календарь чуть выше
+const CALENDAR_HEIGHT = 470;
 
 // Значение хранится как ISO-строка YYYY-MM-DD — в таком виде его ждёт сервер
 const parseISO = (value) => {
@@ -46,7 +47,7 @@ const WEEKDAYS = {
 };
 
 // Календарь в стиле выпадающих списков: кнопка как у поля формы, меню — карточка в portal
-const DatePicker = ({ id, value, onChange, ariaLabel }) => {
+const DatePicker = ({ id, value, onChange, ariaLabel, time = '', onTimeChange }) => {
   const { t, lang, formatDate } = useLanguage();
   const [open, setOpen] = useState(false);
   const [calendarStyle, setCalendarStyle] = useState(null);
@@ -116,8 +117,9 @@ const DatePicker = ({ id, value, onChange, ariaLabel }) => {
     setOpen(true);
   };
 
+  // Календарь остаётся открытым: в нём же выбирается время дедлайна,
+  // закрыть можно кликом вне или Escape
   const pickDay = (day) => {
-    setOpen(false);
     onChange(toISO(day));
   };
 
@@ -165,6 +167,8 @@ const DatePicker = ({ id, value, onChange, ariaLabel }) => {
               const isSelected = isSameDay(day, selectedDate);
               const isToday = isSameDay(day, today);
               const isOutside = day.getMonth() !== viewDate.getMonth();
+              // Дедлайн в прошлом выбрать нельзя
+              const isPast = day < today;
               return (
                 <button
                   key={toISO(day)}
@@ -174,16 +178,33 @@ const DatePicker = ({ id, value, onChange, ariaLabel }) => {
                     isOutside ? 'date-picker__day--outside' : '',
                     isToday ? 'date-picker__day--today' : '',
                     isSelected ? 'date-picker__day--selected' : '',
+                    isPast ? 'date-picker__day--past' : '',
                   ]
                     .filter(Boolean)
                     .join(' ')}
                   onClick={() => pickDay(day)}
+                  disabled={isPast}
                   aria-pressed={isSelected}
                 >
                   {day.getDate()}
                 </button>
               );
             })}
+          </div>
+
+          {/* Время выбирается здесь же, чтобы дедлайн задавался одним действием */}
+          <div className="date-picker__time">
+            <label className="date-picker__time-label" htmlFor={`${id}-time`}>
+              {t('tasks.field.deadlineTime')}
+            </label>
+            <input
+              id={`${id}-time`}
+              type="time"
+              className="date-picker__time-input"
+              value={time}
+              onChange={(e) => onTimeChange?.(e.target.value)}
+              disabled={!value}
+            />
           </div>
 
           <div className="date-picker__footer">
@@ -193,6 +214,8 @@ const DatePicker = ({ id, value, onChange, ariaLabel }) => {
               onClick={() => {
                 setOpen(false);
                 onChange('');
+                // Без даты время не имеет смысла
+                onTimeChange?.('');
               }}
               disabled={!value}
             >
@@ -227,7 +250,7 @@ const DatePicker = ({ id, value, onChange, ariaLabel }) => {
         aria-label={ariaLabel}
       >
         <span className={`date-picker__value${value ? '' : ' date-picker__value--empty'}`}>
-          {value ? formatDate(value) : t('date.placeholder')}
+          {value ? `${formatDate(value)}${time ? `, ${time}` : ''}` : t('date.placeholder')}
         </span>
         <span className="date-picker__icon" aria-hidden="true">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">

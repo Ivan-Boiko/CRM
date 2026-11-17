@@ -14,7 +14,12 @@ import {
   unlink,
   sendMessage,
 } from './telegram.js';
-import { runReminderTick, saveTimezone } from './notifications.js';
+import {
+  runReminderTick,
+  saveTimezone,
+  isDeadlineInPast,
+  getUserTimezone,
+} from './notifications.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -336,7 +341,7 @@ app.post('/api/notifications/read-all', auth, (req, res) => {
 
 // --- Универсальный CRUD для пользовательских сущностей ---
 
-function crud(route, table, fields, requiredField, decorateRow) {
+function crud(route, table, fields, requiredField, decorateRow, validate) {
   // Список записей текущего пользователя
   app.get(`/api/${route}`, auth, (req, res) => {
     const rows = db
@@ -350,6 +355,8 @@ function crud(route, table, fields, requiredField, decorateRow) {
     if (requiredField && !req.body[requiredField]) {
       return res.status(400).json({ message: `Поле «${requiredField}» обязательно` });
     }
+    const validationError = validate ? validate(req, null) : null;
+    if (validationError) return res.status(400).json({ message: validationError });
     const cols = ['user_id', ...fields].join(', ');
     const placeholders = ['?', ...fields.map(() => '?')].join(', ');
     const values = fields.map((f) => req.body[f] ?? null);
@@ -366,6 +373,9 @@ function crud(route, table, fields, requiredField, decorateRow) {
       .prepare(`SELECT * FROM ${table} WHERE id = ? AND user_id = ?`)
       .get(req.params.id, req.user.id);
     if (!existing) return res.status(404).json({ message: 'Запись не найдена' });
+
+    const validationError = validate ? validate(req, existing) : null;
+    if (validationError) return res.status(400).json({ message: validationError });
 
     const setClause = fields.map((f) => `${f} = ?`).join(', ');
     // Явно переданный null (например, сброс подгруппы) сохраняем, а не подменяем старым значением
@@ -466,7 +476,35 @@ crud(
   'tasks',
   ['name', 'description', 'priority', 'deadline', 'deadline_time', 'status', 'comment', 'group_id'],
   'name',
-  withComments
+  withComments,
+  // Дедлайн в прошлом не принимаем. Проверяем только когда он пришёл в запросе:
+  // смена статуса или правка названия не должны упираться в уже прошедший срок
+  (req, existing) => {
+    const hasDeadlineField =
+      Object.prototype.hasOwnProperty.call(req.body, 'deadline') ||
+      Object.prototype.hasOwnProperty.call(req.body, 'deadline_time');
+    if (!hasDeadlineField) return null;
+
+    const deadline = Object.prototype.hasOwnProperty.call(req.body, 'deadline')
+      ? req.body.deadline
+      : existing && existing.deadline;
+    if (!deadline) return null;
+
+    const time = Object.prototype.hasOwnProperty.call(req.body, 'deadline_time')
+      ? req.body.deadline_time
+      : existing && existing.deadline_time;
+
+    // Старый просроченный дедлайн можно сохранить без изменений (правка названия)
+    const unchanged =
+      existing &&
+      String(deadline) === String(existing.deadline || '') &&
+      String(time || '') === String(existing.deadline_time || '');
+    if (unchanged) return null;
+
+    return isDeadlineInPast(deadline, time, getUserTimezone(req.user.id))
+      ? 'Дедлайн не может быть в прошлом'
+      : null;
+  }
 );
 crud('diary', 'diary', ['text', 'date'], 'text');
 
