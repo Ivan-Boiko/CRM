@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import './ThemeToggle.css';
+import { useLanguage } from '../context/LanguageContext';
 
-const ThemeToggle = () => {
+const ThemeToggle = ({ compact = false }) => {
+  const { t } = useLanguage();
   const [isDarkMode, setIsDarkMode] = useState(
     localStorage.getItem('theme') === 'dark'
   );
@@ -16,6 +18,22 @@ const ThemeToggle = () => {
       document.body.dataset.theme = '';
     }
   }, [isDarkMode]);
+
+  // Компактная кнопка для шапки и страницы входа: одна иконка вместо плашки
+  if (compact) {
+    const label = isDarkMode ? t('theme.toLight') : t('theme.toDark');
+    return (
+      <button
+        type="button"
+        className={`theme-toggle theme-toggle--icon ${isDarkMode ? 'dark-contaner' : ''}`}
+        onClick={() => setIsDarkMode(!isDarkMode)}
+        aria-label={label}
+        title={label}
+      >
+        {isDarkMode ? '☀️' : '🌙'}
+      </button>
+    );
+  }
 
   return (
     <div

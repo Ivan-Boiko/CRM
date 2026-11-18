@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import ThemeToggle from './ThemeToggle';
-import LanguageToggle from './LanguageToggle';
+import IconSettings from './IconSettings';
 import './Settings.css';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -43,9 +42,41 @@ const Settings = () => {
   const [telegram, setTelegram] = useState(null);
   const [telegramLink, setTelegramLink] = useState(null);
   const [telegramBusy, setTelegramBusy] = useState(false);
+  // Аккаунт: смена email и пароля
+  const [emailDraft, setEmailDraft] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [passwords, setPasswords] = useState({ current: '', next: '', confirm: '' });
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  // Email меняется по ссылке из письма: показываем, какой адрес ждёт подтверждения
+  const [pendingEmail, setPendingEmail] = useState('');
+  // Настроена ли отправка писем на сервере (RESEND_API_KEY + APP_ORIGIN)
+  const [mailEnabled, setMailEnabled] = useState(true);
+  // Конкретная причина, почему письма не отправляются
+  const [mailIssue, setMailIssue] = useState('');
 
   const currentAvatar = preview ?? user?.avatar ?? null;
   const initial = (user?.name || '?').trim().charAt(0).toUpperCase();
+
+  // Поле email заполняется текущим адресом пользователя
+  useEffect(() => {
+    setEmailDraft(user?.email || '');
+  }, [user?.email]);
+
+  // Без настроенной почты смена email и сброс пароля не отправятся — предупреждаем
+  useEffect(() => {
+    let cancelled = false;
+    apiFetch('/config')
+      .then((config) => {
+        if (cancelled) return;
+        setMailEnabled(Boolean(config && config.mailEnabled));
+        setMailIssue((config && config.mailError) || '');
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -170,6 +201,57 @@ const Settings = () => {
     }
   };
 
+  // Email меняется только после подтверждения по ссылке на новый адрес
+  const handleEmailSave = async () => {
+    const nextEmail = emailDraft.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nextEmail)) {
+      setEmailError(t('settings.emailInvalid'));
+      return;
+    }
+    setEmailSaving(true);
+    try {
+      const data = await apiFetch('/me', { method: 'PUT', body: { email: nextEmail } });
+      const saved = data?.pendingEmail || nextEmail;
+      setEmailError('');
+      setPendingEmail(saved);
+      notify(t('settings.emailConfirmSent', { email: saved }), 'success');
+    } catch (err) {
+      // Если почта на сервере не настроена, под полем уже есть предупреждение —
+      // не показываем ту же фразу второй раз красным
+      setEmailError(mailIssue && err.message === mailIssue ? '' : err.message);
+      notify(err.message, 'error');
+    } finally {
+      setEmailSaving(false);
+    }
+  };
+
+  // Смена пароля требует текущий пароль — так чужой не поменяет его из открытой сессии
+  const handlePasswordSave = async () => {
+    const { current, next, confirm } = passwords;
+    if (!current) {
+      notify(t('settings.passwordCurrentRequired'), 'error');
+      return;
+    }
+    if (next.length < 6) {
+      notify(t('settings.passwordShort'), 'error');
+      return;
+    }
+    if (next !== confirm) {
+      notify(t('settings.passwordMismatch'), 'error');
+      return;
+    }
+    setPasswordSaving(true);
+    try {
+      await updateUser({ currentPassword: current, password: next });
+      setPasswords({ current: '', next: '', confirm: '' });
+      notify(t('settings.passwordSaved'), 'success');
+    } catch (err) {
+      notify(err.message, 'error');
+    } finally {
+      setPasswordSaving(false);
+    }
+  };
+
   return (
     <div className="container-card settings">
       <div className="component-header">
@@ -224,20 +306,91 @@ const Settings = () => {
         </div>
 
         <div className="settings__section">
-          <h3 className="settings__section-title">{t('settings.appearance')}</h3>
-          {/* Тема и язык стоят рядом в одной строке — так же, как в карточке входа */}
-          <div className="settings__switches">
-            <div className="settings__switch">
-              <ThemeToggle />
-              <div className="settings__switch-label">{t('settings.theme')}</div>
-              <div className="settings__option-description">{t('settings.themeDesc')}</div>
+          <h3 className="settings__section-title">{t('settings.account')}</h3>
+
+          <div className="settings__account-block">
+            <div className="settings__switch-label">{t('settings.email')}</div>
+            <p className="settings__option-description settings__option-description--left">
+              {t('settings.emailDesc')}
+            </p>
+            <div className="settings__account-row">
+              <input
+                className={`form-input${emailError ? ' form-input--error' : ''}`}
+                type="email"
+                value={emailDraft}
+                onChange={(e) => {
+                  setEmailDraft(e.target.value);
+                  setEmailError('');
+                }}
+                aria-label={t('settings.email')}
+                aria-invalid={Boolean(emailError)}
+                autoComplete="email"
+              />
+              <button className="btn-primary" onClick={handleEmailSave} disabled={emailSaving}>
+                {emailSaving ? '...' : t('common.save')}
+              </button>
             </div>
-            <div className="settings__switch">
-              <LanguageToggle />
-              <div className="settings__switch-label">{t('settings.languageLabel')}</div>
-              <div className="settings__option-description">{t('settings.languageDesc')}</div>
+            {emailError ? <p className="form-group__error">{emailError}</p> : null}
+            {pendingEmail ? (
+              <p className="settings__hint">
+                {t('settings.emailPending', { email: pendingEmail })}
+              </p>
+            ) : null}
+            {!mailEnabled ? (
+              <p className="settings__hint settings__hint--warning">
+                {mailIssue || t('settings.mailNotConfigured')}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="settings__account-block">
+            <div className="settings__switch-label">{t('settings.changePassword')}</div>
+            <div className="settings__account-fields">
+              <input
+                className="form-input"
+                type="password"
+                value={passwords.current}
+                onChange={(e) =>
+                  setPasswords((prev) => ({ ...prev, current: e.target.value }))
+                }
+                placeholder={t('settings.currentPassword')}
+                aria-label={t('settings.currentPassword')}
+                autoComplete="current-password"
+              />
+              <input
+                className="form-input"
+                type="password"
+                value={passwords.next}
+                onChange={(e) => setPasswords((prev) => ({ ...prev, next: e.target.value }))}
+                placeholder={t('settings.newPassword')}
+                aria-label={t('settings.newPassword')}
+                autoComplete="new-password"
+              />
+              <input
+                className="form-input"
+                type="password"
+                value={passwords.confirm}
+                onChange={(e) => setPasswords((prev) => ({ ...prev, confirm: e.target.value }))}
+                placeholder={t('settings.confirmPassword')}
+                aria-label={t('settings.confirmPassword')}
+                autoComplete="new-password"
+              />
+            </div>
+            <div className="settings__account-actions">
+              <button
+                className="btn-primary"
+                onClick={handlePasswordSave}
+                disabled={passwordSaving}
+              >
+                {passwordSaving ? '...' : t('settings.changePasswordSubmit')}
+              </button>
             </div>
           </div>
+        </div>
+
+        <div className="settings__section">
+          <h3 className="settings__section-title">{t('settings.icons')}</h3>
+          <IconSettings />
         </div>
 
         <div className="settings__section">

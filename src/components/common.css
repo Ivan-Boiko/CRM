@@ -322,3 +322,48 @@
   border-color: #00C17E;
   box-shadow: 0 0 0 3px rgba(0, 193, 126, 0.2);
 }
+
+/* Незаполненное обязательное поле: красная рамка и подпись под ним */
+.form-group .form-input--error,
+.form-group .form-input--error:focus,
+.form-group input.form-input--error,
+.form-group textarea.form-input--error {
+  border-color: #CF1322;
+  box-shadow: 0 0 0 3px rgba(207, 19, 34, 0.15);
+}
+
+.form-group__error {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #CF1322;
+}
+
+/* Второстепенная кнопка опасного действия: та же форма, что у btn-secondary */
+.btn-secondary--danger {
+  color: #CF1322;
+  border-color: #CF1322;
+}
+
+.btn-secondary--danger:hover {
+  background-color: #FFF1F0;
+}
+
+[data-theme="dark"] .form-group .form-input--error,
+[data-theme="dark"] .form-group .form-input--error:focus {
+  border-color: #FF7875;
+  box-shadow: 0 0 0 3px rgba(255, 120, 117, 0.2);
+}
+
+[data-theme="dark"] .btn-secondary--danger {
+  color: #FF7875;
+  border-color: #FF7875;
+}
+
+[data-theme="dark"] .btn-secondary--danger:hover {
+  background-color: rgba(255, 120, 117, 0.12);
+}
+
+[data-theme="dark"] .form-group__error {
+  color: #FF7875;
+}

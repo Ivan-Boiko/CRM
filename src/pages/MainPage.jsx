@@ -2,6 +2,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import LoginForm from '../components/LoginForm';
+import ThemeToggle from '../components/ThemeToggle';
+import LanguageToggle from '../components/LanguageToggle';
 import RegistrationModal from '../components/RegistrationModal';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -68,6 +70,13 @@ function MainPage() {
               onLogin={handleLogin}
               onRegister={() => setIsModalOpen(true)}
               showRegister={registrationEnabled}
+              /* Тема слева, язык справа — в одной строке с заголовком «CRM» */
+              appearance={
+                <div className="login-appearance">
+                  <ThemeToggle compact />
+                  <LanguageToggle compact />
+                </div>
+              }
             />
             <RegistrationModal
               isOpen={isModalOpen}

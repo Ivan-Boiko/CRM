@@ -38,7 +38,22 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 15px;
   margin-bottom: 15px;
+}
+
+/* Тема записи: короткий заголовок над текстом */
+.diary-card__body {
+  min-width: 0;
+}
+
+.diary-card__topic {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-primary-color, #2C3E50);
+  overflow-wrap: anywhere;
 }
 
 .diary-card__text {
@@ -46,17 +61,23 @@
   font-size: 14px;
   line-height: 1.5;
   color: #2C3E50;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .diary-card__date {
   font-size: 12px;
   color: #7F8C8D;
   white-space: nowrap;
-  margin-left: 15px;
+  margin-left: auto;
 }
 
 .diary-card__edit {
   width: 100%;
+}
+
+.diary-card__edit-topic {
+  margin-bottom: 10px;
 }
 
 .diary-card__edit-textarea {
@@ -83,58 +104,11 @@
   justify-content: flex-end;
 }
 
-.diary-card__edit-btn,
-.diary-card__save-btn,
-.diary-card__cancel-btn {
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.diary-card__edit-btn {
-  background: transparent;
-  border: 1px solid #E0E0E0;
-  color: #2C3E50;
-}
-
-.diary-card__save-btn {
-  background-color: #00A86B;
-  color: white;
-  border: none;
-}
-
-.diary-card__cancel-btn {
-  background-color: white;
-  border: 1px solid #E0E0E0;
-  color: #2C3E50;
-}
-
-.diary-card__edit-btn:hover {
-  background: #F8F9FA;
-}
-
-.diary-card__save-btn:hover {
-  background-color: #009960;
-}
-
-.diary-card__cancel-btn:hover {
-  background-color: #F8F9FA;
-}
-
 .diary-card__actions {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
-}
-
-.diary-card__edit-btn--danger {
-  color: #FF6B6B;
-  border-color: #FF6B6B;
-}
-
-.diary-card__edit-btn--danger:hover {
-  background-color: rgba(255, 107, 107, 0.1);
+  flex-wrap: wrap;
 }
 
 /* Animation */
@@ -145,4 +119,19 @@
 
 .diary__modal {
   animation: slideIn 0.3s ease;
+}
+
+@media (max-width: 480px) {
+  .diary-card__content {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .diary-card__date {
+    margin-left: 0;
+  }
+
+  .diary-card__actions .btn-secondary {
+    flex: 1 1 auto;
+  }
 }

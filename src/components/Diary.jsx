@@ -6,12 +6,17 @@ import ConfirmDialog from './ConfirmDialog';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
 
+const EMPTY_ENTRY = { topic: '', text: '' };
+
 const Diary = ({ search = '' }) => {
   const [entries, setEntries] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [newEntry, setNewEntry] = useState({ text: '' });
-  const [editText, setEditText] = useState('');
+  const [newEntry, setNewEntry] = useState(EMPTY_ENTRY);
+  // Тема и текст записи при редактировании
+  const [editDraft, setEditDraft] = useState(EMPTY_ENTRY);
+  // Незаполненное обязательное поле подсвечиваем красным
+  const [errors, setErrors] = useState({});
   // Запись, ожидающая подтверждения удаления
   const [pendingDelete, setPendingDelete] = useState(null);
   const { notify } = useToast();
@@ -30,15 +35,29 @@ const Diary = ({ search = '' }) => {
     loadEntries();
   }, [loadEntries]);
 
+  const openAdd = () => {
+    setNewEntry(EMPTY_ENTRY);
+    setErrors({});
+    setIsModalOpen(true);
+  };
+
   const handleAddEntry = async () => {
-    if (!newEntry.text.trim()) return;
+    if (!newEntry.text.trim()) {
+      setErrors({ text: t('diary.field.textRequired') });
+      return;
+    }
     try {
       await apiFetch('/diary', {
         method: 'POST',
-        body: { text: newEntry.text, date: new Date().toISOString() },
+        body: {
+          topic: newEntry.topic.trim(),
+          text: newEntry.text,
+          date: new Date().toISOString(),
+        },
       });
       notify(t('toast.entryAdded'), 'success');
-      setNewEntry({ text: '' });
+      setNewEntry(EMPTY_ENTRY);
+      setErrors({});
       setIsModalOpen(false);
       loadEntries();
     } catch (err) {
@@ -46,16 +65,25 @@ const Diary = ({ search = '' }) => {
     }
   };
 
-  const handleEdit = (id, text) => {
-    setEditingId(id);
-    setEditText(text);
+  const handleEdit = (entry) => {
+    setEditingId(entry.id);
+    setEditDraft({ topic: entry.topic || '', text: entry.text || '' });
+    setErrors({});
   };
 
   const saveEdit = async (id) => {
+    if (!editDraft.text.trim()) {
+      setErrors({ text: t('diary.field.textRequired') });
+      return;
+    }
     try {
-      await apiFetch(`/diary/${id}`, { method: 'PUT', body: { text: editText } });
+      await apiFetch(`/diary/${id}`, {
+        method: 'PUT',
+        body: { topic: editDraft.topic.trim(), text: editDraft.text },
+      });
       notify(t('toast.entryUpdated'), 'success');
       setEditingId(null);
+      setErrors({});
       loadEntries();
     } catch (err) {
       notify(err.message, 'error');
@@ -79,17 +107,21 @@ const Diary = ({ search = '' }) => {
     if (entry) removeEntry(entry.id);
   };
 
-  // Клиентская фильтрация по строке поиска из TopBar
+  // Клиентская фильтрация по строке поиска из TopBar: тема и текст
   const query = search.trim().toLowerCase();
   const visibleEntries = query
-    ? entries.filter((entry) => entry.text && String(entry.text).toLowerCase().includes(query))
+    ? entries.filter((entry) =>
+        [entry.topic, entry.text].some(
+          (value) => value && String(value).toLowerCase().includes(query)
+        )
+      )
     : entries;
 
   return (
     <div className="container-card diary">
       <div className="component-header">
         <h2 className="component-title">{t('diary.title')}</h2>
-        <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
+        <button className="btn-primary" onClick={openAdd}>
           {t('diary.add')}
         </button>
       </div>
@@ -100,16 +132,33 @@ const Diary = ({ search = '' }) => {
             <div key={entry.id} className="diary-card">
               {editingId === entry.id ? (
                 <div className="diary-card__edit">
-                  <textarea
-                    className="diary-card__edit-textarea"
-                    value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
+                  <input
+                    type="text"
+                    className="diary-card__edit-topic"
+                    value={editDraft.topic}
+                    onChange={(e) =>
+                      setEditDraft((prev) => ({ ...prev, topic: e.target.value }))
+                    }
+                    placeholder={t('diary.topicPlaceholder')}
+                    aria-label={t('diary.field.topic')}
                   />
+                  <textarea
+                    className={`diary-card__edit-textarea${
+                      errors.text ? ' form-input--error' : ''
+                    }`}
+                    value={editDraft.text}
+                    onChange={(e) => {
+                      setEditDraft((prev) => ({ ...prev, text: e.target.value }));
+                      if (errors.text) setErrors({});
+                    }}
+                    aria-invalid={Boolean(errors.text)}
+                  />
+                  {errors.text ? <p className="form-group__error">{errors.text}</p> : null}
                   <div className="diary-card__edit-buttons">
-                    <button className="diary-card__save-btn" onClick={() => saveEdit(entry.id)}>
+                    <button className="btn-primary" onClick={() => saveEdit(entry.id)}>
                       {t('common.save')}
                     </button>
-                    <button className="diary-card__cancel-btn" onClick={() => setEditingId(null)}>
+                    <button className="btn-secondary" onClick={() => setEditingId(null)}>
                       {t('common.cancel')}
                     </button>
                   </div>
@@ -117,18 +166,20 @@ const Diary = ({ search = '' }) => {
               ) : (
                 <>
                   <div className="diary-card__content">
-                    <p className="diary-card__text">{entry.text}</p>
+                    <div className="diary-card__body">
+                      {entry.topic ? (
+                        <h3 className="diary-card__topic">{entry.topic}</h3>
+                      ) : null}
+                      <p className="diary-card__text">{entry.text}</p>
+                    </div>
                     <span className="diary-card__date">{formatDate(entry.date)}</span>
                   </div>
                   <div className="diary-card__actions">
-                    <button
-                      className="diary-card__edit-btn"
-                      onClick={() => handleEdit(entry.id, entry.text)}
-                    >
+                    <button className="btn-secondary" onClick={() => handleEdit(entry)}>
                       {t('common.edit')}
                     </button>
                     <button
-                      className="diary-card__edit-btn diary-card__edit-btn--danger"
+                      className="btn-secondary btn-secondary--danger"
                       onClick={() => setPendingDelete(entry)}
                     >
                       {t('common.delete')}
@@ -156,22 +207,38 @@ const Diary = ({ search = '' }) => {
             </div>
             <div className="modal__body">
               <div className="form-group">
+                <label htmlFor="topic">{t('diary.field.topic')}</label>
+                <input
+                  type="text"
+                  id="topic"
+                  value={newEntry.topic}
+                  onChange={(e) => setNewEntry((prev) => ({ ...prev, topic: e.target.value }))}
+                  placeholder={t('diary.topicPlaceholder')}
+                />
+              </div>
+              <div className="form-group">
                 <label htmlFor="text">{t('diary.field.text')} *</label>
                 <textarea
                   id="text"
+                  className={errors.text ? 'form-input--error' : undefined}
                   value={newEntry.text}
-                  onChange={(e) => setNewEntry({ text: e.target.value })}
+                  onChange={(e) => {
+                    setNewEntry((prev) => ({ ...prev, text: e.target.value }));
+                    if (errors.text) setErrors({});
+                  }}
                   placeholder={t('diary.placeholder')}
                   rows="6"
                   required
+                  aria-invalid={Boolean(errors.text)}
                 />
+                {errors.text ? <p className="form-group__error">{errors.text}</p> : null}
               </div>
             </div>
             <div className="modal__footer">
-              <button className="modal__cancel" onClick={() => setIsModalOpen(false)}>
+              <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>
                 {t('common.cancel')}
               </button>
-              <button className="modal__submit" onClick={handleAddEntry}>
+              <button className="btn-primary" onClick={handleAddEntry}>
                 {t('common.add')}
               </button>
             </div>
@@ -182,7 +249,11 @@ const Diary = ({ search = '' }) => {
       <ConfirmDialog
         open={Boolean(pendingDelete)}
         title={t('confirm.deleteEntryTitle')}
-        message={pendingDelete ? `${pendingDelete.text}\n${t('confirm.deleteText')}` : ''}
+        message={
+          pendingDelete
+            ? `${pendingDelete.topic || pendingDelete.text}\n${t('confirm.deleteText')}`
+            : ''
+        }
         confirmLabel={t('common.delete')}
         cancelLabel={t('common.cancel')}
         onConfirm={confirmDelete}

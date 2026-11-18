@@ -57,6 +57,33 @@
     font-weight: 600;
 }
 
+/* Строка заголовка карточки: по краям — тема и язык, по центру — заголовок */
+.login__header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    margin-bottom: 20px;
+}
+
+.login__header .login__title {
+    margin: 0;
+    text-align: center;
+}
+
+/* Слой переключателей растянут на всю строку, но клики ловят только сами кнопки */
+.login__header-appearance {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.login__header-appearance > * {
+    pointer-events: auto;
+}
+
 .login__register {
     margin-top: 16px;
     text-align: center;
@@ -115,5 +142,52 @@
         min-height: 44px;
         font-size: 16px;
     }
+}
+
+/* Ссылка «Забыли пароль?» под формой входа */
+.login__forgot {
+    display: block;
+    margin: 0 auto;
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--accent-color);
+    cursor: pointer;
+}
+
+.login__forgot:hover {
+    text-decoration: underline;
+}
+
+/* Подсказки и ошибки в карточке входа и на странице сброса пароля */
+.login__hint {
+    margin: 0 0 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-secondary-color);
+    text-align: center;
+}
+
+.login__hint--success {
+    color: var(--accent-color);
+}
+
+.login__hint--error,
+.login__error {
+    color: #CF1322;
+}
+
+.login__error {
+    margin: -6px 0 12px;
+    font-size: 13px;
+    text-align: left;
+}
+
+a.login__register-button {
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
 }
   

@@ -76,6 +76,37 @@ export function initDb() {
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS password_resets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      token_hash TEXT NOT NULL UNIQUE,
+      expires_at TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      used_at TEXT,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS custom_icons (
+      user_id INTEGER NOT NULL,
+      icon_key TEXT NOT NULL,
+      mime TEXT NOT NULL,
+      data TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      PRIMARY KEY (user_id, icon_key),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS email_change_requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      new_email TEXT NOT NULL,
+      token_hash TEXT NOT NULL UNIQUE,
+      expires_at TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      used_at TEXT,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
   `);
 
   // Один и тот же порог по одной и той же задаче не должен срабатывать дважды
@@ -84,6 +115,12 @@ export function initDb() {
       ON notifications(user_id, dedupe_key);
     CREATE INDEX IF NOT EXISTS idx_notifications_user
       ON notifications(user_id, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_password_resets_user
+      ON password_resets(user_id);
+    CREATE INDEX IF NOT EXISTS idx_email_change_user
+      ON email_change_requests(user_id);
+    CREATE INDEX IF NOT EXISTS idx_email_change_new_email
+      ON email_change_requests(new_email);
   `);
 
   // Миграции для существующих баз
@@ -104,6 +141,15 @@ export function initDb() {
   addColumnIfMissing('task_comments', 'kind', "TEXT DEFAULT 'comment'");
   // Подгруппа задачи («Работа», «Личное» и свои)
   addColumnIfMissing('tasks', 'group_id', 'INTEGER');
+  // Тема записи дневника: короткий заголовок над текстом
+  addColumnIfMissing('diary', 'topic', 'TEXT');
+  // Подзадача ссылается на основную задачу (один уровень вложенности)
+  addColumnIfMissing('tasks', 'parent_id', 'INTEGER');
+
+  // Просроченные ссылки сброса пароля и подтверждения email не нужны
+  const nowIso = new Date().toISOString();
+  db.prepare('DELETE FROM password_resets WHERE expires_at < ?').run(nowIso);
+  db.prepare('DELETE FROM email_change_requests WHERE expires_at < ?').run(nowIso);
 
   // Старый одиночный комментарий задачи переносим в таблицу комментариев
   const legacyComments = db

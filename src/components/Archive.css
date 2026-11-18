@@ -179,3 +179,28 @@
     gap: 12px;
   }
 }
+
+/* Подзадачи внутри архивной карточки: все уже выполнены */
+.archive-subtasks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.archive-subtask {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text-color);
+  overflow-wrap: anywhere;
+}
+
+.archive-subtask__check {
+  color: var(--accent-color, #00A86B);
+  font-weight: 700;
+}

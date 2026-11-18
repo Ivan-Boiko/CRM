@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
 import NotificationsBell from './NotificationsBell';
+import ThemeToggle from './ThemeToggle';
+import LanguageToggle from './LanguageToggle';
 
 const TopBar = ({ search = '', onSearch, onOpenTask }) => {
   const { user, logout } = useAuth();
@@ -35,6 +37,11 @@ const TopBar = ({ search = '', onSearch, onOpenTask }) => {
         </div>
       </div>
       <div className="topbar-right">
+        {/* Тема и язык переехали из настроек в шапку, рядом с колокольчиком */}
+        <div className="topbar__appearance">
+          <ThemeToggle compact />
+          <LanguageToggle compact />
+        </div>
         <NotificationsBell onOpenTask={onOpenTask} />
         <div className="user-profile">
           {user?.avatar ? (

@@ -57,15 +57,27 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  // Обновление профиля (имя, аватар и т.д.)
+  // Перечитать профиль: нужно после подтверждения смены email
+  const refreshUser = async () => {
+    const me = await apiFetch('/me');
+    setUser(me);
+    return me;
+  };
+
+  // Обновление профиля (имя, аватар, email, пароль).
+  // При смене email сервер выдаёт новый токен — сохраняем его отдельно от user.
   const updateUser = async (data) => {
     const updated = await apiFetch('/me', { method: 'PUT', body: data });
-    setUser(updated);
-    return updated;
+    const { token, ...profile } = updated;
+    if (token) setToken(token);
+    setUser(profile);
+    return profile;
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, register, logout, updateUser, refreshUser }}
+    >
       {children}
     </AuthContext.Provider>
   );

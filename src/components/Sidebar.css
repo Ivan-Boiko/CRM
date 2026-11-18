@@ -165,3 +165,8 @@
 .sidebar__menu-item--active .sidebar__menu-title {
   font-weight: 500;
 }
+
+/* Пункт меню — ссылка на страницу раздела */
+a.sidebar__menu-item {
+  text-decoration: none;
+}

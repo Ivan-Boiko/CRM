@@ -245,6 +245,47 @@ textarea::placeholder {
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A0A0A0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
 }
 
+/* Иконки приложения: своя картинка (PNG/SVG) или стандартная */
+.app-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+img.app-icon {
+  object-fit: contain;
+  -webkit-user-drag: none;
+}
+
+.app-icon--fallback {
+  width: 1em;
+  height: 1em;
+  font-size: inherit;
+}
+
+.sidebar__menu-icon .app-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.bottom-nav__icon .app-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.tasks__icon-btn .app-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.notifications__button .app-icon {
+  width: 20px;
+  height: 20px;
+}
+
 /* Мобильные поля: 16 px, иначе iOS Safari зумит страницу при фокусе */
 @media (max-width: 768px) {
   input[type="text"],

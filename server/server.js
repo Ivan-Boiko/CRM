@@ -1,7 +1,11 @@
+// Первым делом читаем .env (локальный запуск): mailer.js и database.js
+// берут переменные при импорте, поэтому загрузчик должен выполниться раньше них
+import './env.js';
 import express from 'express';
 import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'node:crypto';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -20,11 +24,35 @@ import {
   isDeadlineInPast,
   getUserTimezone,
 } from './notifications.js';
+import { isMailConfigured, sendMail } from './mailer.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Публичный адрес приложения нужен для ссылки сброса пароля.
+// Host из запроса не используем: его можно подделать заголовком.
+const APP_ORIGIN = (process.env.APP_ORIGIN || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000')).replace(/\/$/, '');
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
+const EMAIL_CHANGE_TTL_MS = 60 * 60 * 1000;
+// Пароль при смене и сбросе не короче 6 символов
+const MIN_PASSWORD_LENGTH = 6;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const normalizeEmail = (value) => String(value || '').trim().toLowerCase();
+const hashResetToken = (token) => crypto.createHash('sha256').update(token).digest('hex');
+
+// Письмо отправляем только когда есть и ключ, и публичный адрес приложения:
+// без APP_ORIGIN ссылка внутри письма будет неверной, такое письмо бесполезно
+const getMailError = () => {
+  if (!isMailConfigured()) {
+    return 'Отправка писем не настроена: укажите RESEND_API_KEY на сервере';
+  }
+  if (!APP_ORIGIN) {
+    return 'Не задан APP_ORIGIN: без него ссылка в письме будет неверной. Укажите адрес приложения в .env';
+  }
+  return null;
+};
 
 // В production без своего секрета токены можно подделать — лучше не стартовать
 if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
@@ -91,6 +119,11 @@ app.use(express.json());
 
 initDb();
 
+// Без APP_ORIGIN ссылка в письме будет неполной — предупреждаем при старте
+if (isMailConfigured() && !APP_ORIGIN) {
+  console.warn('APP_ORIGIN не задан: письма со ссылками отправляться не будут');
+}
+
 // Необязательный Telegram: без TELEGRAM_BOT_TOKEN ничего не запускается
 initTelegram();
 
@@ -124,7 +157,13 @@ function auth(req, res, next) {
 const ALLOW_REGISTRATION = (process.env.ALLOW_REGISTRATION || 'true').toLowerCase() !== 'false';
 
 // Публичная настройка для клиента: показывать ли кнопку «Регистрация»
-app.get('/api/config', (req, res) => res.json({ registrationEnabled: ALLOW_REGISTRATION }));
+app.get('/api/config', (req, res) =>
+  res.json({
+    registrationEnabled: ALLOW_REGISTRATION,
+    mailEnabled: !getMailError(),
+    mailError: getMailError(),
+  })
+);
 
 app.post('/api/register', (req, res) => {
   if (!ALLOW_REGISTRATION) {
@@ -240,28 +279,331 @@ app.get('/api/me', auth, (req, res) => {
   res.json(user);
 });
 
-// Обновление профиля пользователя (имя, аватар)
-app.put('/api/me', auth, (req, res) => {
-  const { name, avatar } = req.body;
+// --- Пользовательские иконки (PNG/SVG) ---
+// Свои иконки храним прямо в базе как base64: файловое хранилище не нужно,
+// а размер ограничен 64 КБ, чтобы база не росла.
+const ICON_KEYS = new Set([
+  'nav.tasks',
+  'nav.diary',
+  'nav.analytics',
+  'nav.settings',
+  'bell',
+  'action.edit',
+  'action.delete',
+  'action.return',
+]);
+const ICON_MAX_BYTES = 64 * 1024;
+const ICON_DATA_URL = /^data:(image\/png|image\/svg\+xml);base64,([A-Za-z0-9+/]+={0,2})$/;
+
+app.get('/api/icons', auth, (req, res) => {
+  const rows = db
+    .prepare('SELECT icon_key, mime, data FROM custom_icons WHERE user_id = ?')
+    .all(req.user.id);
+  const icons = {};
+  for (const row of rows) {
+    icons[row.icon_key] = `data:${row.mime};base64,${row.data}`;
+  }
+  res.json({ icons });
+});
+
+app.put('/api/icons/:key', auth, (req, res) => {
+  const key = req.params.key;
+  if (!ICON_KEYS.has(key)) {
+    return res.status(400).json({ message: 'Неизвестная иконка' });
+  }
+  const match = ICON_DATA_URL.exec(String((req.body && req.body.dataUrl) || ''));
+  if (!match) {
+    return res.status(400).json({ message: 'Поддерживаются только PNG и SVG' });
+  }
+  const [, mime, base64] = match;
+  const buffer = Buffer.from(base64, 'base64');
+  if (!buffer.length) {
+    return res.status(400).json({ message: 'Пустой файл' });
+  }
+  if (buffer.length > ICON_MAX_BYTES) {
+    return res.status(413).json({ message: 'Иконка больше 64 КБ' });
+  }
+  // Проверяем, что внутри действительно картинка заявленного формата
+  if (mime === 'image/png') {
+    const isPng =
+      buffer.length > 8 &&
+      buffer[0] === 0x89 &&
+      buffer.toString('ascii', 1, 4) === 'PNG';
+    if (!isPng) return res.status(400).json({ message: 'Файл не является PNG' });
+  } else if (!/<svg[\s>]/i.test(buffer.toString('utf8', 0, 512))) {
+    return res.status(400).json({ message: 'Файл не является SVG' });
+  }
+
+  db.prepare(
+    `INSERT INTO custom_icons (user_id, icon_key, mime, data, updated_at)
+     VALUES (?, ?, ?, ?, ?)
+     ON CONFLICT(user_id, icon_key)
+     DO UPDATE SET mime = excluded.mime, data = excluded.data, updated_at = excluded.updated_at`
+  ).run(req.user.id, key, mime, base64, new Date().toISOString());
+
+  res.json({ key, dataUrl: `data:${mime};base64,${base64}` });
+});
+
+app.delete('/api/icons/:key', auth, (req, res) => {
+  db.prepare('DELETE FROM custom_icons WHERE user_id = ? AND icon_key = ?').run(
+    req.user.id,
+    req.params.key
+  );
+  res.json({ ok: true });
+});
+
+// Обновление профиля пользователя: имя, аватар, пароль.
+// Email меняется только после подтверждения по ссылке, отправленной на новый адрес.
+app.put('/api/me', auth, async (req, res) => {
+  const { name, avatar, email, password, currentPassword } = req.body;
   const fields = [];
   const values = [];
+  let pendingEmail = null;
+
   if (name !== undefined) {
     fields.push('name = ?');
-    values.push(name);
+    values.push(String(name).trim());
   }
   if (avatar !== undefined) {
     fields.push('avatar = ?');
     values.push(avatar);
   }
-  if (fields.length === 0) {
+
+  if (email !== undefined) {
+    const nextEmail = normalizeEmail(email);
+    if (!EMAIL_PATTERN.test(nextEmail)) {
+      return res.status(400).json({ message: 'Укажите корректный email' });
+    }
+    const mailError = getMailError();
+    if (mailError) {
+      return res.status(503).json({ message: mailError });
+    }
+
+    const current = db.prepare('SELECT email FROM users WHERE id = ?').get(req.user.id);
+    if (current && normalizeEmail(current.email) === nextEmail) {
+      return res.status(400).json({ message: 'Это ваш текущий email' });
+    }
+
+    // Адрес не должен быть занят другим аккаунтом или уже ждать подтверждения
+    const taken = db
+      .prepare('SELECT id FROM users WHERE LOWER(email) = ? AND id <> ?')
+      .get(nextEmail, req.user.id);
+    if (taken) {
+      return res.status(409).json({ message: 'Такой email уже зарегистрирован' });
+    }
+    const pendingElsewhere = db
+      .prepare(
+        'SELECT id FROM email_change_requests WHERE LOWER(new_email) = ? AND user_id <> ? AND used_at IS NULL AND expires_at > ?'
+      )
+      .get(nextEmail, req.user.id, new Date().toISOString());
+    if (pendingElsewhere) {
+      return res.status(409).json({ message: 'Этот email уже ожидает подтверждения' });
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + EMAIL_CHANGE_TTL_MS).toISOString();
+    // Новая заявка отменяет предыдущую
+    db.prepare('DELETE FROM email_change_requests WHERE user_id = ?').run(req.user.id);
+    db.prepare(
+      'INSERT INTO email_change_requests (user_id, new_email, token_hash, expires_at, created_at) VALUES (?, ?, ?, ?, ?)'
+    ).run(req.user.id, nextEmail, hashResetToken(token), expiresAt, now.toISOString());
+
+    const link = `${APP_ORIGIN}/confirm-email?token=${token}`;
+    try {
+      await sendMail({
+        to: nextEmail,
+        subject: 'Подтверждение смены email в CRM',
+        text: `Вы запросили смену email в CRM на этот адрес. Откройте ссылку и введите пароль от аккаунта: ${link}\nСсылка действует час.`,
+        html: `<p>Вы запросили смену email в CRM на этот адрес.</p><p><a href="${link}">Подтвердить смену email</a></p><p>На странице потребуется ввести пароль от аккаунта. Ссылка действует час.</p><p>Если вы не запрашивали смену, просто проигнорируйте письмо.</p>`,
+      });
+    } catch (err) {
+      console.error('Смена email: письмо не отправлено —', err.message);
+      db.prepare('DELETE FROM email_change_requests WHERE user_id = ?').run(req.user.id);
+      return res.status(502).json({ message: 'Не удалось отправить письмо на новый адрес' });
+    }
+    pendingEmail = nextEmail;
+  }
+
+  if (password !== undefined) {
+    if (String(password).length < MIN_PASSWORD_LENGTH) {
+      return res
+        .status(400)
+        .json({ message: `Пароль должен быть не короче ${MIN_PASSWORD_LENGTH} символов` });
+    }
+    const row = db.prepare('SELECT password FROM users WHERE id = ?').get(req.user.id);
+    // Смена пароля только с подтверждением текущего
+    if (!currentPassword || !row || !bcrypt.compareSync(String(currentPassword), row.password)) {
+      return res.status(400).json({ message: 'Текущий пароль указан неверно' });
+    }
+    fields.push('password = ?');
+    values.push(bcrypt.hashSync(String(password), 10));
+  }
+
+  if (fields.length === 0 && !pendingEmail) {
     return res.status(400).json({ message: 'Нет полей для обновления' });
   }
-  values.push(req.user.id);
-  db.prepare(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+  if (fields.length > 0) {
+    values.push(req.user.id);
+    db.prepare(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+  }
   const user = db
     .prepare('SELECT id, name, email, avatar FROM users WHERE id = ?')
     .get(req.user.id);
-  res.json(user);
+  res.json({ ...user, token: signToken(user), pendingEmail });
+});
+
+// Проверка ссылки из письма: какие данные подтверждаем
+app.get('/api/auth/email-change', (req, res) => {
+  const token = String(req.query.token || '');
+  const row = db
+    .prepare(
+      'SELECT new_email, expires_at, used_at FROM email_change_requests WHERE token_hash = ?'
+    )
+    .get(hashResetToken(token));
+  if (!token || !row || row.used_at || row.expires_at < new Date().toISOString()) {
+    return res.status(400).json({ message: 'Ссылка недействительна или устарела' });
+  }
+  res.json({ email: row.new_email });
+});
+
+// Подтверждение смены email: ссылка из письма + пароль от аккаунта
+app.post('/api/auth/confirm-email', (req, res) => {
+  const token = String(req.body.token || '');
+  const password = String(req.body.password || '');
+  if (!token || !password) {
+    return res.status(400).json({ message: 'Ссылка недействительна или пароль не указан' });
+  }
+
+  const now = new Date().toISOString();
+  const row = db
+    .prepare(
+      `SELECT r.id, r.user_id, r.new_email, r.expires_at, r.used_at, u.password AS password_hash
+         FROM email_change_requests r
+         JOIN users u ON u.id = r.user_id
+        WHERE r.token_hash = ?`
+    )
+    .get(hashResetToken(token));
+  if (!row || row.used_at || row.expires_at < now) {
+    return res.status(400).json({ message: 'Ссылка недействительна или устарела' });
+  }
+  if (!bcrypt.compareSync(password, row.password_hash)) {
+    return res.status(400).json({ message: 'Пароль указан неверно' });
+  }
+
+  // Пока ссылка ждала, адрес мог занять другой аккаунт
+  const taken = db
+    .prepare('SELECT id FROM users WHERE LOWER(email) = ? AND id <> ?')
+    .get(row.new_email.toLowerCase(), row.user_id);
+  if (taken) {
+    return res.status(409).json({ message: 'Этот email уже зарегистрирован' });
+  }
+
+  db.prepare('UPDATE users SET email = ? WHERE id = ?').run(row.new_email, row.user_id);
+  db.prepare('UPDATE email_change_requests SET used_at = ? WHERE id = ?').run(now, row.id);
+  db.prepare('DELETE FROM email_change_requests WHERE user_id = ? AND id <> ?').run(
+    row.user_id,
+    row.id
+  );
+
+  res.json({ ok: true, email: row.new_email });
+});
+
+// --- Сброс пароля по ссылке из письма ---
+
+// Ограничение на количество запросов ссылки с одного адреса
+const RESET_MAX_REQUESTS = Math.max(1, Number(process.env.RESET_MAX_REQUESTS) || 5);
+const RESET_WINDOW_MS = 15 * 60 * 1000;
+const resetRequests = new Map();
+
+const allowResetRequest = (ip) => {
+  const record = resetRequests.get(ip);
+  if (!record || Date.now() - record.startedAt >= RESET_WINDOW_MS) {
+    resetRequests.set(ip, { startedAt: Date.now(), count: 1 });
+    return true;
+  }
+  record.count += 1;
+  return record.count <= RESET_MAX_REQUESTS;
+};
+
+// Письмо со ссылкой. Существование аккаунта не раскрываем: ответ всегда одинаковый
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const mailError = getMailError();
+  if (mailError) {
+    return res.status(503).json({ message: mailError });
+  }
+
+  const email = normalizeEmail(req.body.email);
+  if (!EMAIL_PATTERN.test(email)) {
+    return res.status(400).json({ message: 'Укажите корректный email' });
+  }
+
+  if (!allowResetRequest(req.ip)) {
+    return res
+      .status(429)
+      .json({ message: 'Слишком много запросов. Попробуйте через 15 минут.' });
+  }
+
+  const user = db.prepare('SELECT id, email FROM users WHERE LOWER(email) = ?').get(email);
+  if (!user) {
+    return res.json({ sent: true });
+  }
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + RESET_TOKEN_TTL_MS).toISOString();
+  // Старые ссылки перестают работать: активной остаётся только последняя
+  db.prepare('DELETE FROM password_resets WHERE user_id = ?').run(user.id);
+  db.prepare(
+    'INSERT INTO password_resets (user_id, token_hash, expires_at, created_at) VALUES (?, ?, ?, ?)'
+  ).run(user.id, hashResetToken(token), expiresAt, now.toISOString());
+
+  const link = `${APP_ORIGIN}/reset?token=${token}`;
+  try {
+    await sendMail({
+      to: user.email,
+      subject: 'Сброс пароля CRM',
+      text: `Чтобы задать новый пароль, перейдите по ссылке: ${link}\nСсылка действует час.`,
+      html: `<p>Чтобы задать новый пароль, перейдите по ссылке:</p><p><a href="${link}">${link}</a></p><p>Ссылка действует час. Если вы не запрашивали сброс, просто проигнорируйте письмо.</p>`,
+    });
+  } catch (err) {
+    console.error('Сброс пароля: письмо не отправлено —', err.message);
+    return res.status(502).json({ message: 'Не удалось отправить письмо' });
+  }
+
+  res.json({ sent: true });
+});
+
+// Установка нового пароля по одноразовому токену из письма
+app.post('/api/auth/reset-password', (req, res) => {
+  const token = String(req.body.token || '');
+  const password = String(req.body.password || '');
+  if (!token || !password) {
+    return res.status(400).json({ message: 'Ссылка недействительна' });
+  }
+  if (password.length < MIN_PASSWORD_LENGTH) {
+    return res
+      .status(400)
+      .json({ message: `Пароль должен быть не короче ${MIN_PASSWORD_LENGTH} символов` });
+  }
+
+  const now = new Date().toISOString();
+  const row = db
+    .prepare('SELECT id, user_id, expires_at, used_at FROM password_resets WHERE token_hash = ?')
+    .get(hashResetToken(token));
+  if (!row || row.used_at || row.expires_at < now) {
+    return res.status(400).json({ message: 'Ссылка недействительна или устарела' });
+  }
+
+  db.prepare('UPDATE users SET password = ? WHERE id = ?').run(
+    bcrypt.hashSync(password, 10),
+    row.user_id
+  );
+  // Токен одноразовый: помечаем использованным и удаляем остальные
+  db.prepare('UPDATE password_resets SET used_at = ? WHERE id = ?').run(now, row.id);
+  db.prepare('DELETE FROM password_resets WHERE user_id = ? AND id <> ?').run(row.user_id, row.id);
+
+  res.json({ ok: true });
 });
 
 // --- Telegram (необязательная привязка личного бота) ---
@@ -341,7 +683,7 @@ app.post('/api/notifications/read-all', auth, (req, res) => {
 
 // --- Универсальный CRUD для пользовательских сущностей ---
 
-function crud(route, table, fields, requiredField, decorateRow, validate) {
+function crud(route, table, fields, requiredField, decorateRow, validate, beforeDelete) {
   // Список записей текущего пользователя
   app.get(`/api/${route}`, auth, (req, res) => {
     const rows = db
@@ -393,10 +735,18 @@ function crud(route, table, fields, requiredField, decorateRow, validate) {
 
   // Удаление записи
   app.delete(`/api/${route}/:id`, auth, (req, res) => {
-    const info = db
-      .prepare(`DELETE FROM ${table} WHERE id = ? AND user_id = ?`)
-      .run(req.params.id, req.user.id);
-    if (!info.changes) return res.status(404).json({ message: 'Запись не найдена' });
+    const existing = db
+      .prepare(`SELECT id FROM ${table} WHERE id = ? AND user_id = ?`)
+      .get(req.params.id, req.user.id);
+    if (!existing) return res.status(404).json({ message: 'Запись не найдена' });
+
+    // Связанные записи обрабатываются до удаления (подзадачи отвязываются)
+    if (beforeDelete) beforeDelete(existing.id, req.user.id);
+
+    db.prepare(`DELETE FROM ${table} WHERE id = ? AND user_id = ?`).run(
+      existing.id,
+      req.user.id
+    );
     res.json({ message: 'Удалено' });
   });
 }
@@ -474,12 +824,37 @@ const withComments = (task) => ({
 crud(
   'tasks',
   'tasks',
-  ['name', 'description', 'priority', 'deadline', 'deadline_time', 'status', 'comment', 'group_id'],
+  ['name', 'description', 'priority', 'deadline', 'deadline_time', 'status', 'comment', 'group_id', 'parent_id'],
   'name',
   withComments,
   // Дедлайн в прошлом не принимаем. Проверяем только когда он пришёл в запросе:
   // смена статуса или правка названия не должны упираться в уже прошедший срок
   (req, existing) => {
+    // Подзадача: только один уровень вложенности, только в свою основную задачу
+    if (Object.prototype.hasOwnProperty.call(req.body, 'parent_id')) {
+      const rawParent = req.body.parent_id;
+      const parentId = rawParent === null || rawParent === '' ? null : Number(rawParent);
+      if (parentId !== null) {
+        if (!Number.isInteger(parentId) || parentId <= 0) {
+          return 'Некорректная основная задача';
+        }
+        if (existing && existing.id === parentId) {
+          return 'Задача не может быть подзадачей самой себя';
+        }
+        const parent = db
+          .prepare('SELECT id, parent_id FROM tasks WHERE id = ? AND user_id = ?')
+          .get(parentId, req.user.id);
+        if (!parent) return 'Основная задача не найдена';
+        if (parent.parent_id) return 'Подзадачу нельзя вложить в другую подзадачу';
+        if (existing) {
+          const { count } = db
+            .prepare('SELECT COUNT(*) AS count FROM tasks WHERE parent_id = ? AND user_id = ?')
+            .get(existing.id, req.user.id);
+          if (count > 0) return 'Сначала снимите подзадачи с этой задачи';
+        }
+      }
+    }
+
     const hasDeadlineField =
       Object.prototype.hasOwnProperty.call(req.body, 'deadline') ||
       Object.prototype.hasOwnProperty.call(req.body, 'deadline_time');
@@ -504,9 +879,16 @@ crud(
     return isDeadlineInPast(deadline, time, getUserTimezone(req.user.id))
       ? 'Дедлайн не может быть в прошлом'
       : null;
+  },
+  // Подзадачи не удаляются вместе с основной, а становятся отдельными задачами
+  (taskId, userId) => {
+    db.prepare('UPDATE tasks SET parent_id = NULL WHERE parent_id = ? AND user_id = ?').run(
+      taskId,
+      userId
+    );
   }
 );
-crud('diary', 'diary', ['text', 'date'], 'text');
+crud('diary', 'diary', ['topic', 'text', 'date'], 'text');
 
 // Добавление комментария к задаче
 app.post('/api/tasks/:id/comments', auth, (req, res) => {

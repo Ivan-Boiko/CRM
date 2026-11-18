@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './NotificationsBell.css';
 import { apiFetch } from '../api';
 import { useLanguage } from '../context/LanguageContext';
+import AppIcon from './AppIcon';
 
 // Больше 99 в бейдже не показываем — цифра не влезет в кружок
 const MAX_BADGE = 99;
@@ -118,7 +119,7 @@ const NotificationsBell = ({ onOpenTask }) => {
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-        <span aria-hidden="true">🔔</span>
+        <AppIcon name="bell" fallback="🔔" />
         {unread > 0 && (
           <span className="notifications__badge">
             {unread > MAX_BADGE ? `${MAX_BADGE}+` : unread}

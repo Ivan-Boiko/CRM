@@ -1,17 +1,20 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import './Sidebar.css';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import AppIcon from './AppIcon';
 
-const Sidebar = ({ onMenuClick, activeItemId }) => {
+const Sidebar = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
 
+  // Пункты меню — ссылки: каждый раздел имеет свой адрес
   const menuItems = [
-    { id: 1, title: t('nav.tasks'), icon: '✓' },
-    { id: 2, title: t('nav.diary'), icon: '📔' },
-    { id: 3, title: t('nav.analytics'), icon: '📊' },
-    { id: 4, title: t('nav.settings'), icon: '⚙️' },
+    { id: 1, to: '/main/tasks', title: t('nav.tasks'), icon: '✓', iconKey: 'nav.tasks' },
+    { id: 2, to: '/main/diary', title: t('nav.diary'), icon: '📔', iconKey: 'nav.diary' },
+    { id: 3, to: '/main/analytics', title: t('nav.analytics'), icon: '📊', iconKey: 'nav.analytics' },
+    { id: 4, to: '/main/settings', title: t('nav.settings'), icon: '⚙️', iconKey: 'nav.settings' },
   ];
 
   const initial = (user?.name || '?').trim().charAt(0).toUpperCase();
@@ -31,16 +34,18 @@ const Sidebar = ({ onMenuClick, activeItemId }) => {
       </div>
       <nav className="sidebar__menu">
         {menuItems.map((item, index) => (
-          <div
+          <NavLink
             key={item.id}
-            className={`sidebar__menu-item ${activeItemId === item.id ? 'sidebar__menu-item--active' : ''}`}
-            onClick={() => onMenuClick(item.id)}
+            to={item.to}
+            className={({ isActive }) =>
+              `sidebar__menu-item${isActive ? ' sidebar__menu-item--active' : ''}`
+            }
           >
             <span className={`sidebar__menu-icon ${index === 0 ? 'sidebar__menu-icon--first' : ''}`}>
-              {item.icon}
+              <AppIcon name={item.iconKey} fallback={item.icon} />
             </span>
             <span className="sidebar__menu-title">{item.title}</span>
-          </div>
+          </NavLink>
         ))}
       </nav>
     </div>

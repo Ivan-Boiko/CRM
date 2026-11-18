@@ -51,6 +51,9 @@ nano .env
 | `JWT_SECRET` | вывод команды `openssl rand -hex 32` |
 | `CORS_ORIGINS` | `https://crm.example.com` — тот же домен, что в `DOMAIN` |
 | `TELEGRAM_BOT_TOKEN` | необязательно: токен личного бота от @BotFather (`/newbot`); без него подключение Telegram в настройках выключено |
+| `APP_ORIGIN` | `https://crm.example.com` — из него собирается ссылка в письме для сброса пароля |
+| `RESEND_API_KEY` | необязательно: ключ Resend для писем со сбросом пароля; без него кнопка «Забыли пароль?» отвечает 503 |
+| `MAIL_FROM` | отправитель писем; `onboarding@resend.dev` работает только для писем на свой аккаунт Resend |
 
 `DB_PATH=/data/crm.db` и `CLIENT_BUILD_DIR=/app/build` уже указаны верно для контейнера — менять не нужно.
 

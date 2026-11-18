@@ -71,3 +71,8 @@
     white-space: nowrap;
   }
 }
+
+/* Таб — ссылка на страницу раздела */
+a.bottom-nav__item {
+  text-decoration: none;
+}

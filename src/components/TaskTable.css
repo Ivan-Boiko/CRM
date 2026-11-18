@@ -18,6 +18,20 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  padding: 12px;
+  gap: 12px;
+  /* Список задач — деловая часть интерфейса: без жирного серифа,
+     чтобы размеры и жирность действительно различались */
+  font-family: var(--font-secondary, 'Lato', sans-serif);
+  font-weight: 400;
+}
+
+/* Каждая группа — отдельная карточка со своей шапкой */
+.tasks__group {
+  background-color: var(--card-bg-color, #FFFFFF);
+  border: 1px solid #E4ECE8;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 /* Переключатель «Задачи / Архив» в шапке раздела */
@@ -98,29 +112,36 @@
 .tasks__group-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  padding: 10px 16px;
-  background-color: #F5F8F6;
+  min-height: 48px;
+  padding: 10px 16px 10px 14px;
+  background-color: #EDF6F1;
   border: none;
-  border-bottom: 1px solid var(--border-light-color, #F5F5F5);
+  border-left: 4px solid var(--accent-color, #00A86B);
+  border-bottom: 1px solid #E4ECE8;
   font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-color, #2C3E50);
+  font-size: 16px;
+  font-weight: 700;
+  color: #1F2D2A;
   text-align: left;
   cursor: pointer;
 }
 
 .tasks__group-header:hover {
-  background-color: #EDF5F0;
+  background-color: #E5F2EB;
 }
 
 .tasks__group-chevron {
   display: inline-flex;
   align-items: center;
-  color: var(--text-secondary-color, #7F8C8D);
+  color: #5F7A70;
   transition: transform 0.15s ease;
+}
+
+.tasks__group-chevron svg {
+  width: 14px;
+  height: 14px;
 }
 
 .tasks__group-chevron--collapsed {
@@ -129,11 +150,23 @@
 
 .tasks__group-title {
   flex: 1 1 auto;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .tasks__group-count {
-  font-weight: 500;
-  color: var(--text-secondary-color, #7F8C8D);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  background-color: rgba(0, 168, 107, 0.14);
+  color: var(--accent-color, #00A86B);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 /* Строка */
@@ -141,6 +174,7 @@
   display: flex;
   align-items: center;
   width: 100%;
+  min-height: 56px;
   position: relative;
   box-sizing: border-box;
   border-bottom: 1px solid var(--border-light-color, #F5F5F5);
@@ -162,13 +196,25 @@
 }
 
 .tasks__row--header {
-  background-color: var(--main-bg-color);
+  min-height: 36px;
+  background-color: #FAFCFB;
+  border-bottom: 1px solid #EAF0ED;
   font-weight: 500;
   cursor: default;
 }
 
 .tasks__row--header:hover {
-  background-color: var(--main-bg-color);
+  background-color: #FAFCFB;
+}
+
+/* Подписи колонок — вспомогательный уровень, а не заголовок секции */
+.tasks__row--header .tasks__cell--header {
+  padding: 10px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8B9793;
 }
 
 /* Ячейка */
@@ -177,8 +223,9 @@
   display: flex;
   align-items: center;
   font-size: 14px;
-  color: var(--text-color);
-  padding: 14px 16px;
+  font-weight: 500;
+  color: #2C3E50;
+  padding: 16px;
   min-width: 0;
   gap: 6px;
   /* Длинные строки без пробелов переносятся, а не вылезают на соседние колонки */
@@ -196,6 +243,9 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1F2D2A;
 }
 
 /* Подпись поля нужна только в мобильных карточках — в таблице её заменяет заголовок */
@@ -206,8 +256,9 @@
 /* Действия: иконки справа сверху строки */
 .tasks__actions {
   position: absolute;
-  top: 10px;
+  top: 50%;
   right: 12px;
+  transform: translateY(-50%);
   display: flex;
   gap: 6px;
 }
@@ -249,13 +300,52 @@
 
 /* Тёмная тема: заголовки подгрупп и бейджи статусов */
 [data-theme="dark"] .tasks__group-header {
-  background-color: #232323;
-  border-bottom-color: var(--border-light-color, #444444);
-  color: var(--text-color, #ffffff);
+  background-color: #1E2422;
+  border-bottom-color: #333B38;
+  border-left-color: var(--accent-color, #00A86B);
+  color: #F2F5F3;
 }
 
 [data-theme="dark"] .tasks__group-header:hover {
-  background-color: #2A2A2A;
+  background-color: #242B28;
+}
+
+[data-theme="dark"] .tasks__group-title {
+  color: #F2F5F3;
+}
+
+[data-theme="dark"] .tasks__group-count {
+  background-color: rgba(0, 168, 107, 0.2);
+  color: #5FD3A3;
+}
+
+[data-theme="dark"] .tasks__cell {
+  color: #E7ECEA;
+}
+
+[data-theme="dark"] .tasks__cell-name {
+  color: #F2F5F3;
+}
+
+[data-theme="dark"] .tasks__row {
+  border-bottom-color: #333B38;
+}
+
+[data-theme="dark"] .tasks__row--header {
+  background-color: #202624;
+  border-bottom-color: #333B38;
+}
+
+[data-theme="dark"] .tasks__row--header .tasks__cell--header {
+  color: #9AA5A0;
+}
+
+/* Тёмная карточка группы нужна только в табличном виде */
+@media (min-width: 1201px) {
+  [data-theme="dark"] .tasks__group {
+    background-color: #1B1F1E;
+    border-color: #333B38;
+  }
 }
 
 [data-theme="dark"] .tasks__status--todo {
@@ -280,7 +370,7 @@
 
 /* Приоритет */
 .tasks__priority {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 13px;
 }
 
@@ -535,15 +625,29 @@
     display: none;
   }
 
+  /* На телефоне группы — просто шапки-полосы, а задачи остаются карточками */
+  .tasks__table {
+    padding: 0;
+    gap: 16px;
+  }
+
+  .tasks__group {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+  }
+
   .tasks__row {
     flex-direction: column;
     align-items: stretch;
-    padding: 16px;
-    gap: 10px;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    border: 1px solid var(--border-light-color, #E0E0E0);
-    border-bottom: 1px solid var(--border-light-color, #E0E0E0);
+    min-height: 0;
+    padding: 14px;
+    gap: 8px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    border: 1px solid #E4ECE8;
+    border-bottom: 1px solid #E4ECE8;
   }
 
   .tasks__cell {
@@ -552,14 +656,18 @@
     justify-content: space-between;
     align-items: center;
     gap: 12px;
+    font-size: 15px;
+    font-weight: 500;
   }
 
   .tasks__cell-label {
     display: inline-block;
-    font-size: 12px;
-    color: var(--text-secondary-color, #7F8C8D);
-    font-weight: 500;
-    min-width: 90px;
+    min-width: 96px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8B9793;
   }
 
   .tasks__cell--name {
@@ -570,8 +678,9 @@
     padding-right: 0;
   }
 
+  /* Название задачи и так крупное — подпись «Название задачи» не нужна */
   .tasks__cell--name .tasks__cell-label {
-    min-width: 0;
+    display: none;
   }
 
   .tasks__cell-name {
@@ -579,11 +688,18 @@
     white-space: normal;
     overflow: visible;
     text-overflow: clip;
-    font-size: 16px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #1F2D2A;
   }
 
   .tasks__actions {
     position: static;
+    /* Сбрасываем десктопное центрирование: иначе transform тянет кнопки вверх,
+       они наезжают на шапку группы и оставляют пустую полосу над названием */
+    top: auto;
+    right: auto;
+    transform: none;
     order: -1;
     align-self: flex-end;
     margin-bottom: 4px;
@@ -603,8 +719,25 @@
   }
 
   .tasks__group-header {
-    min-height: 48px;
-    font-size: 14px;
+    min-height: 52px;
+    margin-bottom: 8px;
+    padding: 12px 14px;
+    font-size: 17px;
+    border-radius: 10px;
+    border-bottom: none;
+  }
+
+  .tasks__group-title {
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .tasks__group-count {
+    min-width: 26px;
+    height: 26px;
+    padding: 0 8px;
+    font-size: 12px;
+    border-radius: 13px;
   }
 
   /* Кнопка-бейдж статуса в карточке */
@@ -644,5 +777,255 @@
 
   .tasks__view-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* === Подзадачи, ожидание подзадач и перетаскивание === */
+
+/* Подзадача показывается сразу под основной задачей: отступ
+   и линия, соединяющая её с основной задачей */
+.tasks__row--subtask {
+  padding-left: 38px;
+  background-color: #F5FAF7;
+}
+
+.tasks__row--subtask .tasks__cell-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4A5A54;
+}
+
+.tasks__row--subtask::before {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: #CFE0D8;
+}
+
+/* У последней подзадачи линия заканчивается на её середине — получается уголок */
+.tasks__row--subtask-last::before {
+  bottom: 50%;
+}
+
+.tasks__row--subtask::after {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  width: 16px;
+  height: 2px;
+  background-color: #CFE0D8;
+}
+
+[data-theme="dark"] .tasks__row--subtask {
+  background-color: rgba(0, 168, 107, 0.06);
+}
+
+[data-theme="dark"] .tasks__row--subtask .tasks__cell-name {
+  color: #C9D4CF;
+}
+
+[data-theme="dark"] .tasks__row--subtask::before,
+[data-theme="dark"] .tasks__row--subtask::after {
+  background-color: #3E4B46;
+}
+
+.tasks__subtask-mark {
+  flex: 0 0 auto;
+  font-size: 13px;
+  color: var(--text-secondary-color, #7F8C8D);
+}
+
+/* Основная задача выполнена, но подзадачи ещё нет — в архив рано */
+.tasks__waiting {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background-color: #FFF7E6;
+  color: #D46B08;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .tasks__waiting {
+  background-color: rgba(212, 107, 8, 0.22);
+  color: #FFA940;
+}
+
+/* Удержание не должно выделять текст и вызывать контекстное меню */
+.tasks__row {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  /* Вертикальная прокрутка разрешена, горизонтальные жесты — нет */
+  touch-action: pan-y;
+  -webkit-user-drag: none;
+}
+
+/* Пока задачу тянут, страница не выделяет текст и не показывает курсор ввода */
+body.tasks-dragging {
+  cursor: grabbing;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body.tasks-dragging .tasks__row {
+  cursor: grabbing;
+}
+
+.tasks__row--dragging {
+  opacity: 0.45;
+}
+
+.tasks__row--drop-target {
+  background-color: rgba(0, 168, 107, 0.12);
+  outline: 2px dashed var(--accent-color, #00A86B);
+  outline-offset: -2px;
+}
+
+.tasks__group-header--drop {
+  background-color: rgba(0, 168, 107, 0.16);
+  outline: 2px dashed var(--accent-color, #00A86B);
+  outline-offset: -2px;
+}
+
+/* Кнопка сворачивания подзадач рядом с названием основной задачи */
+.tasks__subtasks-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-left: 6px;
+  padding: 2px 4px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary-color, #7F8C8D);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tasks__subtasks-toggle:hover {
+  color: var(--accent-color, #00A86B);
+  background-color: rgba(0, 168, 107, 0.1);
+}
+
+.tasks__subtasks-toggle svg {
+  transition: transform 0.15s ease;
+}
+
+.tasks__subtasks-toggle--collapsed svg {
+  transform: rotate(-90deg);
+}
+
+.tasks__subtasks-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  background-color: rgba(0, 168, 107, 0.14);
+  color: var(--accent-color, #00A86B);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Подсказка при перетаскивании подзадачи вне задач */
+.tasks__detach-hint {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 80;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background-color: var(--text-primary-color, #2C3E50);
+  color: #ffffff;
+  font-size: 13px;
+  pointer-events: none;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+  .tasks__detach-hint {
+    bottom: 84px;
+    max-width: calc(100vw - 32px);
+    text-align: center;
+  }
+}
+
+.tasks__drag-hint {
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-secondary-color, #7F8C8D);
+}
+
+.tasks__field-hint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--text-secondary-color, #7F8C8D);
+}
+
+@media (max-width: 1200px) {
+  /* На телефоне строка — карточка: линию заменяет её левый край */
+  .tasks__row--subtask {
+    margin-left: 14px;
+    width: auto; /* базовая ширина 100% + отступ вылезала за карточку */
+    padding-left: 18px;
+    border-left: 3px solid var(--accent-color, #00A86B);
+    background-color: #F5FAF7;
+  }
+
+  .tasks__row--subtask .tasks__cell-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1F2D2A;
+  }
+
+  .tasks__row--subtask::before,
+  .tasks__row--subtask::after {
+    display: none;
+  }
+
+  /* На телефоне подзадачу выдают отступ и зелёный край — стрелка лишняя */
+  .tasks__subtask-mark {
+    display: none;
+  }
+
+  /* Тёмная тема для мобильных карточек */
+  [data-theme="dark"] .tasks__row {
+    border-color: #333B38;
+  }
+
+  [data-theme="dark"] .tasks__cell-label {
+    color: #9AA5A0;
+  }
+
+  [data-theme="dark"] .tasks__cell-name {
+    color: #F2F5F3;
+  }
+
+  [data-theme="dark"] .tasks__row--subtask {
+    background-color: rgba(0, 168, 107, 0.09);
+  }
+
+  [data-theme="dark"] .tasks__row--subtask .tasks__cell-name {
+    color: #C9D4CF;
+  }
+
+  .tasks__waiting {
+    white-space: normal;
+    margin-left: 0;
   }
 }

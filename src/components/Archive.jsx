@@ -5,13 +5,23 @@ import { apiFetch } from '../api';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
 import { DeleteIcon, ReturnIcon } from './ActionIcons';
+import AppIcon from './AppIcon';
 import ConfirmDialog from './ConfirmDialog';
 import TasksTabs from './TasksTabs';
 import TaskFilter, { applyTaskFilter } from './TaskFilter';
 
 // Архив выполненных задач: редактирование недоступно, но можно добавить сколько угодно
 // комментариев и удалить задачу.
-const Archive = ({ tasks = [], search = '', onRefresh, tab, onTabChange, filter, onFilterChange }) => {
+const Archive = ({
+  tasks = [],
+  subtasksByParent = {},
+  search = '',
+  onRefresh,
+  tab,
+  onTabChange,
+  filter,
+  onFilterChange,
+}) => {
   // Черновики новых комментариев по id задачи
   const [drafts, setDrafts] = useState({});
   const [savingId, setSavingId] = useState(null);
@@ -138,6 +148,7 @@ const Archive = ({ tasks = [], search = '', onRefresh, tab, onTabChange, filter,
           {visibleTasks.map((task) => {
             const comments = task.comments || [];
             const draft = getDraft(task.id);
+            const subtasks = subtasksByParent[task.id] || [];
             return (
               <div className="archive-card" key={task.id}>
                 <div className="archive-card__top">
@@ -163,7 +174,7 @@ const Archive = ({ tasks = [], search = '', onRefresh, tab, onTabChange, filter,
                       aria-label={t('archive.return')}
                       title={t('archive.return')}
                     >
-                      <ReturnIcon />
+                      <AppIcon name="action.return" fallback={<ReturnIcon />} />
                     </button>
                     <button
                       type="button"
@@ -172,13 +183,29 @@ const Archive = ({ tasks = [], search = '', onRefresh, tab, onTabChange, filter,
                       aria-label={t('common.delete')}
                       title={t('common.delete')}
                     >
-                      <DeleteIcon />
+                      <AppIcon name="action.delete" fallback={<DeleteIcon />} />
                     </button>
                   </div>
                 </div>
 
                 {task.description ? (
                   <p className="archive-card__description">{task.description}</p>
+                ) : null}
+
+                {subtasks.length > 0 ? (
+                  <>
+                    <div className="archive-card__label">{t('tasks.subtasks')}</div>
+                    <ul className="archive-subtasks">
+                      {subtasks.map((subtask) => (
+                        <li className="archive-subtask" key={subtask.id}>
+                          <span className="archive-subtask__check" aria-hidden="true">
+                            ✓
+                          </span>
+                          <span>{subtask.name}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
                 ) : null}
 
                 <div className="archive-card__label">{t('archive.comments')}</div>

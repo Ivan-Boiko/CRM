@@ -127,8 +127,16 @@ const DatePicker = ({ id, value, onChange, ariaLabel, time = '', onTimeChange })
     setOpen(true);
   };
 
+  // Подтверждение выбора: закрываем и панель времени, и календарь.
+  // На телефоне это заменяет тап вне окна, который раньше требовался.
+  const closeCalendar = () => {
+    setTimeOpen(false);
+    setOpen(false);
+    buttonRef.current?.focus();
+  };
+
   // Календарь остаётся открытым: в нём же выбирается время дедлайна,
-  // закрыть можно кликом вне или Escape
+  // закрыть можно кнопкой «Подтвердить», кликом вне или Escape
   const pickDay = (day) => {
     onChange(toISO(day));
   };
@@ -294,7 +302,7 @@ const DatePicker = ({ id, value, onChange, ariaLabel, time = '', onTimeChange })
               <button
                 type="button"
                 className="date-picker__time-done"
-                onClick={() => setTimeOpen(false)}
+                onClick={closeCalendar}
               >
                 {t('date.done')}
               </button>
@@ -302,28 +310,35 @@ const DatePicker = ({ id, value, onChange, ariaLabel, time = '', onTimeChange })
           )}
 
           <div className="date-picker__footer">
-            <button
-              type="button"
-              className="date-picker__action"
-              onClick={() => {
-                setOpen(false);
-                onChange('');
-                // Без даты время не имеет смысла
-                onTimeChange?.('');
-              }}
-              disabled={!value}
-            >
-              {t('date.clear')}
-            </button>
-            <button
-              type="button"
-              className="date-picker__action date-picker__action--accent"
-              onClick={() => {
-                setViewDate(new Date());
-                pickDay(new Date());
-              }}
-            >
-              {t('date.today')}
+            <div className="date-picker__footer-actions">
+              <button
+                type="button"
+                className="date-picker__action"
+                onClick={() => {
+                  setOpen(false);
+                  setTimeOpen(false);
+                  onChange('');
+                  // Без даты время не имеет смысла
+                  onTimeChange?.('');
+                }}
+                disabled={!value}
+              >
+                {t('date.clear')}
+              </button>
+              <button
+                type="button"
+                className="date-picker__action date-picker__action--accent"
+                onClick={() => {
+                  setViewDate(new Date());
+                  pickDay(new Date());
+                }}
+              >
+                {t('date.today')}
+              </button>
+            </div>
+            {/* Подтверждение выбора даты и времени вместо тапа вне календаря */}
+            <button type="button" className="date-picker__confirm" onClick={closeCalendar}>
+              {t('date.confirm')}
             </button>
           </div>
         </div>,
