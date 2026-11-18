@@ -9,6 +9,7 @@ import AppIcon from './AppIcon';
 import ConfirmDialog from './ConfirmDialog';
 import TasksTabs from './TasksTabs';
 import TaskFilter, { applyTaskFilter } from './TaskFilter';
+import { isCompletedLate } from './taskHierarchy';
 
 // Архив выполненных задач: редактирование недоступно, но можно добавить сколько угодно
 // комментариев и удалить задачу.
@@ -153,15 +154,25 @@ const Archive = ({
               <div className="archive-card" key={task.id}>
                 <div className="archive-card__top">
                   <div className="archive-card__heading">
+                    {/* Без подписи название читается как заголовок раздела, а не как задача */}
+                    <span className="archive-card__eyebrow">{t('tasks.col.name')}</span>
                     <h3 className="archive-card__title">{task.name}</h3>
                     <div className="archive-card__meta">
                       <span className="tasks__status tasks__status--done">{t('status.done')}</span>
                       {task.groupName ? (
-                        <span className="archive-card__meta-item">{task.groupName}</span>
+                        <span className="archive-card__meta-item">
+                          {t('tasks.group')}: {task.groupName}
+                        </span>
                       ) : null}
                       {task.deadline ? (
                         <span className="archive-card__meta-item">
                           {t('tasks.col.deadline')}: {formatDate(task.deadline)}
+                        </span>
+                      ) : null}
+                      {/* Только для задач, закрытых после срока */}
+                      {isCompletedLate(task) ? (
+                        <span className="archive-card__meta-item archive-card__meta-item--overdue">
+                          {t('archive.overdue')}
                         </span>
                       ) : null}
                     </div>
@@ -230,25 +241,29 @@ const Archive = ({
                   <p className="archive-comments__empty">{t('archive.noComments')}</p>
                 )}
 
-                <label className="archive-card__label" htmlFor={`archive-comment-${task.id}`}>
-                  {t('archive.addComment')}
-                </label>
-                <textarea
-                  id={`archive-comment-${task.id}`}
-                  className="archive-card__comment"
-                  value={draft}
-                  onChange={(e) => handleDraftChange(task.id, e.target.value)}
-                  placeholder={t('archive.commentPlaceholder')}
-                  rows={2}
-                />
-                <button
-                  type="button"
-                  className="btn-primary archive-card__save"
-                  onClick={() => handleAddComment(task)}
-                  disabled={!draft.trim() || savingId === task.id}
-                >
-                  {savingId === task.id ? '...' : t('archive.addComment')}
-                </button>
+                {/* Форма добавления отделена линией: статичная информация
+                    карточки и действие не должны сливаться */}
+                <div className="archive-card__comment-form">
+                  <label className="archive-card__label" htmlFor={`archive-comment-${task.id}`}>
+                    {t('archive.addComment')}
+                  </label>
+                  <textarea
+                    id={`archive-comment-${task.id}`}
+                    className="archive-card__comment"
+                    value={draft}
+                    onChange={(e) => handleDraftChange(task.id, e.target.value)}
+                    placeholder={t('archive.commentPlaceholder')}
+                    rows={2}
+                  />
+                  <button
+                    type="button"
+                    className="btn-primary archive-card__save"
+                    onClick={() => handleAddComment(task)}
+                    disabled={!draft.trim() || savingId === task.id}
+                  >
+                    {savingId === task.id ? '...' : t('archive.addComment')}
+                  </button>
+                </div>
               </div>
             );
           })}

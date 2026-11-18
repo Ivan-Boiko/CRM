@@ -141,6 +141,7 @@ export const translations = {
     'archive.returnReason': 'Причина возврата',
     'archive.returnReasonPlaceholder': 'Опишите, что нужно доработать...',
     'archive.returnSubmit': 'Вернуть в работу',
+    'archive.overdue': 'Просрочена',
 
     'diary.title': 'Дневник',
     'diary.add': 'Добавить запись',
@@ -408,6 +409,7 @@ export const translations = {
     'archive.returnReason': 'Reason for return',
     'archive.returnReasonPlaceholder': 'Describe what needs to be reworked...',
     'archive.returnSubmit': 'Return to work',
+    'archive.overdue': 'Completed late',
 
     'diary.title': 'Diary',
     'diary.add': 'Add entry',

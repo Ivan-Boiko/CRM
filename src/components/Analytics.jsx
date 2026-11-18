@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import './Analytics.css';
 import { useLanguage } from '../context/LanguageContext';
+import { isCompletedLate } from './taskHierarchy';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -21,7 +22,8 @@ const categorize = (task, today) => {
   const deadline = task.deadline ? new Date(task.deadline) : null;
   if (deadline) deadline.setHours(0, 0, 0, 0);
 
-  if (task.status === 'done') return 'completedOnTime';
+  // Закрытая после срока задача — просрочка, а не выполнение в срок
+  if (task.status === 'done') return isCompletedLate(task) ? 'overdue' : 'completedOnTime';
   if (deadline && deadline < today) return 'overdue';
   if (deadline && deadline - today <= 3 * DAY_MS) return 'dueSoon';
   if (task.priority === 'high') return 'urgent';

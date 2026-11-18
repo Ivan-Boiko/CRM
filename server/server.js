@@ -836,12 +836,25 @@ crud(
     'parent_id',
     // Что было сделано: заполняется при завершении задачи, показывается в архиве
     'result',
+    // Момент завершения: заполняется сервером, клиент его не задаёт
+    'completed_at',
   ],
   'name',
   withComments,
   // Дедлайн в прошлом не принимаем. Проверяем только когда он пришёл в запросе:
   // смена статуса или правка названия не должны упираться в уже прошедший срок
   (req, existing) => {
+    // Фактическое время завершения: архив показывает по нему просрочку,
+    // аналитика относит такие задачи к просроченным. При возврате в работу
+    // отметка сбрасывается, чтобы повторное завершение записало новый момент
+    if (Object.prototype.hasOwnProperty.call(req.body, 'status')) {
+      if (req.body.status === 'done' && (!existing || existing.status !== 'done')) {
+        req.body.completed_at = new Date().toISOString();
+      } else if (existing && existing.status === 'done' && req.body.status !== 'done') {
+        req.body.completed_at = null;
+      }
+    }
+
     // Подзадача: только один уровень вложенности, только в свою основную задачу
     if (Object.prototype.hasOwnProperty.call(req.body, 'parent_id')) {
       const rawParent = req.body.parent_id;

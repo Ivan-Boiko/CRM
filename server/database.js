@@ -148,6 +148,8 @@ export function initDb() {
   addColumnIfMissing('tasks', 'parent_id', 'INTEGER');
   // Результат выполненных действий: пишется при завершении задачи и виден в архиве
   addColumnIfMissing('tasks', 'result', 'TEXT');
+  // Фактический момент завершения: по нему архив показывает просрочку, аналитика считает опоздания
+  addColumnIfMissing('tasks', 'completed_at', 'TEXT');
 
   // Просроченные ссылки сброса пароля и подтверждения email не нужны
   const nowIso = new Date().toISOString();
