@@ -12,6 +12,7 @@ import DatePicker from './DatePicker';
 import ConfirmDialog from './ConfirmDialog';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
+import { pluralForm } from '../i18n';
 
 const EMPTY_TASK = {
   name: '',
@@ -22,6 +23,26 @@ const EMPTY_TASK = {
   status: 'todo',
   group_id: '',
   parent_id: '',
+  result: '',
+};
+
+// Дедлайн ближе двух часов — жёлтая подсветка, прошедший — красная.
+// Без времени срок истекает в конце дня, как и на сервере.
+const SOON_DEADLINE_MS = 2 * 60 * 60 * 1000;
+
+const deadlineTimestamp = (task) => {
+  if (!task.deadline) return null;
+  const date = new Date(`${task.deadline}T${task.deadline_time || '23:59'}:00`);
+  return Number.isNaN(date.getTime()) ? null : date.getTime();
+};
+
+// Выполненная задача всегда без подсветки: при завершении цвета сбрасываются
+const getDeadlineState = (task, now) => {
+  if (task.status === 'done') return '';
+  const end = deadlineTimestamp(task);
+  if (end === null) return '';
+  if (end <= now) return 'overdue';
+  return end - now <= SOON_DEADLINE_MS ? 'soon' : '';
 };
 
 // Долгое нажатие/удержание мыши, после которого задачу можно перетащить
@@ -55,6 +76,12 @@ const TaskTable = ({
   // Черновик комментария в окне просмотра задачи
   const [commentDraft, setCommentDraft] = useState('');
   const [savingComment, setSavingComment] = useState(false);
+  // Задача, которую завершают: результат выполненных действий пишется в окне
+  const [completingTask, setCompletingTask] = useState(null);
+  const [resultDraft, setResultDraft] = useState('');
+  const [savingResult, setSavingResult] = useState(false);
+  // Текущее время: по нему считаются жёлтая и красная подсветки дедлайна
+  const [now, setNow] = useState(() => Date.now());
   // Незаполненные обязательные поля: подсвечиваем их красным
   const [errors, setErrors] = useState({});
   // Развёрнутые подгруппы. Пустая карта значит, что все секции свёрнуты —
@@ -86,7 +113,13 @@ const TaskTable = ({
   const longPressRef = useRef(null);
   const suppressClickRef = useRef(false);
   const { notify } = useToast();
-  const { t, formatDate } = useLanguage();
+  const { t, formatDate, lang } = useLanguage();
+
+  // Раз в минуту пересчитываем подсветку, не дожидаясь действий пользователя
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 60 * 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Все задачи, включая подзадачи: нужны для карточки и выбора основной задачи
   const allKnownTasks = useMemo(() => {
@@ -182,6 +215,7 @@ const TaskTable = ({
       status: task.status || 'todo',
       group_id: task.group_id || '',
       parent_id: task.parent_id || '',
+      result: task.result || '',
     });
     setErrors({});
     setIsNewGroupOpen(false);
@@ -224,6 +258,8 @@ const TaskTable = ({
     // Пустые значения — «без подгруппы» и «без основной задачи»
     const payload = {
       ...form,
+      // Пустой результат храним как null, чтобы в архиве не было пустого блока
+      result: form.result && form.result.trim() ? form.result.trim() : null,
       group_id: form.group_id === '' || form.group_id === null ? null : Number(form.group_id),
       parent_id:
         form.parent_id === '' || form.parent_id === null ? null : Number(form.parent_id),
@@ -285,12 +321,42 @@ const TaskTable = ({
   // Статус можно менять прямо в строке, не открывая редактирование
   const handleStatusChange = async (task, status) => {
     if (status === task.status) return;
+    // Завершение задачи: сначала спрашиваем результат выполненной работы
+    if (status === 'done') {
+      setCompletingTask(task);
+      setResultDraft(task.result || '');
+      return;
+    }
     try {
       await apiFetch(`/tasks/${task.id}`, { method: 'PUT', body: { status } });
       notify(t('toast.statusUpdated'), 'success');
       onRefresh();
     } catch (err) {
       notify(err.message, 'error');
+    }
+  };
+
+  const closeCompletion = () => {
+    setCompletingTask(null);
+    setResultDraft('');
+  };
+
+  // Задача становится выполненной только вместе с результатом: пустой текст допустим
+  const saveCompletion = async () => {
+    if (!completingTask) return;
+    setSavingResult(true);
+    try {
+      await apiFetch(`/tasks/${completingTask.id}`, {
+        method: 'PUT',
+        body: { status: 'done', result: resultDraft.trim() || null },
+      });
+      notify(t('toast.statusUpdated'), 'success');
+      closeCompletion();
+      onRefresh();
+    } catch (err) {
+      notify(err.message, 'error');
+    } finally {
+      setSavingResult(false);
     }
   };
 
@@ -548,6 +614,13 @@ const TaskTable = ({
       !isSubtask && task.status === 'done' && children.some((child) => child.status !== 'done');
     const hasChildren = !isSubtask && children.length > 0;
     const subtasksCollapsed = hasChildren && Boolean(collapsedSubtasks[task.id]);
+    // «Скоро» (меньше 2 часов) и «просрочено» — подстветка всей строки
+    const deadlineState = getDeadlineState(task, now);
+    const subtaskWord = pluralForm(lang, children.length, {
+      one: t('tasks.subtaskCount.one'),
+      few: t('tasks.subtaskCount.few'),
+      many: t('tasks.subtaskCount.many'),
+    });
 
     return (
       <React.Fragment key={task.id}>
@@ -558,6 +631,8 @@ const TaskTable = ({
             isSubtask && isLastSubtask ? 'tasks__row--subtask-last' : '',
             draggingId === task.id ? 'tasks__row--dragging' : '',
             dropTargetId === task.id ? 'tasks__row--drop-target' : '',
+            deadlineState === 'soon' ? 'tasks__row--deadline-soon' : '',
+            deadlineState === 'overdue' ? 'tasks__row--deadline-overdue' : '',
           ]
             .filter(Boolean)
             .join(' ')}
@@ -586,14 +661,10 @@ const TaskTable = ({
         >
           <div className="tasks__cell tasks__cell--name">
             <span className="tasks__cell-label">{t('tasks.col.name')}</span>
-            {isSubtask ? (
-              <span className="tasks__subtask-mark" aria-hidden="true">
-                ↳
-              </span>
-            ) : null}
-            <span className="tasks__cell-name" title={task.name}>
-              {task.name}
-            </span>
+            <div className="tasks__name-line">
+            {/* Стрелка слева от названия, как у групп: раскрывает только подзадачи.
+                У задачи без подзадач на её месте пустая заглушка — имена в столбце
+                остаются выровненными. */}
             {hasChildren ? (
               <button
                 type="button"
@@ -623,10 +694,26 @@ const TaskTable = ({
                 >
                   <polyline points="6 9 12 15 18 9" />
                 </svg>
-                <span className="tasks__subtasks-count">{children.length}</span>
               </button>
+            ) : isSubtask ? null : (
+              <span className="tasks__subtasks-toggle tasks__subtasks-toggle--empty" aria-hidden="true" />
+            )}
+            {isSubtask ? (
+              <span className="tasks__subtask-mark" aria-hidden="true">
+                ↳
+              </span>
+            ) : null}
+            <span className="tasks__cell-name" title={task.name}>
+              {task.name}
+            </span>
+            {/* Количество подзадач — отдельная подпись, клик по ней ничего не раскрывает */}
+            {hasChildren ? (
+              <span className="tasks__subtasks-count">
+                {children.length} {subtaskWord}
+              </span>
             ) : null}
             {waiting ? <span className="tasks__waiting">{t('tasks.waitingSubtasks')}</span> : null}
+            </div>
           </div>
           <div className="tasks__cell">
             <span className="tasks__cell-label">{t('tasks.col.priority')}</span>
@@ -722,7 +809,15 @@ const TaskTable = ({
                     </svg>
                   </span>
                   <span className="tasks__group-title">{section.title}</span>
-                  <span className="tasks__group-count">{section.tasks.length}</span>
+                  {/* Число задач с пояснением: «4 задачи», а не одна цифра */}
+                  <span className="tasks__group-count">
+                    {section.tasks.length}{' '}
+                    {pluralForm(lang, section.tasks.length, {
+                      one: t('tasks.groupCount.one'),
+                      few: t('tasks.groupCount.few'),
+                      many: t('tasks.groupCount.many'),
+                    })}
+                  </span>
                 </button>
 
                 {expandedGroups[section.key] && (
@@ -896,6 +991,20 @@ const TaskTable = ({
                   ]}
                 />
               </div>
+              {/* Результат выполненной работы: виден в архиве под описанием */}
+              {form.status === 'done' ? (
+                <div className="form-group">
+                  <label htmlFor="result">{t('tasks.result')}</label>
+                  <textarea
+                    id="result"
+                    value={form.result || ''}
+                    onChange={handleInputChange}
+                    placeholder={t('tasks.resultPlaceholder')}
+                    rows="3"
+                  />
+                  <p className="tasks__field-hint">{t('tasks.resultHint')}</p>
+                </div>
+              ) : null}
             </div>
             <div className="modal__footer">
               <button className="btn-secondary modal__cancel" onClick={() => setIsModalOpen(false)}>
@@ -923,6 +1032,12 @@ const TaskTable = ({
                 <div className="tasks__view-section">
                   <div className="tasks__view-label">{t('tasks.field.description')}</div>
                   <div className="tasks__view-description">{viewingTask.description}</div>
+                </div>
+              ) : null}
+              {viewingTask.result ? (
+                <div className="tasks__view-section">
+                  <div className="tasks__view-label">{t('tasks.result')}</div>
+                  <div className="tasks__view-description">{viewingTask.result}</div>
                 </div>
               ) : null}
               <div className="tasks__view-grid">
@@ -1016,6 +1131,53 @@ const TaskTable = ({
           </div>
         </div>
       )}
+
+      {/* Завершение задачи: результат выполненной работы пишется в модальном окне */}
+      {completingTask ? (
+        <div className="modal-overlay" onClick={closeCompletion}>
+          <div
+            className="modal tasks__modal tasks__complete-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="task-complete-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal__header">
+              <h3 id="task-complete-title">{t('tasks.resultTitle')}</h3>
+              <button className="modal__close" onClick={closeCompletion} aria-label={t('common.cancel')}>
+                &times;
+              </button>
+            </div>
+            <div className="modal__body">
+              <p className="tasks__complete-task">{completingTask.name}</p>
+              <div className="form-group">
+                <label htmlFor="task-result">{t('tasks.result')}</label>
+                <textarea
+                  id="task-result"
+                  value={resultDraft}
+                  onChange={(e) => setResultDraft(e.target.value)}
+                  placeholder={t('tasks.resultPlaceholder')}
+                  rows="4"
+                  autoFocus
+                />
+                <p className="tasks__field-hint">{t('tasks.resultHint')}</p>
+              </div>
+            </div>
+            <div className="modal__footer">
+              <button className="btn-secondary modal__cancel" onClick={closeCompletion}>
+                {t('common.cancel')}
+              </button>
+              <button
+                className="btn-primary modal__submit"
+                onClick={saveCompletion}
+                disabled={savingResult}
+              >
+                {savingResult ? '...' : t('common.save')}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <ConfirmDialog
         open={pendingGroupDelete && Boolean(form.group_id)}

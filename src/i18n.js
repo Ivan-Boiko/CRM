@@ -89,6 +89,11 @@ export const translations = {
     'tasks.empty': 'Задач пока нет',
     'tasks.comments': 'Комментарии',
     'tasks.addComment': 'Добавить комментарий',
+    'tasks.result': 'Что сделано',
+    'tasks.resultTitle': 'Задача выполнена',
+    'tasks.resultHint': 'Опишите результат: он сохранится в архиве вместе с задачей.',
+    'tasks.resultPlaceholder': 'Например: «Согласовал смету и отправил клиенту»',
+    'tasks.resultEmpty': 'Результат не описан',
     'tasks.group': 'Подгруппа',
     'tasks.groupNone': 'Без подгруппы',
     'tasks.groupAdd': 'Новая подгруппа',
@@ -99,6 +104,13 @@ export const translations = {
     'tasks.parentHint': 'Подзадача показывается под выбранной задачей',
     'tasks.subtasks': 'Подзадачи',
     'tasks.waitingSubtasks': 'Ждёт подзадачи',
+    // Число задач и подзадач подписываем словом, а не одной цифрой
+    'tasks.subtaskCount.one': 'подзадача',
+    'tasks.subtaskCount.few': 'подзадачи',
+    'tasks.subtaskCount.many': 'подзадач',
+    'tasks.groupCount.one': 'задача',
+    'tasks.groupCount.few': 'задачи',
+    'tasks.groupCount.many': 'задач',
     'tasks.dragHint': 'Удерживайте задачу и перетащите её на другую, чтобы сделать подзадачей. Подзадачу можно сделать самостоятельной: отпустите её на заголовке группы или вне списка задач',
     'tasks.detachHint': 'Отпустите, чтобы сделать задачу самостоятельной',
     'tasks.collapseSubtasks': 'Свернуть подзадачи',
@@ -139,6 +151,8 @@ export const translations = {
     'diary.modal.add': 'Добавить новую запись',
     'diary.placeholder': 'Напишите новую запись...',
     'diary.empty': 'Дневник пуст',
+    'diary.read': 'Читать запись',
+    'diary.textLimit': 'Не больше {max} символов',
 
     'analytics.title': 'Аналитика задач',
     'analytics.week': 'Неделя',
@@ -343,6 +357,11 @@ export const translations = {
     'tasks.empty': 'No tasks yet',
     'tasks.comments': 'Comments',
     'tasks.addComment': 'Add comment',
+    'tasks.result': 'What was done',
+    'tasks.resultTitle': 'Task completed',
+    'tasks.resultHint': 'Describe the result: it is saved to the archive with the task.',
+    'tasks.resultPlaceholder': 'For example: “Approved the estimate and sent it to the client”',
+    'tasks.resultEmpty': 'No result described',
     'tasks.group': 'Group',
     'tasks.groupNone': 'No group',
     'tasks.groupAdd': 'New group',
@@ -353,6 +372,12 @@ export const translations = {
     'tasks.parentHint': 'The subtask is shown under the selected task',
     'tasks.subtasks': 'Subtasks',
     'tasks.waitingSubtasks': 'Waiting for subtasks',
+    'tasks.subtaskCount.one': 'subtask',
+    'tasks.subtaskCount.few': 'subtasks',
+    'tasks.subtaskCount.many': 'subtasks',
+    'tasks.groupCount.one': 'task',
+    'tasks.groupCount.few': 'tasks',
+    'tasks.groupCount.many': 'tasks',
     'tasks.dragHint': 'Hold a task and drag it onto another to make it a subtask. To turn a subtask back into a task, drop it on a group header or outside the task list',
     'tasks.detachHint': 'Release to make the task independent',
     'tasks.collapseSubtasks': 'Collapse subtasks',
@@ -393,6 +418,8 @@ export const translations = {
     'diary.modal.add': 'Add a new entry',
     'diary.placeholder': 'Write a new entry...',
     'diary.empty': 'The diary is empty',
+    'diary.read': 'Read entry',
+    'diary.textLimit': 'Up to {max} characters',
 
     'analytics.title': 'Task analytics',
     'analytics.week': 'Week',
@@ -507,4 +534,16 @@ export const translations = {
     'confirm.deleteText': 'This action cannot be undone.',
     'confirm.deleteParentText': 'The subtasks will stay and become separate tasks.',
   },
+};
+
+// Форма слова для числа: «1 задача», «2 задачи», «5 задач».
+// В английском различаются только единственное и множественное число.
+export const pluralForm = (lang, count, forms) => {
+  const value = Math.abs(Number(count) || 0);
+  if (lang !== 'ru') return value === 1 ? forms.one : forms.many;
+  const mod10 = value % 10;
+  const mod100 = value % 100;
+  if (mod10 === 1 && mod100 !== 11) return forms.one;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return forms.few;
+  return forms.many;
 };

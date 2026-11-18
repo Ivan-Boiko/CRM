@@ -154,19 +154,19 @@
   font-weight: 700;
 }
 
+/* Счётчик группы с пояснением: «4 задачи», а не одна цифра */
 .tasks__group-count {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 24px;
-  height: 24px;
-  padding: 0 8px;
+  padding: 3px 10px;
   box-sizing: border-box;
   border-radius: 12px;
   background-color: rgba(0, 168, 107, 0.14);
   color: var(--accent-color, #00A86B);
   font-size: 12px;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 /* Строка */
@@ -180,8 +180,9 @@
   border-bottom: 1px solid var(--border-light-color, #F5F5F5);
   transition: background-color 0.2s ease;
   margin: 0;
-  /* Резерв под иконки действий справа: колонки заканчиваются до них */
-  padding: 0 84px 0 0;
+  /* Резерв под иконки действий справа: кнопки начинаются с отступа 25px,
+     поэтому колонки заканчиваются раньше них */
+  padding: 0 98px 0 0;
   list-style: none;
   cursor: pointer;
 }
@@ -232,8 +233,18 @@
   overflow-wrap: anywhere;
 }
 
+/* Название — главная колонка: ей достаётся больше места, чем приоритету и статусу */
 .tasks__cell--name {
-  flex: 1.5;
+  flex: 2.5;
+}
+
+/* Стрелка подзадач, название и счётчик — одной строкой */
+.tasks__name-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .tasks__cell-name {
@@ -257,7 +268,7 @@
 .tasks__actions {
   position: absolute;
   top: 50%;
-  right: 12px;
+  right: 25px;
   transform: translateY(-50%);
   display: flex;
   gap: 6px;
@@ -684,13 +695,29 @@
   }
 
   .tasks__cell-name {
-    flex: none;
+    flex: 1 1 auto;
     white-space: normal;
     overflow: visible;
     text-overflow: clip;
     font-size: 17px;
     font-weight: 700;
     color: #1F2D2A;
+  }
+
+  /* В карточке стрелка, название и счётчик тоже одной строкой */
+  .tasks__name-line {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* На телефоне в стрелку должно попадать пальцем */
+  .tasks__subtasks-toggle {
+    width: 28px;
+    height: 28px;
+  }
+
+  .tasks__subtasks-count {
+    font-size: 12px;
   }
 
   .tasks__actions {
@@ -733,9 +760,7 @@
   }
 
   .tasks__group-count {
-    min-width: 26px;
-    height: 26px;
-    padding: 0 8px;
+    padding: 4px 10px;
     font-size: 12px;
     border-radius: 13px;
   }
@@ -893,21 +918,22 @@ body.tasks-dragging .tasks__row {
   outline-offset: -2px;
 }
 
-/* Кнопка сворачивания подзадач рядом с названием основной задачи */
+/* Стрелка раскрытия подзадач — слева от названия, как у заголовков групп.
+   Счётчик подзадач — отдельная подпись справа от названия. */
 .tasks__subtasks-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-  margin-left: 6px;
-  padding: 2px 4px;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  padding: 0;
   background: none;
   border: none;
   border-radius: 6px;
   color: var(--text-secondary-color, #7F8C8D);
-  font-family: inherit;
-  font-size: 13px;
   cursor: pointer;
+  transition: color 0.18s ease, background-color 0.18s ease;
 }
 
 .tasks__subtasks-toggle:hover {
@@ -916,27 +942,82 @@ body.tasks-dragging .tasks__row {
 }
 
 .tasks__subtasks-toggle svg {
-  transition: transform 0.15s ease;
+  transition: transform 0.2s ease;
 }
 
 .tasks__subtasks-toggle--collapsed svg {
   transform: rotate(-90deg);
 }
 
+/* Задача без подзадач: место под стрелку остаётся, но кликать некуда */
+.tasks__subtasks-toggle--empty {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .tasks__subtasks-count {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-width: 19px;
-  height: 19px;
-  padding: 0 5px;
+  flex: 0 0 auto;
+  padding: 3px 8px;
   box-sizing: border-box;
   border-radius: 10px;
   background-color: rgba(0, 168, 107, 0.14);
   color: var(--accent-color, #00A86B);
   font-size: 11px;
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* === Дедлайн: меньше 2 часов — жёлтый, просрочено — красный === */
+.tasks__row--deadline-soon {
+  background-color: #FFFAEB;
+  box-shadow: inset 3px 0 0 #E6B800;
+}
+
+.tasks__row--deadline-soon:hover {
+  background-color: #FFF6DE;
+}
+
+.tasks__row--deadline-overdue {
+  background-color: #FFF4F3;
+  box-shadow: inset 3px 0 0 #CF1322;
+}
+
+.tasks__row--deadline-overdue:hover {
+  background-color: #FFEBE9;
+}
+
+[data-theme="dark"] .tasks__row--deadline-soon {
+  background-color: rgba(230, 184, 0, 0.12);
+  box-shadow: inset 3px 0 0 #E6B800;
+}
+
+[data-theme="dark"] .tasks__row--deadline-soon:hover {
+  background-color: rgba(230, 184, 0, 0.18);
+}
+
+[data-theme="dark"] .tasks__row--deadline-overdue {
+  background-color: rgba(207, 19, 34, 0.16);
+  box-shadow: inset 3px 0 0 #FF7875;
+}
+
+[data-theme="dark"] .tasks__row--deadline-overdue:hover {
+  background-color: rgba(207, 19, 34, 0.22);
+}
+
+/* Окно завершения задачи: название и поле результата */
+.tasks__complete-modal {
+  max-width: 480px;
+}
+
+.tasks__complete-task {
+  margin: 0 0 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary-color, #2C3E50);
+  overflow-wrap: anywhere;
 }
 
 /* Подсказка при перетаскивании подзадачи вне задач */

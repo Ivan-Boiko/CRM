@@ -106,6 +106,25 @@
   word-break: break-word;
 }
 
+/* Результат выполненной задачи: виден сразу под описанием */
+.archive-card__result {
+  margin: 0;
+  padding: 10px 14px;
+  border-left: 3px solid var(--accent-color, #00A86B);
+  border-radius: 0 8px 8px 0;
+  background-color: rgba(0, 168, 107, 0.08);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-color);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+[data-theme="dark"] .archive-card__result {
+  background-color: rgba(0, 193, 126, 0.1);
+  color: #E7ECEA;
+}
+
 .archive-card__label {
   display: block;
   margin: 14px 0 6px;

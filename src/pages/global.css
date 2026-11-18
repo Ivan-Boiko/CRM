@@ -286,6 +286,40 @@ img.app-icon {
   height: 20px;
 }
 
+/* === Плавные, но быстрые переходы: 0.18–0.2 с, чтобы интерфейс не «плыл» === */
+@keyframes overlayFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalRise {
+  from { opacity: 0; transform: translateY(10px) scale(0.995); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger,
+  .tasks__icon-btn,
+  .topbar__logout,
+  .sidebar__menu-item,
+  .tasks__group-header,
+  .diary-card,
+  .archive-card {
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease,
+      box-shadow 0.2s ease, transform 0.18s ease;
+  }
+
+  .modal-overlay {
+    animation: overlayFade 0.16s ease-out;
+  }
+
+  .modal {
+    animation: modalRise 0.2s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+}
+
 /* Мобильные поля: 16 px, иначе iOS Safari зумит страницу при фокусе */
 @media (max-width: 768px) {
   input[type="text"],

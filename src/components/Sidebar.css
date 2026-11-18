@@ -17,6 +17,22 @@
   border-bottom: 1px solid #F5F5F5;
 }
 
+/* Тёмная тема: вместо белой полосы — тонкая линия, растворяющаяся к краям */
+[data-theme="dark"] .sidebar__user {
+  border-bottom: none;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0,
+    rgba(255, 255, 255, 0.22) 16%,
+    rgba(0, 193, 126, 0.55) 50%,
+    rgba(255, 255, 255, 0.22) 84%,
+    transparent 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+  background-position: 0 100%;
+}
+
 .sidebar__avatar {
   width: 45px;
   height: 45px;

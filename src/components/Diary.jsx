@@ -8,6 +8,10 @@ import { useLanguage } from '../context/LanguageContext';
 
 const EMPTY_ENTRY = { topic: '', text: '' };
 
+// Ограничения на ввод: длинные записи не рвут карточку и читаются в отдельном окне
+const TOPIC_MAX = 80;
+const TEXT_MAX = 2000;
+
 const Diary = ({ search = '' }) => {
   const [entries, setEntries] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -19,6 +23,8 @@ const Diary = ({ search = '' }) => {
   const [errors, setErrors] = useState({});
   // Запись, ожидающая подтверждения удаления
   const [pendingDelete, setPendingDelete] = useState(null);
+  // Запись, открытая для чтения целиком
+  const [readingEntry, setReadingEntry] = useState(null);
   const { notify } = useToast();
   const { t, formatDate } = useLanguage();
 
@@ -141,6 +147,7 @@ const Diary = ({ search = '' }) => {
                     }
                     placeholder={t('diary.topicPlaceholder')}
                     aria-label={t('diary.field.topic')}
+                    maxLength={TOPIC_MAX}
                   />
                   <textarea
                     className={`diary-card__edit-textarea${
@@ -152,7 +159,11 @@ const Diary = ({ search = '' }) => {
                       if (errors.text) setErrors({});
                     }}
                     aria-invalid={Boolean(errors.text)}
+                    maxLength={TEXT_MAX}
                   />
+                  <div className="diary__counter">
+                    {editDraft.text.length} / {TEXT_MAX}
+                  </div>
                   {errors.text ? <p className="form-group__error">{errors.text}</p> : null}
                   <div className="diary-card__edit-buttons">
                     <button className="btn-primary" onClick={() => saveEdit(entry.id)}>
@@ -165,7 +176,20 @@ const Diary = ({ search = '' }) => {
                 </div>
               ) : (
                 <>
-                  <div className="diary-card__content">
+                  {/* Клик по карточке открывает запись целиком в модальном окне */}
+                  <div
+                    className="diary-card__content"
+                    role="button"
+                    tabIndex={0}
+                    title={t('diary.read')}
+                    onClick={() => setReadingEntry(entry)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        setReadingEntry(entry);
+                      }
+                    }}
+                  >
                     <div className="diary-card__body">
                       {entry.topic ? (
                         <h3 className="diary-card__topic">{entry.topic}</h3>
@@ -214,6 +238,7 @@ const Diary = ({ search = '' }) => {
                   value={newEntry.topic}
                   onChange={(e) => setNewEntry((prev) => ({ ...prev, topic: e.target.value }))}
                   placeholder={t('diary.topicPlaceholder')}
+                  maxLength={TOPIC_MAX}
                 />
               </div>
               <div className="form-group">
@@ -230,7 +255,11 @@ const Diary = ({ search = '' }) => {
                   rows="6"
                   required
                   aria-invalid={Boolean(errors.text)}
+                  maxLength={TEXT_MAX}
                 />
+                <div className="diary__counter">
+                  {newEntry.text.length} / {TEXT_MAX}
+                </div>
                 {errors.text ? <p className="form-group__error">{errors.text}</p> : null}
               </div>
             </div>
@@ -245,6 +274,55 @@ const Diary = ({ search = '' }) => {
           </div>
         </div>
       )}
+
+      {/* Чтение длинной записи целиком */}
+      {readingEntry ? (
+        <div className="modal-overlay" onClick={() => setReadingEntry(null)}>
+          <div
+            className="modal diary__modal diary__read-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="diary-read-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="modal__header">
+              <h3 id="diary-read-title">{readingEntry.topic || t('diary.title')}</h3>
+              <button
+                type="button"
+                className="modal__close"
+                onClick={() => setReadingEntry(null)}
+                aria-label={t('common.close')}
+              >
+                &times;
+              </button>
+            </div>
+            <div className="modal__body">
+              <div className="diary__read-date">{formatDate(readingEntry.date)}</div>
+              <p className="diary__read-text">{readingEntry.text}</p>
+            </div>
+            <div className="modal__footer">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => {
+                  const entry = readingEntry;
+                  setReadingEntry(null);
+                  handleEdit(entry);
+                }}
+              >
+                {t('common.edit')}
+              </button>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => setReadingEntry(null)}
+              >
+                {t('common.close')}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <ConfirmDialog
         open={Boolean(pendingDelete)}

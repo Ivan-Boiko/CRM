@@ -35,6 +35,7 @@ export function initDb() {
       assigned TEXT,
       deadline TEXT,
       status TEXT,
+      result TEXT,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
@@ -145,6 +146,8 @@ export function initDb() {
   addColumnIfMissing('diary', 'topic', 'TEXT');
   // Подзадача ссылается на основную задачу (один уровень вложенности)
   addColumnIfMissing('tasks', 'parent_id', 'INTEGER');
+  // Результат выполненных действий: пишется при завершении задачи и виден в архиве
+  addColumnIfMissing('tasks', 'result', 'TEXT');
 
   // Просроченные ссылки сброса пароля и подтверждения email не нужны
   const nowIso = new Date().toISOString();

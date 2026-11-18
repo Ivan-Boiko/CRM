@@ -824,7 +824,19 @@ const withComments = (task) => ({
 crud(
   'tasks',
   'tasks',
-  ['name', 'description', 'priority', 'deadline', 'deadline_time', 'status', 'comment', 'group_id', 'parent_id'],
+  [
+    'name',
+    'description',
+    'priority',
+    'deadline',
+    'deadline_time',
+    'status',
+    'comment',
+    'group_id',
+    'parent_id',
+    // Что было сделано: заполняется при завершении задачи, показывается в архиве
+    'result',
+  ],
   'name',
   withComments,
   // Дедлайн в прошлом не принимаем. Проверяем только когда он пришёл в запросе:

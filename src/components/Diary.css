@@ -16,22 +16,22 @@
 .diary__empty {
   text-align: center;
   padding: 40px;
-  color: #7F8C8D;
+  color: var(--text-secondary-color, #7F8C8D);
   font-size: 16px;
 }
 
 /* Card styles */
 .diary-card {
   padding: 20px;
-  border: 1px solid #E0E0E0;
+  border: 1px solid var(--border-light-color, #E0E0E0);
   border-radius: 8px;
-  background: #FAFAFA;
-  transition: transform 0.2s, box-shadow 0.2s;
+  background: var(--card-bg-color, #FAFAFA);
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 
 .diary-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px var(--shadow-hover-color, rgba(0, 0, 0, 0.1));
 }
 
 .diary-card__content {
@@ -40,6 +40,21 @@
   align-items: flex-start;
   gap: 15px;
   margin-bottom: 15px;
+  cursor: pointer;
+}
+
+.diary-card__content:focus-visible {
+  outline: 2px solid var(--accent-color, #00A86B);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+/* У записи показываем начало текста, целиком она открывается в модальном окне */
+.diary-card__text {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* Тема записи: короткий заголовок над текстом */
@@ -60,14 +75,22 @@
   margin: 0;
   font-size: 14px;
   line-height: 1.5;
-  color: #2C3E50;
+  color: var(--text-primary-color, #2C3E50);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
+/* Счётчик введённых символов под полями дневника */
+.diary__counter {
+  margin: 6px 0 0;
+  font-size: 12px;
+  text-align: right;
+  color: var(--text-secondary-color, #7F8C8D);
+}
+
 .diary-card__date {
   font-size: 12px;
-  color: #7F8C8D;
+  color: var(--text-secondary-color, #7F8C8D);
   white-space: nowrap;
   margin-left: auto;
 }
@@ -111,6 +134,26 @@
   flex-wrap: wrap;
 }
 
+/* Окно чтения записи: длинный текст прокручивается внутри модалки */
+.diary__read-modal {
+  max-width: 620px;
+}
+
+.diary__read-date {
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: var(--text-secondary-color, #7F8C8D);
+}
+
+.diary__read-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-primary-color, #2C3E50);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 /* Animation */
 @keyframes slideIn {
   from { transform: translateY(-20px); opacity: 0; }
@@ -119,6 +162,27 @@
 
 .diary__modal {
   animation: slideIn 0.3s ease;
+}
+
+/* Тёмная тема: карточка не остаётся светлой, подписи и текст читаются */
+[data-theme="dark"] .diary-card {
+  background-color: var(--card-bg-color, #2A2A2A);
+  border-color: var(--border-light-color, #444444);
+}
+
+[data-theme="dark"] .diary-card:hover {
+  border-color: rgba(0, 193, 126, 0.45);
+}
+
+[data-theme="dark"] .diary-card__text,
+[data-theme="dark"] .diary__read-text {
+  color: #E7ECEA;
+}
+
+[data-theme="dark"] .diary-card__date,
+[data-theme="dark"] .diary__read-date,
+[data-theme="dark"] .diary__counter {
+  color: var(--text-secondary-color, #A0A0A0);
 }
 
 @media (max-width: 480px) {

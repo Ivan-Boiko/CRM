@@ -192,6 +192,14 @@ const Archive = ({
                   <p className="archive-card__description">{task.description}</p>
                 ) : null}
 
+                {/* Результат, записанный при завершении задачи */}
+                {task.result ? (
+                  <>
+                    <div className="archive-card__label">{t('tasks.result')}</div>
+                    <p className="archive-card__result">{task.result}</p>
+                  </>
+                ) : null}
+
                 {subtasks.length > 0 ? (
                   <>
                     <div className="archive-card__label">{t('tasks.subtasks')}</div>

@@ -1,9 +1,15 @@
 .topbar {
+  /* Шапка остаётся сверху при прокрутке страницы */
+  position: sticky;
+  top: 0;
+  z-index: 60;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 15px 30px;
   background-color: var(--header-bg-color);
+  /* Тонкая линия отделяет шапку от прокручиваемого содержимого */
+  box-shadow: 0 1px 0 var(--border-light-color, #E0E0E0);
 }
 
 .topbar-left {
